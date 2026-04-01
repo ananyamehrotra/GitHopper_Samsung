@@ -5,207 +5,378 @@
 # =============================================================================
 
 APP_SECURITY_PROMPT = """
-You are a senior security engineer performing COMPREHENSIVE code security audit.
-Find EVERY security vulnerability - be thorough and check ALL categories.
+You are a senior security engineer performing DEEP code security analysis.
+Analyze EVERY line of this code for security issues. Be THOROUGH and STRICT.
 
-CHECK FOR (COMPREHENSIVE):
-1. HARDCODED SECRETS: API keys, passwords, AWS keys, tokens, OAuth secrets, crypto keys, private keys
-2. INJECTION FLAWS: SQL injection, command injection, NoSQL, LDAP, XPath, template injection, log injection
-3. BROKEN AUTH: Weak password validation, missing rate limiting, session bugs, privilege escalation
-4. CRYPTO FLAWS: Weak hashing (MD5/SHA1), hardcoded keys, insecure random, no TLS verification
-5. INPUT VALIDATION: Missing validation, buffer overflow, XXE, path traversal, CRLF injection
-6. DATA EXPOSURE: Logging sensitive data, unencrypted PII, unencrypted transmission, unsafe deserialization
-7. DANGEROUS FUNCTIONS: eval(), exec(), pickle.loads(), subprocess(shell=True), dangerous regex (ReDoS)
-8. BUSINESS LOGIC: Race conditions, time-of-check-time-of-use, IDOR, privilege escalation chains
-9. DEPENDENCIES: Vulnerable libraries, deprecated functions, unmaintained packages
-10. INFRASTRUCTURE: Hardcoded URLs/IPs, debug code, insecure defaults, missing security headers
+CRITICAL CHECKS (highest priority - report ALL instances):
+1. SQL INJECTION patterns:
+   - query = "SELECT * FROM users WHERE id = " + user_input
+   - f"SELECT * FROM table WHERE id={id}"
+   - .format() or % with user data in SQL strings
+   - string concatenation in SQL queries
+   - parameterized queries NOT used (should use ? or %s placeholders)
+   - Any SQL string containing variables without parameterization
+
+2. COMMAND INJECTION:
+   - os.system(user_input)
+   - subprocess.call(cmd) with string concatenation
+   - shell=True in subprocess
+   - eval(), exec(), compile() with user data
+   - Any shell command built from user input
+
+3. HARDCODED SECRETS:
+   - password = "some_password"
+   - api_key = "sk_live_..."
+   - AWS_SECRET = "AKIAIOSFODNN7EXAMPLE"
+   - db_password in code
+   - Any string that looks like a token/key/credential
+
+4. AUTHENTICATION/AUTHORIZATION BYPASS:
+   - if admin: (checking request.user without validation)
+   - No validation of user_id from request
+   - Missing CSRF tokens
+   - No rate limiting on login
+   - Plaintext passwords (should be hashed)
+
+5. UNSAFE OPERATIONS:
+   - pickle.loads(untrusted_data)
+   - yaml.load() without Loader
+   - json.loads() on unsanitized input
+   - Input not validated before use
+   - No bounds checking on arrays/loops
+
+6. PATH TRAVERSAL:
+   - file_path = uploads_dir + request.filename
+   - open(filename) where filename comes from user
+   - No sanitization of file paths
+
+7. XSS/INJECTION in responses:
+   - return user_data without escaping
+   - render_template with unsanitized variables
+   - Direct HTML generation from user input
 
 File: {filename}
 Branch: {branch_name}
 
-Return ONLY valid JSON - EXACT format below:
+IMPORTANT: Report ALL vulnerabilities found, even if there are many.
+Return ONLY valid JSON with ALL findings:
 {{
-  "vulnerabilities": [
+  "findings": [
     {{
-      "type": "HARDCODED_SECRET",
+      "type": "SQL_INJECTION",
       "severity": "CRITICAL",
-      "cvss_score": 9.8,
       "file": "{filename}",
-      "line": 14,
-      "explanation": "AWS secret key directly hardcoded in source. Visible to all repo members.",
-      "business_impact": "AWS compromise, data theft, infrastructure destruction. Loss: >$100k.",
-      "fix": "Move to environment variables or AWS Secrets Manager. Rotate key immediately.",
-      "remediated_code": "AWS_KEY = os.getenv('AWS_SECRET_KEY')",
-      "estimated_minutes": 10
+      "line": 45,
+      "explanation": "User input directly concatenated into SQL query. Attacker can inject SQL commands.",
+      "vulnerable_code": "query = f'SELECT * FROM users WHERE username = {{username}}'",
+      "fix": "Use parameterized queries: query = 'SELECT * FROM users WHERE username = ?'",
+      "remediated_code": "cursor.execute('SELECT * FROM users WHERE username = ?', (username,))",
+      "estimated_minutes": 15
     }}
   ]
 }}
 
-Be detailed. Check every line. Code:
+Code to analyze:
 {code_chunk}
 """
 
 
 IAC_SECURITY_PROMPT = """
-You are a cloud security architect performing COMPREHENSIVE infrastructure code audit.
-Check this IaC (Terraform/CloudFormation/Ansible) for ALL security misconfigurations.
+You are a cloud security engineer performing DEEP infrastructure analysis.
+Analyze EVERY resource in this IaC configuration. Be THOROUGH and STRICT.
 
-CHECK FOR (THOROUGH):
-1. S3 SECURITY: Public access ACLs, missing block_public_acls, exposed bucket policies, no encryption, no versioning
-2. NETWORKING: Security groups exposed to 0.0.0.0/0, RDP/SSH open, open NACLs, missing security groups, unencrypted channels
-3. DATABASE: Unencrypted RDS/DynamoDB, public accessibility, weak security groups, no backups, no encryption at rest
-4. IAM: Wildcard policies (Action=* Resource=*), overly permissive roles, missing resource restrictions, risky cross-account access
-5. LOGGING & MONITORING: Disabled CloudTrail, no VPC Flow Logs, missing S3 access logs, no CloudWatch alarms, disabled GuardDuty
-6. ENCRYPTION: Unencrypted EBS volumes, unencrypted RDS, missing KMS keys, hardcoded encryption keys, weak algorithms
-7. SECRETS MANAGEMENT: Hardcoded passwords, API keys in config, credentials in tags, exposed database passwords
-8. CONTAINERS: Unscanned images, privileged containers, missing resource limits, root user containers, exposed registries
-9. COMPLIANCE: Public-facing resources, missing VPC endpoints, no multi-AZ failover, inadequate retention policies
-10. DISASTER RECOVERY: No backups configured, missing snapshots, no cross-region replication, insufficient failover setup
+CRITICAL CHECKS (scan entire config):
+1. S3 BUCKET EXPOSURE:
+   - acl = "public-read" or "public-read-write"
+   - Block public access = false
+   - Any bucket without proper ACL restrictions
+   - aws_s3_bucket_public_access_block not present
+   - Policy grants s3:* to Principal: "*"
+
+2. SECURITY GROUP EXPOSURE:
+   - from_port = 0, to_port = 65535 with 0.0.0.0/0
+   - Any wide-open ingress rule
+   - No egress restrictions
+   - SSH (22), RDP (3389), DB ports open to 0.0.0.0/0
+   - HTTP (80) or HTTPS (443) open when shouldn't be
+
+3. DATABASE SECURITY:
+   - publicly_accessible = true
+   - Multi-AZ = false (no redundancy)
+   - No encryption: storage_encrypted = false
+   - backup_retention_days = 0
+   - No SSL/TLS enforcement
+   - Master username/password in code
+
+4. ENCRYPTION:
+   - ebs_encryption_enabled = false
+   - kms_key_id not specified
+   - No encryption at rest or in transit
+   - Default encryption not enabled
+
+5. LOGGING & MONITORING:
+   - CloudTrail disabled
+   - Access logging not enabled
+   - No CloudWatch alarms
+   - VPC Flow Logs not enabled
+
+6. HARDCODED CREDENTIALS:
+   - admin_password = "..."
+   - api_key in code
+   - AWS secret keys embedded
+
+7. NETWORK ISSUES:
+   - No VPC specified
+   - No subnets isolated
+   - Route table allows 0.0.0.0/0 to resources
 
 File: {filename}
 Branch: {branch_name}
 
-Return ONLY valid JSON:
+Return ONLY valid JSON with ALL findings, even if multiple:
 {{
-  "vulnerabilities": [
+  "findings": [
     {{
-      "type": "OPEN_S3_BUCKET",
+      "type": "PUBLIC_S3_BUCKET",
       "severity": "CRITICAL",
-      "cvss_score": 9.7,
       "file": "{filename}",
-      "resource": "aws_s3_bucket.public",
-      "explanation": "S3 bucket 'company-data' has ACL=public-read and no block_public_acls. 2.3TB world-readable.",
-      "business_impact": "Data breach: PII, financial records, customer data exposed. GDPR fine: $20M. CCPA: $10M+.",
-      "fix": "Set acl=private, enable block_public_acls + block_public_policy, use bucket policies for access.",
-      "remediated_code": "acl = \"private\"\\nblock_public_acls = true\\nblock_public_policy = true",
+      "resource": "aws_s3_bucket.data",
+      "explanation": "S3 bucket configured with acl='public-read'. All objects are world-readable. Data breach risk.",
+      "vulnerable_code": "resource 'aws_s3_bucket' 'data' {{ acl = 'public-read' }}",
+      "fix": "Set acl to 'private' and use bucket policies for specific access",
+      "remediated_code": "resource 'aws_s3_bucket' 'data' {{ acl = 'private' }}\nresource 'aws_s3_bucket_public_access_block' 'data' {{ bucket = aws_s3_bucket.data.id; block_public_acls = true }}",
       "estimated_minutes": 20
     }}
   ]
 }}
 
-Be exhaustive. Check all resources. IaC:
+Config to analyze:
 {code_chunk}
 """
 
 
 IAM_PROMPT = """
-You are an IAM security architect performing COMPREHENSIVE least-privilege policy audit.
-Find ALL privilege escalation risks and dangerous IAM permission configurations.
+You are an IAM security specialist performing DEEP permission analysis.
+Analyze EVERY statement in this policy. Be THOROUGH and identify all risks.
 
-CHECK FOR (DEEP ANALYSIS):
-1. WILDCARD ABUSE: Action=\"*\", Resource=\"*\", Principal=\"*\", Effect=\"Allow\" with wildcards, NotPrincipal misuse
-2. PRIVILEGE ESCALATION: iam:*, ec2:*, s3:*, sts:AssumeRole without conditions, CreateAccessKey, AttachUserPolicy, PutUserPolicy
-3. DATA ACCESS: s3:GetObject without resource restrictions, rds-db:connect/*, dynamodb:* permission scope
-4. CREDENTIAL GENERATION: sts:AssumeRole to external accounts, SecurityToken generation, CreateAccessKey without MFA
-5. MISSING CONDITIONS: AssumeRole without IP/time/MFA conditions, resource modifications without MFA, cross-account access
-6. CROSS-ACCOUNT RISKS: AssumeRole to external AWS accounts, unconstrained external account permissions
-7. SERVICE ROLES: Lambda/EC2/ECS roles with overly broad permissions, missing resource ARN restrictions
-8. ESCALATION CHAINS: CreateUser + AttachUserPolicy (privilege escalation), PutUserPolicy + CreateAccessKey
-9. UNRESTRICTED DELETION: DeleteUser, DeleteRole, DeleteBucket, DeletePolicy without resource constraints
-10. DENIAL OF SERVICE: Quota-exceed actions (RunInstances), cost-amplifying operations (CreateTable)
+CRITICAL CHECKS (scan all statements):
+1. WILDCARD OVERREACH:
+   - Action: "*" (allows all actions)
+   - Resource: "*" (applies to all resources)
+   - Principal: "*" (open to anyone)
+   - "arn:aws:*:*:*:*" patterns
+   - "s3:*" or "ec2:*" instead of specific actions
+
+2. DANGEROUS ACTIONS:
+   - iam:* (full IAM permissions - privilege escalation)
+   - sts:AssumeRole (can assume other roles)
+   - s3:DeleteObject, s3:DeleteBucket (data destruction)
+   - ec2:TerminateInstances (infrastructure destruction)
+   - rds:DeleteDBCluster (database destruction)
+   - kms:ScheduleKeyDeletion (encryption key destruction)
+
+3. MISSING CONDITIONS:
+   - s3:GetObject on arn:aws:s3:::*/* without IP/source restrictions
+   - No conditions on sensitive operations
+   - No MFA requirement for sensitive actions
+   - No time-based restrictions
+
+4. OVERLY BROAD RESOURCES:
+   - arn:aws:s3:::*/* (all bucket objects)
+   - arn:aws:lambda:region:account:function:* (all functions)
+   - arn:aws:rds:*:account:db:* (all databases)
+   - arn:aws:ec2:*:account:* (all EC2 resources)
+
+5. PRINCIPAL ISSUES:
+   - Principal: "*" (service role open to world)
+   - Principal: AWS "arn:aws:iam::*:root" (any AWS account)
+   - No restrictions on cross-account access
+   - Using NotPrincipal (deny-style, harder to audit)
+
+6. SENSITIVE DATA ACCESS:
+   - kms:Decrypt on all keys
+   - secretsmanager:GetSecretValue unrestricted
+   - dynamodb:Scan on tables with sensitive data
+   - logs:GetLogEvents on all log groups
+
+7. CREDENTIAL EXPOSURE:
+   - iam:CreateAccessKey unrestricted (create extra credentials)
+   - iam:PutUserPolicy (add permissions to self)
+   - sts:GetCallerIdentity (enumerate targets)
 
 File: {filename}
 Branch: {branch_name}
 
-Return ONLY valid JSON:
+Return ONLY valid JSON with ANY findings detected:
 {{
-  "vulnerabilities": [
+  "findings": [
     {{
-      "type": "WILDCARD_PERMISSIONS",
+      "type": "WILDCARD_IAM_ACTION",
       "severity": "CRITICAL",
-      "cvss_score": 9.9,
       "file": "{filename}",
-      "policy": "AssumeRolePolicy",
-      "explanation": "Policy grants Action=\"*\" on Resource=\"*\" to all Principal:\"*\". Complete AWS account takeover.",
-      "business_impact": "Infrastructure compromise, data theft, ransomware deployment, backup destruction. Loss: >$1M.",
-      "fix": "Remove all wildcards. Specify exact actions + resources + principals. Add MFA + IP conditions.",
-      "remediated_code": "\"Action\": [\"s3:GetObject\"],  \"Resource\": \"arn:aws:s3:::bucket/uploads/*\", \"Condition\": {{\"Bool\": {{\"aws:MultiFactorAuthPresent\": \"true\"}}}}",
-      "estimated_minutes": 30
-    }}
-  ]
-}}
-
-Be very detailed. Analyze every statement. Policy:
-{code_chunk}
-"""
-
-
-DEBT_PROMPT = """
-You are a code quality architect performing COMPREHENSIVE technical debt assessment.
-Find ALL maintainability, testability, complexity, and stability issues.
-
-CHECK FOR (EXHAUSTIVE):
-1. COMPLEXITY: Functions >40 lines, nesting depth >3, >10 parameters, McCabe complexity >5, deep inheritance chains
-2. DUPLICATION: Copy-pasted code blocks, duplicate logic, repeated error handling, duplicate method implementations
-3. COUPLING: Tight dependencies, hard-wired refs, God classes (>300 lines), God objects, circular imports
-4. ERROR HANDLING: Bare except clauses, swallowed exceptions, missing try-catch, generic Exception catches, no logging
-5. HARDCODING: Magic numbers, hardcoded strings/paths/URLs, hardcoded credentials, hardcoded timeouts
-6. PATTERNS: Deprecated functions, obsolete library versions, unmaintained code, anti-patterns, unmaintained dependencies
-7. TESTING: Missing unit tests, coverage <50%, untestable code, lack of mocks, brittle tests, integration-only tests
-8. DOCUMENTATION: Missing docstrings, undocumented parameters, outdated comments, unclear variable names, no README
-9. PERFORMANCE: O(n²) algorithms, memory leaks, unbounded loops, synchronous blocking I/O, missing caching, N+1 queries
-10. MAINTAINABILITY: Unclear logic flow, poor naming conventions, long methods, missing constants, dead code, missing SOLID principles
-
-File: {filename}
-Branch: {branch_name}
-
-Return ONLY valid JSON:
-{{
-  "vulnerabilities": [
-    {{
-      "type": "HIGH_COMPLEXITY",
-      "severity": "MEDIUM",
-      "file": "{filename}",
-      "explanation": "Function 'process_payment' is 87 lines with 9 nested conditionals. McCabe complexity: 13 (unacceptable).",
-      "business_impact": "Each bug fix takes 8+ hours to trace through nested logic. Defects cost $50k+ per incident.",
-      "fix": "Extract validate_payment_input(), execute_transaction(), build_response() as separate functions.",
-      "remediated_code": "def process_payment(order):\\n    validate_payment_input(order)\\n    result = execute_transaction(order)\\n    return build_response(result)",
+      "statement": 1,
+      "explanation": "Policy allows iam:* (all IAM actions) unrestricted. Attacker can create users, steal keys, modify policies, grant themselves permissions.",
+      "vulnerable_code": "{{ 'Effect': 'Allow', 'Action': 'iam:*', 'Resource': '*' }}",
+      "fix": "Specify only needed actions. Never use wildcard for iam:* actions",
+      "remediated_code": "{{ 'Effect': 'Allow', 'Action': ['iam:GetUser', 'iam:ListAccessKeys'], 'Resource': 'arn:aws:iam::ACCOUNT:user/SPECIFIC_USER' }}",
       "estimated_minutes": 45
     }}
   ]
 }}
 
-Analyze thoroughly. Code:
+IAM policy to analyze:
+{code_chunk}
+"""
+
+
+DEBT_PROMPT = """
+You are a code quality engineer performing DEEP technical debt analysis.
+Analyze EVERY function and class for quality issues. Be THOROUGH.
+
+CRITICAL CHECKS:
+1. FUNCTION COMPLEXITY:
+   - Functions > 30 lines (should be < 20)
+   - Nested depth > 3 levels
+   - Cyclomatic complexity (too many branches)
+   - Multiple responsibilities
+
+2. CODE DUPLICATION:
+   - Same code pattern repeated 2+ times
+   - Copy-pasted logic blocks
+   - Duplicate if/else logic
+   - Similar database queries
+
+3. ERROR HANDLING:
+   - bare except: (catches all exceptions)
+   - except Exception: (too broad)
+   - Swallowed exceptions (except ... pass)
+   - No logging of errors
+   - No proper error propagation
+
+4. HARDCODED VALUES:
+   - Magic numbers (100, 255, 1000) not in constants
+   - Hardcoded strings ("admin", "localhost", "localhost:5000")
+   - Hardcoded file paths
+   - Hardcoded credentials or URLs
+   - API endpoints as strings
+
+5. MISSING DOCUMENTATION:
+   - No docstrings on functions
+   - Missing type hints
+   - No comments on complex logic
+   - Unclear variable names (x, temp, data)
+
+6. POOR PATTERNS:
+   - Mutable default arguments: def func(items=[]):
+   - Global variables
+   - Tight coupling between classes
+   - God objects doing too much
+   - Inconsistent naming conventions
+
+7. PERFORMANCE:
+   - Nested loops without optimization
+   - O(n²) algorithms that should be O(n) or O(n log n)
+   - Database queries in loops
+   - Loading entire files/datasets when not needed
+
+File: {filename}
+Branch: {branch_name}
+
+Return ONLY valid JSON with all debt identified:
+{{
+  "findings": [
+    {{
+      "type": "FUNCTION_TOO_COMPLEX",
+      "severity": "MEDIUM",
+      "file": "{filename}",
+      "function": "process_user_data",
+      "lines": "45-120",
+      "explanation": "Function is 75 lines with 6 nested levels and handles validation, processing, logging, and response formatting. Hard to test and maintain.",
+      "fix": "Extract into separate functions: validate_user(), process_data(), format_response(), log_action()",
+      "remediated_code": "def validate_user(user): ...\ndef process_data(data): ...\ndef format_response(result): ...\ndef process_user_data(user): validate_user(user); return format_response(process_data(user))",
+      "estimated_minutes": 60
+    }}
+  ]
+}}
+
+Code to analyze:
 {code_chunk}
 """
 
 
 DEPENDENCY_PROMPT = """
-You are a dependency security analyst performing COMPREHENSIVE supply chain vulnerability assessment.
-Find ALL security and stability risks in this dependency manifest (requirements.txt, package.json, go.mod, pom.xml, etc).
+You are a dependency security analyst performing DEEP package vulnerability analysis.
+Analyze EVERY dependency for security risks and versioning issues.
 
-CHECK FOR (THOROUGH):
-1. KNOWN VULNERABILITIES: CVEs, confirmed security advisories, active exploits, publicly available proof-of-concept code
-2. VERSION AGE: Severely outdated (>2 major versions behind), unmaintained (no updates >2 years), deprecated packages
-3. TYPOSQUATTING: Suspicious names similar to popular packages, misspelled names, domain confusion packages
-4. UNPINNED VERSIONS: Using * or >=X (allows any version), missing exact version pins, floating version constraints
-5. DEV VS PRODUCTION: Dev dependencies in production config, test packages in builds, debug tools deployed to production
-6. TRANSITIVE DEPENDENCIES: Indirect dependency vulnerabilities, deep dependency trees (>5 levels), circular dependencies
-7. LICENSE RISKS: Incompatible licenses (GPL in proprietary), problematic licenses (AGPL), unknown/missing licenses
-8. ABANDONED PROJECTS: Unmaintained forks, archived repositories, inactive maintainers, no community support
-9. SUPPLY CHAIN: Package hijacking risks, single-maintainer dependencies, known malware historical versions, compromised npm/pip accounts
-10. PERFORMANCE: Heavy/large packages (>100MB), slow startup impact, excessive memory footprint, network overhead
+CRITICAL CHECKS:
+1. KNOWN VULNERABILITIES:
+   - Check if version has published CVEs
+   - Common vulnerable package versions:
+     - requests < 2.25.1 (certificate validation)
+     - urllib3 < 1.26 (SSL verification)
+     - jinja2 < 2.11.3 (SSTI)
+     - flask < 1.1.2 (Werkzeug issues)
+     - django < 3.0 (various)
+     - pillow < 8.0 (buffer overflow)
+     - yaml dumps (untrusted data)
+
+2. OUTDATED PACKAGES:
+   - Major versions behind latest (e.g., 1.x when 5.x available)
+   - "Severely outdated" = over 2+ major versions behind
+   - Packages with 1 year+ no updates
+   - Deprecated packages still in use
+
+3. UNPINNED VERSIONS:
+   - requests (no version, always latest)
+   - django>=2.0 (could jump to breaking version)
+   - numpy==* (wildcard matching anything)
+   - No version pins at all
+
+4. SUSPICIOUS PACKAGES:
+   - Typosquatting (installed instead of django: djamgo)
+   - Packages with 0 downloads
+   - Packages from unknown authors
+   - Recently created packages with popular names
+
+5. DEVELOPMENT DEPENDENCIES:
+   - pytest, pytest-cov in requirements.txt (should be requirements-dev.txt)
+   - Black, flake8, pylint in production
+   - Mock libraries in production
+
+6. RISKY PACKAGES:
+   - eval/exec libraries in dependencies
+   - pickle-based serialization
+   - Deserialization libraries without validation
 
 File: {filename}
 Branch: {branch_name}
 
-Return ONLY valid JSON:
+Return ONLY valid JSON with ALL findings:
 {{
-  "vulnerabilities": [
+  "findings": [
     {{
-      "type": "INSECURE_DEPENDENCY",
+      "type": "VULNERABLE_PACKAGE",
       "severity": "HIGH",
-      "cvss_score": 8.1,
       "file": "{filename}",
-      "package": "requests==2.18.0",
-      "explanation": "requests 2.18.0 (Mar 2017) has CVE-2018-18074: HTTPS hostname verification bypass in certificate validation.",
-      "business_impact": "Man-in-the-middle attacks on all API calls. Exposed API keys, auth tokens, customer PII. Breach cost: $500k+.",
-      "fix": "Upgrade to requests>=2.31.0 immediately. Audit recent deployments. Rotate all exposed API keys.",
+      "package": "flask==1.0.0",
+      "current_version": "1.0.0",
+      "safe_version": "2.3.0",
+      "explanation": "Flask 1.0.0 is 5+ years old and has 12+ known security vulnerabilities including Werkzeug issues.",
+      "fix": "Update to Flask 2.3.0: pip install --upgrade flask",
+      "estimated_minutes": 5
+    }},
+    {{
+      "type": "UNPINNED_VERSION",
+      "severity": "MEDIUM",
+      "file": "{filename}",
+      "package": "requests",
+      "explanation": "requests version not pinned. Could auto-upgrade to breaking version.",
+      "fix": "Pin to specific version: requests==2.31.0",
       "estimated_minutes": 2
     }}
   ]
 }}
 
-Check all dependencies comprehensively. Manifest:
+Dependencies to analyze:
 {code_chunk}
 """
