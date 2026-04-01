@@ -64,7 +64,7 @@ export function HomePage() {
 
                         <button
                             className="cta-btn"
-                            onClick={() => navigate('/login')}
+                            onClick={() => navigate('/dashboard')}
                         >
                             Get Started →
                         </button>

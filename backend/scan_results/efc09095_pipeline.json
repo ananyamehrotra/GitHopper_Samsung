@@ -1,0 +1,893 @@
+{
+  "status": "success",
+  "pipeline": "complete",
+  "execution_time_seconds": 15.749773,
+  "stages": {
+    "fetch": {
+      "repo_id": "efc09095",
+      "repo_url": "https://github.com/aniketaggarwal/vulnerable-demo-app",
+      "total_files": 6,
+      "categories": {
+        "config": 0,
+        "dependencies": 0,
+        "source_code": 6
+      },
+      "chunks": [
+        {
+          "chunk_id": "README.md::chunk_0",
+          "file": "README.md",
+          "language": "markdown",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 43,
+          "code": "# Demo App\n\nA simple Flask application.\n\n## Setup\n1. Clone the repo\n2. Run pip install -r requirements.txt\n3. Run python app.py\n```\n\n---\n\n## What your scanner should find\n\n| Finding | Type | Severity |\n|---------|------|----------|\n| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |\n| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |\n| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |\n| SQL injection in get_user | SQL_INJECTION | CRITICAL |\n| SQL injection in get_orders | SQL_INJECTION | CRITICAL |\n| Open S3 bucket | OPEN_S3 | HIGH |\n| Wildcard IAM permissions | OPEN_S3 | HIGH |\n| JWT no expiry | JWT_NO_EXPIRY | HIGH |\n| CORS allows all origins | CORS_MISCONFIGURATION | HIGH |\n| process_order() complexity 20+ | HIGH_COMPLEXITY | HIGH |\n| Duplicate tax logic | DUPLICATE_LOGIC | MEDIUM |\n| No input validation | MISSING_VALIDATION | MEDIUM |\n| No unit tests in payments | MISSING_TESTS | MEDIUM |\n| Unused imports | UNUSED_IMPORT | LOW |\n| No docstrings | MISSING_DOCSTRINGS | LOW |\n\n---\n\n## Expected score\n```\nCRITICAL findings: 5 \u00d7 20 = 100 penalty\nHIGH findings:     5 \u00d7 10 = 50  penalty\nMEDIUM findings:   3 \u00d7 5  = 15  penalty\nLOW findings:      2 \u00d7 1  = 2   penalty\n                           \u2500\u2500\u2500\u2500\u2500\nTotal penalty:             167\nhealth_score = max(0, 100 - 167) = 0",
+          "char_count": 1288,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "hardcoded",
+              "line_number": 17,
+              "line_snippet": "| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |"
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 18,
+              "line_snippet": "| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |"
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 19,
+              "line_snippet": "| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |"
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 43,
+            "code_lines": 32,
+            "blank_lines": 7,
+            "comment_lines": 4,
+            "comment_ratio": 0.093,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: README.md (markdown) | Lines 1\u201343 (chunk 1 of 1). | Debt signals in this chunk: line 17: | DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |; line 18: | STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |; line 19: | AWS keys hardcoded | HARDCODED_SECRET | CRITICAL | | Max nesting depth: 6 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "app.py::chunk_0",
+          "file": "app.py",
+          "language": "python",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 43,
+          "code": "from flask import Flask, request, jsonify\nimport os\nimport sys        # unused\nimport threading  # unused\nimport logging\n\napp = Flask(__name__)\n\n# CORS misconfiguration \u2014 allows all origins\nfrom flask_cors import CORS\nCORS(app, origins=\"*\")\n\n@app.route('/api/register', methods=['POST'])\ndef register():\n    # no input validation\n    data = request.get_json()\n    username = data['username']\n    password = data['password']\n    email = data['email']\n    return jsonify({\"status\": \"registered\"})\n\n@app.route('/api/login', methods=['POST'])\ndef login():\n    # no input validation\n    data = request.get_json()\n    username = data['username']\n    password = data['password']\n    return jsonify({\"status\": \"logged in\"})\n\n@app.route('/api/user', methods=['GET'])\ndef get_user():\n    # no authentication check\n    user_id = request.args.get('id')\n    from database import get_user\n    return jsonify(get_user(user_id))\n\n@app.errorhandler(Exception)\ndef handle_error(e):\n    # exposes full stack trace to client\n    return jsonify({\"error\": str(e), \"trace\": repr(e)}), 500\n\nif __name__ == '__main__':\n    app.run(debug=True)  # debug mode in production",
+          "char_count": 1145,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "password\\s*=",
+              "line_number": 18,
+              "line_snippet": "password = data['password']"
+            },
+            {
+              "pattern": "password\\s*=",
+              "line_number": 27,
+              "line_snippet": "password = data['password']"
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 43,
+            "code_lines": 31,
+            "blank_lines": 7,
+            "comment_lines": 5,
+            "comment_ratio": 0.116,
+            "max_indentation_depth": 1,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: app.py (python) | Lines 1\u201343 (chunk 1 of 1). | Debt signals in this chunk: line 18: password = data['password']; line 27: password = data['password']"
+        },
+        {
+          "chunk_id": "auth/token.py::chunk_0",
+          "file": "auth/token.py",
+          "language": "python",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 16,
+          "code": "import jwt\nimport datetime\n\nSECRET = \"hardcoded_jwt_secret_123\"   # hardcoded secret\n\ndef generate_token(user_id):\n    # JWT with no expiry\n    payload = {\n        \"user_id\": user_id,\n        # no exp field\n    }\n    return jwt.encode(payload, SECRET, algorithm=\"HS256\")\n\ndef verify_token(token):\n    # no error handling\n    return jwt.decode(token, SECRET, algorithms=[\"HS256\"])",
+          "char_count": 379,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 4,
+              "line_snippet": "SECRET = \"hardcoded_jwt_secret_123\"   # hardcoded secret"
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 16,
+            "code_lines": 10,
+            "blank_lines": 3,
+            "comment_lines": 3,
+            "comment_ratio": 0.188,
+            "max_indentation_depth": 2,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: auth/token.py (python) | Lines 1\u201316 (chunk 1 of 1). | Debt signals in this chunk: line 4: SECRET = \"hardcoded_jwt_secret_123\"   # hardcoded secret"
+        },
+        {
+          "chunk_id": "config.py::chunk_0",
+          "file": "config.py",
+          "language": "python",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 38,
+          "code": "import os\n\n# Application Configuration\nAPP_NAME = \"GitHopper\"\nAPP_ENV = \"production\"\nDEBUG = False\n\n# Database\nDB_HOST = \"prod-db.us-east-1.rds.amazonaws.com\"\nDB_NAME = \"githopper_prod\"\nDB_USER = \"admin\"\nDB_PASSWORD = \"Pr0d@ccess#2024\"\n\n# AWS Credentials\nAWS_ACCESS_KEY_ID = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET_ACCESS_KEY = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\nAWS_REGION = \"us-east-1\"\n\n# Stripe\nSTRIPE_SECRET_KEY = \"sk_live_51abc123XYZtest\"\nSTRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\"\n\n# JWT\nJWT_SECRET = \"my_super_secret_jwt_key_2024\"\nJWT_ALGORITHM = \"HS256\"\nJWT_EXPIRY = None\n\n# SendGrid\nSENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\"\n\n# Firebase\nFIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\"\nFIREBASE_PROJECT_ID = \"githopper-prod\"\n\n# Twilio\nTWILIO_ACCOUNT_SID = \"ACabc123xyz789example\"\nTWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\"\nTWILIO_PHONE = \"+1234567890\"",
+          "char_count": 886,
+          "debt_category_hint": "architecture",
+          "debt_signals": [
+            {
+              "pattern": "password\\s*=",
+              "line_number": 12,
+              "line_snippet": "DB_PASSWORD = \"Pr0d@ccess#2024\""
+            },
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 21,
+              "line_snippet": "STRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\""
+            },
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 24,
+              "line_snippet": "JWT_SECRET = \"my_super_secret_jwt_key_2024\""
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 29,
+              "line_snippet": "SENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\""
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 32,
+              "line_snippet": "FIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\""
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 37,
+              "line_snippet": "TWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\""
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 38,
+            "code_lines": 22,
+            "blank_lines": 8,
+            "comment_lines": 8,
+            "comment_ratio": 0.211,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: config.py (python) | Lines 1\u201338 (chunk 1 of 1). | Debt signals in this chunk: line 12: DB_PASSWORD = \"Pr0d@ccess#2024\"; line 21: STRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\"; line 24: JWT_SECRET = \"my_super_secret_jwt_key_2024\"; line 29: SENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\"; line 32: FIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\""
+        },
+        {
+          "chunk_id": "database.py::chunk_0",
+          "file": "database.py",
+          "language": "python",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 23,
+          "code": "import sqlite3\nimport os\nimport sys        # unused\nimport subprocess # unused\n\nconn = sqlite3.connect(\"app.db\")\ncursor = conn.cursor()\n\ndef get_user(user_id):\n    # SQL injection vulnerability\n    query = \"SELECT * FROM users WHERE id = \" + user_id\n    return cursor.execute(query)\n\ndef get_orders(customer_name):\n    # Another SQL injection\n    query = \"SELECT * FROM orders WHERE name = '\" + customer_name + \"'\"\n    return cursor.execute(query)\n\ndef delete_user(user_id):\n    # SQL injection + no auth check\n    query = \"DELETE FROM users WHERE id = \" + user_id\n    cursor.execute(query)\n    conn.commit()",
+          "char_count": 608,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 23,
+            "code_lines": 16,
+            "blank_lines": 4,
+            "comment_lines": 3,
+            "comment_ratio": 0.13,
+            "max_indentation_depth": 1,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: database.py (python) | Lines 1\u201323 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "utils.py::chunk_0",
+          "file": "utils.py",
+          "language": "python",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 50,
+          "code": "# Utility functions\n\ndef process_order(order, user, items, discount, tax, shipping, coupon, gift_card, store_credit, loyalty_points):\n    # cyclomatic complexity of 20+\n    if order:\n        if user:\n            if items:\n                if discount > 0:\n                    if tax > 0:\n                        if shipping > 0:\n                            if coupon:\n                                if gift_card:\n                                    if store_credit > 0:\n                                        if loyalty_points > 0:\n                                            total = sum([i['price'] for i in items])\n                                            total = total - discount\n                                            total = total + tax\n                                            total = total + shipping\n                                            if coupon == \"SAVE10\":\n                                                total = total * 0.9\n                                            if gift_card:\n                                                total = total - gift_card\n                                            if store_credit:\n                                                total = total - store_credit\n                                            if loyalty_points:\n                                                total = total - (loyalty_points * 0.01)\n                                            return total\n    return 0\n\ndef calculate_tax(amount):\n    # duplicate logic \u2014 same as in payments.py\n    tax_rate = 0.18\n    return amount * tax_rate\n\ndef calculate_discount(amount):\n    # duplicate logic \u2014 same as in orders.py\n    discount_rate = 0.10\n    return amount * discount_rate\n\ndef validate_email(email):\n    # no actual validation\n    return True\n\ndef validate_phone(phone):\n    # no actual validation\n    return True\n\ndef validate_address(address):\n    # no actual validation\n    return True",
+          "char_count": 1923,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 50,
+            "code_lines": 37,
+            "blank_lines": 6,
+            "comment_lines": 7,
+            "comment_ratio": 0.14,
+            "max_indentation_depth": 12,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: utils.py (python) | Lines 1\u201350 (chunk 1 of 1). | Max nesting depth: 12 levels (complexity risk)."
+        }
+      ],
+      "files": [
+        {
+          "path": "README.md",
+          "language": "markdown",
+          "content": "# Demo App\n\nA simple Flask application.\n\n## Setup\n1. Clone the repo\n2. Run pip install -r requirements.txt\n3. Run python app.py\n```\n\n---\n\n## What your scanner should find\n\n| Finding | Type | Severity |\n|---------|------|----------|\n| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |\n| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |\n| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |\n| SQL injection in get_user | SQL_INJECTION | CRITICAL |\n| SQL injection in get_orders | SQL_INJECTION | CRITICAL |\n| Open S3 bucket | OPEN_S3 | HIGH |\n| Wildcard IAM permissions | OPEN_S3 | HIGH |\n| JWT no expiry | JWT_NO_EXPIRY | HIGH |\n| CORS allows all origins | CORS_MISCONFIGURATION | HIGH |\n| process_order() complexity 20+ | HIGH_COMPLEXITY | HIGH |\n| Duplicate tax logic | DUPLICATE_LOGIC | MEDIUM |\n| No input validation | MISSING_VALIDATION | MEDIUM |\n| No unit tests in payments | MISSING_TESTS | MEDIUM |\n| Unused imports | UNUSED_IMPORT | LOW |\n| No docstrings | MISSING_DOCSTRINGS | LOW |\n\n---\n\n## Expected score\n```\nCRITICAL findings: 5 \u00d7 20 = 100 penalty\nHIGH findings:     5 \u00d7 10 = 50  penalty\nMEDIUM findings:   3 \u00d7 5  = 15  penalty\nLOW findings:      2 \u00d7 1  = 2   penalty\n                           \u2500\u2500\u2500\u2500\u2500\nTotal penalty:             167\nhealth_score = max(0, 100 - 167) = 0",
+          "size_bytes": 1302,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "hardcoded",
+              "line_number": 17,
+              "line_snippet": "| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |"
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 18,
+              "line_snippet": "| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |"
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 19,
+              "line_snippet": "| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |"
+            }
+          ],
+          "debt_signal_count": 3,
+          "metrics": {
+            "total_lines": 43,
+            "code_lines": 32,
+            "blank_lines": 7,
+            "comment_lines": 4,
+            "comment_ratio": 0.093,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "app.py",
+          "language": "python",
+          "content": "from flask import Flask, request, jsonify\nimport os\nimport sys        # unused\nimport threading  # unused\nimport logging\n\napp = Flask(__name__)\n\n# CORS misconfiguration \u2014 allows all origins\nfrom flask_cors import CORS\nCORS(app, origins=\"*\")\n\n@app.route('/api/register', methods=['POST'])\ndef register():\n    # no input validation\n    data = request.get_json()\n    username = data['username']\n    password = data['password']\n    email = data['email']\n    return jsonify({\"status\": \"registered\"})\n\n@app.route('/api/login', methods=['POST'])\ndef login():\n    # no input validation\n    data = request.get_json()\n    username = data['username']\n    password = data['password']\n    return jsonify({\"status\": \"logged in\"})\n\n@app.route('/api/user', methods=['GET'])\ndef get_user():\n    # no authentication check\n    user_id = request.args.get('id')\n    from database import get_user\n    return jsonify(get_user(user_id))\n\n@app.errorhandler(Exception)\ndef handle_error(e):\n    # exposes full stack trace to client\n    return jsonify({\"error\": str(e), \"trace\": repr(e)}), 500\n\nif __name__ == '__main__':\n    app.run(debug=True)  # debug mode in production",
+          "size_bytes": 1147,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "password\\s*=",
+              "line_number": 18,
+              "line_snippet": "password = data['password']"
+            },
+            {
+              "pattern": "password\\s*=",
+              "line_number": 27,
+              "line_snippet": "password = data['password']"
+            }
+          ],
+          "debt_signal_count": 2,
+          "metrics": {
+            "total_lines": 43,
+            "code_lines": 31,
+            "blank_lines": 7,
+            "comment_lines": 5,
+            "comment_ratio": 0.116,
+            "max_indentation_depth": 1,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "auth/token.py",
+          "language": "python",
+          "content": "import jwt\nimport datetime\n\nSECRET = \"hardcoded_jwt_secret_123\"   # hardcoded secret\n\ndef generate_token(user_id):\n    # JWT with no expiry\n    payload = {\n        \"user_id\": user_id,\n        # no exp field\n    }\n    return jwt.encode(payload, SECRET, algorithm=\"HS256\")\n\ndef verify_token(token):\n    # no error handling\n    return jwt.decode(token, SECRET, algorithms=[\"HS256\"])",
+          "size_bytes": 379,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 4,
+              "line_snippet": "SECRET = \"hardcoded_jwt_secret_123\"   # hardcoded secret"
+            }
+          ],
+          "debt_signal_count": 1,
+          "metrics": {
+            "total_lines": 16,
+            "code_lines": 10,
+            "blank_lines": 3,
+            "comment_lines": 3,
+            "comment_ratio": 0.188,
+            "max_indentation_depth": 2,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "config.py",
+          "language": "python",
+          "content": "import os\n\n# Application Configuration\nAPP_NAME = \"GitHopper\"\nAPP_ENV = \"production\"\nDEBUG = False\n\n# Database\nDB_HOST = \"prod-db.us-east-1.rds.amazonaws.com\"\nDB_NAME = \"githopper_prod\"\nDB_USER = \"admin\"\nDB_PASSWORD = \"Pr0d@ccess#2024\"\n\n# AWS Credentials\nAWS_ACCESS_KEY_ID = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET_ACCESS_KEY = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\nAWS_REGION = \"us-east-1\"\n\n# Stripe\nSTRIPE_SECRET_KEY = \"sk_live_51abc123XYZtest\"\nSTRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\"\n\n# JWT\nJWT_SECRET = \"my_super_secret_jwt_key_2024\"\nJWT_ALGORITHM = \"HS256\"\nJWT_EXPIRY = None\n\n# SendGrid\nSENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\"\n\n# Firebase\nFIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\"\nFIREBASE_PROJECT_ID = \"githopper-prod\"\n\n# Twilio\nTWILIO_ACCOUNT_SID = \"ACabc123xyz789example\"\nTWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\"\nTWILIO_PHONE = \"+1234567890\"",
+          "size_bytes": 886,
+          "debt_category_hint": "architecture",
+          "debt_signals": [
+            {
+              "pattern": "password\\s*=",
+              "line_number": 12,
+              "line_snippet": "DB_PASSWORD = \"Pr0d@ccess#2024\""
+            },
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 21,
+              "line_snippet": "STRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\""
+            },
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 24,
+              "line_snippet": "JWT_SECRET = \"my_super_secret_jwt_key_2024\""
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 29,
+              "line_snippet": "SENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\""
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 32,
+              "line_snippet": "FIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\""
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 37,
+              "line_snippet": "TWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\""
+            }
+          ],
+          "debt_signal_count": 6,
+          "metrics": {
+            "total_lines": 38,
+            "code_lines": 22,
+            "blank_lines": 8,
+            "comment_lines": 8,
+            "comment_ratio": 0.211,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "database.py",
+          "language": "python",
+          "content": "import sqlite3\nimport os\nimport sys        # unused\nimport subprocess # unused\n\nconn = sqlite3.connect(\"app.db\")\ncursor = conn.cursor()\n\ndef get_user(user_id):\n    # SQL injection vulnerability\n    query = \"SELECT * FROM users WHERE id = \" + user_id\n    return cursor.execute(query)\n\ndef get_orders(customer_name):\n    # Another SQL injection\n    query = \"SELECT * FROM orders WHERE name = '\" + customer_name + \"'\"\n    return cursor.execute(query)\n\ndef delete_user(user_id):\n    # SQL injection + no auth check\n    query = \"DELETE FROM users WHERE id = \" + user_id\n    cursor.execute(query)\n    conn.commit()",
+          "size_bytes": 608,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 23,
+            "code_lines": 16,
+            "blank_lines": 4,
+            "comment_lines": 3,
+            "comment_ratio": 0.13,
+            "max_indentation_depth": 1,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "utils.py",
+          "language": "python",
+          "content": "# Utility functions\n\ndef process_order(order, user, items, discount, tax, shipping, coupon, gift_card, store_credit, loyalty_points):\n    # cyclomatic complexity of 20+\n    if order:\n        if user:\n            if items:\n                if discount > 0:\n                    if tax > 0:\n                        if shipping > 0:\n                            if coupon:\n                                if gift_card:\n                                    if store_credit > 0:\n                                        if loyalty_points > 0:\n                                            total = sum([i['price'] for i in items])\n                                            total = total - discount\n                                            total = total + tax\n                                            total = total + shipping\n                                            if coupon == \"SAVE10\":\n                                                total = total * 0.9\n                                            if gift_card:\n                                                total = total - gift_card\n                                            if store_credit:\n                                                total = total - store_credit\n                                            if loyalty_points:\n                                                total = total - (loyalty_points * 0.01)\n                                            return total\n    return 0\n\ndef calculate_tax(amount):\n    # duplicate logic \u2014 same as in payments.py\n    tax_rate = 0.18\n    return amount * tax_rate\n\ndef calculate_discount(amount):\n    # duplicate logic \u2014 same as in orders.py\n    discount_rate = 0.10\n    return amount * discount_rate\n\ndef validate_email(email):\n    # no actual validation\n    return True\n\ndef validate_phone(phone):\n    # no actual validation\n    return True\n\ndef validate_address(address):\n    # no actual validation\n    return True",
+          "size_bytes": 1927,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 50,
+            "code_lines": 37,
+            "blank_lines": 6,
+            "comment_lines": 7,
+            "comment_ratio": 0.14,
+            "max_indentation_depth": 12,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        }
+      ]
+    },
+    "analyze": {
+      "repo_id": "efc09095",
+      "repo_url": "https://github.com/aniketaggarwal/vulnerable-demo-app",
+      "branch_name": "main",
+      "vulnerabilities": [],
+      "vulnerable_files": [],
+      "total_files_analyzed": 6,
+      "files_with_issues": 0,
+      "total_vulnerabilities": 0,
+      "cost_tracker": {
+        "api_calls": 6,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "estimated_cost": 0.0
+      },
+      "billing": {
+        "calls_made": 6,
+        "free_calls_remaining": 94,
+        "estimated_cost": 0.0,
+        "will_be_charged": false,
+        "alternatives": [
+          {
+            "name": "SonarQube Community",
+            "cost": "Free",
+            "url": "https://www.sonarqube.org/"
+          },
+          {
+            "name": "GitHub CodeQL",
+            "cost": "Free (open source)",
+            "url": "https://codeql.github.com/"
+          },
+          {
+            "name": "Snyk",
+            "cost": "$50+/month",
+            "url": "https://snyk.io/"
+          },
+          {
+            "name": "Checkmarx",
+            "cost": "Enterprise pricing",
+            "url": "https://checkmarx.com/"
+          }
+        ]
+      },
+      "chunks_scanned": 6,
+      "total_files": 6
+    },
+    "score": {
+      "repo_id": "efc09095",
+      "repo_url": "https://github.com/aniketaggarwal/vulnerable-demo-app",
+      "health_score": 100,
+      "chunks_scanned": 6,
+      "total_files": 6,
+      "analysis": {
+        "total_security_issues": 0,
+        "total_debt_issues": 0,
+        "critical_issues": 0,
+        "quick_wins": 0
+      },
+      "findings": {
+        "security_findings": [],
+        "debt_findings": [],
+        "security_by_severity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "debt_by_severity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "quick_wins": [],
+        "critical_issues": []
+      },
+      "recommendations": [],
+      "scoring_metadata": {
+        "scoring_version": "1.0",
+        "scoring_algorithm": "weighted_penalty",
+        "max_score": 100,
+        "min_score": 0
+      }
+    }
+  },
+  "data": {
+    "total_files_fetched": 6,
+    "config_files": 0,
+    "dependency_files": 0,
+    "source_files": 6,
+    "total_chunks": 6,
+    "files_by_category": {
+      "config": [
+        {
+          "path": "config.py",
+          "language": "python",
+          "content": "import os\n\n# Application Configuration\nAPP_NAME = \"GitHopper\"\nAPP_ENV = \"production\"\nDEBUG = False\n\n# Database\nDB_HOST = \"prod-db.us-east-1.rds.amazonaws.com\"\nDB_NAME = \"githopper_prod\"\nDB_USER = \"admin\"\nDB_PASSWORD = \"Pr0d@ccess#2024\"\n\n# AWS Credentials\nAWS_ACCESS_KEY_ID = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET_ACCESS_KEY = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\nAWS_REGION = \"us-east-1\"\n\n# Stripe\nSTRIPE_SECRET_KEY = \"sk_live_51abc123XYZtest\"\nSTRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\"\n\n# JWT\nJWT_SECRET = \"my_super_secret_jwt_key_2024\"\nJWT_ALGORITHM = \"HS256\"\nJWT_EXPIRY = None\n\n# SendGrid\nSENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\"\n\n# Firebase\nFIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\"\nFIREBASE_PROJECT_ID = \"githopper-prod\"\n\n# Twilio\nTWILIO_ACCOUNT_SID = \"ACabc123xyz789example\"\nTWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\"\nTWILIO_PHONE = \"+1234567890\"",
+          "size_bytes": 886,
+          "debt_category_hint": "architecture",
+          "debt_signals": [
+            {
+              "pattern": "password\\s*=",
+              "line_number": 12,
+              "line_snippet": "DB_PASSWORD = \"Pr0d@ccess#2024\""
+            },
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 21,
+              "line_snippet": "STRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\""
+            },
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 24,
+              "line_snippet": "JWT_SECRET = \"my_super_secret_jwt_key_2024\""
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 29,
+              "line_snippet": "SENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\""
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 32,
+              "line_snippet": "FIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\""
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 37,
+              "line_snippet": "TWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\""
+            }
+          ],
+          "debt_signal_count": 6,
+          "metrics": {
+            "total_lines": 38,
+            "code_lines": 22,
+            "blank_lines": 8,
+            "comment_lines": 8,
+            "comment_ratio": 0.211,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        }
+      ],
+      "dependencies": [],
+      "source_code": [
+        {
+          "path": "README.md",
+          "language": "markdown",
+          "content": "# Demo App\n\nA simple Flask application.\n\n## Setup\n1. Clone the repo\n2. Run pip install -r requirements.txt\n3. Run python app.py\n```\n\n---\n\n## What your scanner should find\n\n| Finding | Type | Severity |\n|---------|------|----------|\n| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |\n| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |\n| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |\n| SQL injection in get_user | SQL_INJECTION | CRITICAL |\n| SQL injection in get_orders | SQL_INJECTION | CRITICAL |\n| Open S3 bucket | OPEN_S3 | HIGH |\n| Wildcard IAM permissions | OPEN_S3 | HIGH |\n| JWT no expiry | JWT_NO_EXPIRY | HIGH |\n| CORS allows all origins | CORS_MISCONFIGURATION | HIGH |\n| process_order() complexity 20+ | HIGH_COMPLEXITY | HIGH |\n| Duplicate tax logic | DUPLICATE_LOGIC | MEDIUM |\n| No input validation | MISSING_VALIDATION | MEDIUM |\n| No unit tests in payments | MISSING_TESTS | MEDIUM |\n| Unused imports | UNUSED_IMPORT | LOW |\n| No docstrings | MISSING_DOCSTRINGS | LOW |\n\n---\n\n## Expected score\n```\nCRITICAL findings: 5 \u00d7 20 = 100 penalty\nHIGH findings:     5 \u00d7 10 = 50  penalty\nMEDIUM findings:   3 \u00d7 5  = 15  penalty\nLOW findings:      2 \u00d7 1  = 2   penalty\n                           \u2500\u2500\u2500\u2500\u2500\nTotal penalty:             167\nhealth_score = max(0, 100 - 167) = 0",
+          "size_bytes": 1302,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "hardcoded",
+              "line_number": 17,
+              "line_snippet": "| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |"
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 18,
+              "line_snippet": "| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |"
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 19,
+              "line_snippet": "| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |"
+            }
+          ],
+          "debt_signal_count": 3,
+          "metrics": {
+            "total_lines": 43,
+            "code_lines": 32,
+            "blank_lines": 7,
+            "comment_lines": 4,
+            "comment_ratio": 0.093,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "app.py",
+          "language": "python",
+          "content": "from flask import Flask, request, jsonify\nimport os\nimport sys        # unused\nimport threading  # unused\nimport logging\n\napp = Flask(__name__)\n\n# CORS misconfiguration \u2014 allows all origins\nfrom flask_cors import CORS\nCORS(app, origins=\"*\")\n\n@app.route('/api/register', methods=['POST'])\ndef register():\n    # no input validation\n    data = request.get_json()\n    username = data['username']\n    password = data['password']\n    email = data['email']\n    return jsonify({\"status\": \"registered\"})\n\n@app.route('/api/login', methods=['POST'])\ndef login():\n    # no input validation\n    data = request.get_json()\n    username = data['username']\n    password = data['password']\n    return jsonify({\"status\": \"logged in\"})\n\n@app.route('/api/user', methods=['GET'])\ndef get_user():\n    # no authentication check\n    user_id = request.args.get('id')\n    from database import get_user\n    return jsonify(get_user(user_id))\n\n@app.errorhandler(Exception)\ndef handle_error(e):\n    # exposes full stack trace to client\n    return jsonify({\"error\": str(e), \"trace\": repr(e)}), 500\n\nif __name__ == '__main__':\n    app.run(debug=True)  # debug mode in production",
+          "size_bytes": 1147,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "password\\s*=",
+              "line_number": 18,
+              "line_snippet": "password = data['password']"
+            },
+            {
+              "pattern": "password\\s*=",
+              "line_number": 27,
+              "line_snippet": "password = data['password']"
+            }
+          ],
+          "debt_signal_count": 2,
+          "metrics": {
+            "total_lines": 43,
+            "code_lines": 31,
+            "blank_lines": 7,
+            "comment_lines": 5,
+            "comment_ratio": 0.116,
+            "max_indentation_depth": 1,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "auth/token.py",
+          "language": "python",
+          "content": "import jwt\nimport datetime\n\nSECRET = \"hardcoded_jwt_secret_123\"   # hardcoded secret\n\ndef generate_token(user_id):\n    # JWT with no expiry\n    payload = {\n        \"user_id\": user_id,\n        # no exp field\n    }\n    return jwt.encode(payload, SECRET, algorithm=\"HS256\")\n\ndef verify_token(token):\n    # no error handling\n    return jwt.decode(token, SECRET, algorithms=[\"HS256\"])",
+          "size_bytes": 379,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 4,
+              "line_snippet": "SECRET = \"hardcoded_jwt_secret_123\"   # hardcoded secret"
+            }
+          ],
+          "debt_signal_count": 1,
+          "metrics": {
+            "total_lines": 16,
+            "code_lines": 10,
+            "blank_lines": 3,
+            "comment_lines": 3,
+            "comment_ratio": 0.188,
+            "max_indentation_depth": 2,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "database.py",
+          "language": "python",
+          "content": "import sqlite3\nimport os\nimport sys        # unused\nimport subprocess # unused\n\nconn = sqlite3.connect(\"app.db\")\ncursor = conn.cursor()\n\ndef get_user(user_id):\n    # SQL injection vulnerability\n    query = \"SELECT * FROM users WHERE id = \" + user_id\n    return cursor.execute(query)\n\ndef get_orders(customer_name):\n    # Another SQL injection\n    query = \"SELECT * FROM orders WHERE name = '\" + customer_name + \"'\"\n    return cursor.execute(query)\n\ndef delete_user(user_id):\n    # SQL injection + no auth check\n    query = \"DELETE FROM users WHERE id = \" + user_id\n    cursor.execute(query)\n    conn.commit()",
+          "size_bytes": 608,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 23,
+            "code_lines": 16,
+            "blank_lines": 4,
+            "comment_lines": 3,
+            "comment_ratio": 0.13,
+            "max_indentation_depth": 1,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "utils.py",
+          "language": "python",
+          "content": "# Utility functions\n\ndef process_order(order, user, items, discount, tax, shipping, coupon, gift_card, store_credit, loyalty_points):\n    # cyclomatic complexity of 20+\n    if order:\n        if user:\n            if items:\n                if discount > 0:\n                    if tax > 0:\n                        if shipping > 0:\n                            if coupon:\n                                if gift_card:\n                                    if store_credit > 0:\n                                        if loyalty_points > 0:\n                                            total = sum([i['price'] for i in items])\n                                            total = total - discount\n                                            total = total + tax\n                                            total = total + shipping\n                                            if coupon == \"SAVE10\":\n                                                total = total * 0.9\n                                            if gift_card:\n                                                total = total - gift_card\n                                            if store_credit:\n                                                total = total - store_credit\n                                            if loyalty_points:\n                                                total = total - (loyalty_points * 0.01)\n                                            return total\n    return 0\n\ndef calculate_tax(amount):\n    # duplicate logic \u2014 same as in payments.py\n    tax_rate = 0.18\n    return amount * tax_rate\n\ndef calculate_discount(amount):\n    # duplicate logic \u2014 same as in orders.py\n    discount_rate = 0.10\n    return amount * discount_rate\n\ndef validate_email(email):\n    # no actual validation\n    return True\n\ndef validate_phone(phone):\n    # no actual validation\n    return True\n\ndef validate_address(address):\n    # no actual validation\n    return True",
+          "size_bytes": 1927,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 50,
+            "code_lines": 37,
+            "blank_lines": 6,
+            "comment_lines": 7,
+            "comment_ratio": 0.14,
+            "max_indentation_depth": 12,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        }
+      ]
+    },
+    "detailed_files": [
+      {
+        "path": "README.md",
+        "language": "markdown",
+        "content": "# Demo App\n\nA simple Flask application.\n\n## Setup\n1. Clone the repo\n2. Run pip install -r requirements.txt\n3. Run python app.py\n```\n\n---\n\n## What your scanner should find\n\n| Finding | Type | Severity |\n|---------|------|----------|\n| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |\n| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |\n| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |\n| SQL injection in get_user | SQL_INJECTION | CRITICAL |\n| SQL injection in get_orders | SQL_INJECTION | CRITICAL |\n| Open S3 bucket | OPEN_S3 | HIGH |\n| Wildcard IAM permissions | OPEN_S3 | HIGH |\n| JWT no expiry | JWT_NO_EXPIRY | HIGH |\n| CORS allows all origins | CORS_MISCONFIGURATION | HIGH |\n| process_order() complexity 20+ | HIGH_COMPLEXITY | HIGH |\n| Duplicate tax logic | DUPLICATE_LOGIC | MEDIUM |\n| No input validation | MISSING_VALIDATION | MEDIUM |\n| No unit tests in payments | MISSING_TESTS | MEDIUM |\n| Unused imports | UNUSED_IMPORT | LOW |\n| No docstrings | MISSING_DOCSTRINGS | LOW |\n\n---\n\n## Expected score\n```\nCRITICAL findings: 5 \u00d7 20 = 100 penalty\nHIGH findings:     5 \u00d7 10 = 50  penalty\nMEDIUM findings:   3 \u00d7 5  = 15  penalty\nLOW findings:      2 \u00d7 1  = 2   penalty\n                           \u2500\u2500\u2500\u2500\u2500\nTotal penalty:             167\nhealth_score = max(0, 100 - 167) = 0",
+        "size_bytes": 1302,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [
+          {
+            "pattern": "hardcoded",
+            "line_number": 17,
+            "line_snippet": "| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |"
+          },
+          {
+            "pattern": "hardcoded",
+            "line_number": 18,
+            "line_snippet": "| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |"
+          },
+          {
+            "pattern": "hardcoded",
+            "line_number": 19,
+            "line_snippet": "| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |"
+          }
+        ],
+        "debt_signal_count": 3,
+        "metrics": {
+          "total_lines": 43,
+          "code_lines": 32,
+          "blank_lines": 7,
+          "comment_lines": 4,
+          "comment_ratio": 0.093,
+          "max_indentation_depth": 6,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "app.py",
+        "language": "python",
+        "content": "from flask import Flask, request, jsonify\nimport os\nimport sys        # unused\nimport threading  # unused\nimport logging\n\napp = Flask(__name__)\n\n# CORS misconfiguration \u2014 allows all origins\nfrom flask_cors import CORS\nCORS(app, origins=\"*\")\n\n@app.route('/api/register', methods=['POST'])\ndef register():\n    # no input validation\n    data = request.get_json()\n    username = data['username']\n    password = data['password']\n    email = data['email']\n    return jsonify({\"status\": \"registered\"})\n\n@app.route('/api/login', methods=['POST'])\ndef login():\n    # no input validation\n    data = request.get_json()\n    username = data['username']\n    password = data['password']\n    return jsonify({\"status\": \"logged in\"})\n\n@app.route('/api/user', methods=['GET'])\ndef get_user():\n    # no authentication check\n    user_id = request.args.get('id')\n    from database import get_user\n    return jsonify(get_user(user_id))\n\n@app.errorhandler(Exception)\ndef handle_error(e):\n    # exposes full stack trace to client\n    return jsonify({\"error\": str(e), \"trace\": repr(e)}), 500\n\nif __name__ == '__main__':\n    app.run(debug=True)  # debug mode in production",
+        "size_bytes": 1147,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [
+          {
+            "pattern": "password\\s*=",
+            "line_number": 18,
+            "line_snippet": "password = data['password']"
+          },
+          {
+            "pattern": "password\\s*=",
+            "line_number": 27,
+            "line_snippet": "password = data['password']"
+          }
+        ],
+        "debt_signal_count": 2,
+        "metrics": {
+          "total_lines": 43,
+          "code_lines": 31,
+          "blank_lines": 7,
+          "comment_lines": 5,
+          "comment_ratio": 0.116,
+          "max_indentation_depth": 1,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "auth/token.py",
+        "language": "python",
+        "content": "import jwt\nimport datetime\n\nSECRET = \"hardcoded_jwt_secret_123\"   # hardcoded secret\n\ndef generate_token(user_id):\n    # JWT with no expiry\n    payload = {\n        \"user_id\": user_id,\n        # no exp field\n    }\n    return jwt.encode(payload, SECRET, algorithm=\"HS256\")\n\ndef verify_token(token):\n    # no error handling\n    return jwt.decode(token, SECRET, algorithms=[\"HS256\"])",
+        "size_bytes": 379,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [
+          {
+            "pattern": "secret\\s*=",
+            "line_number": 4,
+            "line_snippet": "SECRET = \"hardcoded_jwt_secret_123\"   # hardcoded secret"
+          }
+        ],
+        "debt_signal_count": 1,
+        "metrics": {
+          "total_lines": 16,
+          "code_lines": 10,
+          "blank_lines": 3,
+          "comment_lines": 3,
+          "comment_ratio": 0.188,
+          "max_indentation_depth": 2,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "config.py",
+        "language": "python",
+        "content": "import os\n\n# Application Configuration\nAPP_NAME = \"GitHopper\"\nAPP_ENV = \"production\"\nDEBUG = False\n\n# Database\nDB_HOST = \"prod-db.us-east-1.rds.amazonaws.com\"\nDB_NAME = \"githopper_prod\"\nDB_USER = \"admin\"\nDB_PASSWORD = \"Pr0d@ccess#2024\"\n\n# AWS Credentials\nAWS_ACCESS_KEY_ID = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET_ACCESS_KEY = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\nAWS_REGION = \"us-east-1\"\n\n# Stripe\nSTRIPE_SECRET_KEY = \"sk_live_51abc123XYZtest\"\nSTRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\"\n\n# JWT\nJWT_SECRET = \"my_super_secret_jwt_key_2024\"\nJWT_ALGORITHM = \"HS256\"\nJWT_EXPIRY = None\n\n# SendGrid\nSENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\"\n\n# Firebase\nFIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\"\nFIREBASE_PROJECT_ID = \"githopper-prod\"\n\n# Twilio\nTWILIO_ACCOUNT_SID = \"ACabc123xyz789example\"\nTWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\"\nTWILIO_PHONE = \"+1234567890\"",
+        "size_bytes": 886,
+        "debt_category_hint": "architecture",
+        "debt_signals": [
+          {
+            "pattern": "password\\s*=",
+            "line_number": 12,
+            "line_snippet": "DB_PASSWORD = \"Pr0d@ccess#2024\""
+          },
+          {
+            "pattern": "secret\\s*=",
+            "line_number": 21,
+            "line_snippet": "STRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\""
+          },
+          {
+            "pattern": "secret\\s*=",
+            "line_number": 24,
+            "line_snippet": "JWT_SECRET = \"my_super_secret_jwt_key_2024\""
+          },
+          {
+            "pattern": "api_key\\s*=",
+            "line_number": 29,
+            "line_snippet": "SENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\""
+          },
+          {
+            "pattern": "api_key\\s*=",
+            "line_number": 32,
+            "line_snippet": "FIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\""
+          },
+          {
+            "pattern": "token\\s*=",
+            "line_number": 37,
+            "line_snippet": "TWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\""
+          }
+        ],
+        "debt_signal_count": 6,
+        "metrics": {
+          "total_lines": 38,
+          "code_lines": 22,
+          "blank_lines": 8,
+          "comment_lines": 8,
+          "comment_ratio": 0.211,
+          "max_indentation_depth": 0,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "database.py",
+        "language": "python",
+        "content": "import sqlite3\nimport os\nimport sys        # unused\nimport subprocess # unused\n\nconn = sqlite3.connect(\"app.db\")\ncursor = conn.cursor()\n\ndef get_user(user_id):\n    # SQL injection vulnerability\n    query = \"SELECT * FROM users WHERE id = \" + user_id\n    return cursor.execute(query)\n\ndef get_orders(customer_name):\n    # Another SQL injection\n    query = \"SELECT * FROM orders WHERE name = '\" + customer_name + \"'\"\n    return cursor.execute(query)\n\ndef delete_user(user_id):\n    # SQL injection + no auth check\n    query = \"DELETE FROM users WHERE id = \" + user_id\n    cursor.execute(query)\n    conn.commit()",
+        "size_bytes": 608,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 23,
+          "code_lines": 16,
+          "blank_lines": 4,
+          "comment_lines": 3,
+          "comment_ratio": 0.13,
+          "max_indentation_depth": 1,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "utils.py",
+        "language": "python",
+        "content": "# Utility functions\n\ndef process_order(order, user, items, discount, tax, shipping, coupon, gift_card, store_credit, loyalty_points):\n    # cyclomatic complexity of 20+\n    if order:\n        if user:\n            if items:\n                if discount > 0:\n                    if tax > 0:\n                        if shipping > 0:\n                            if coupon:\n                                if gift_card:\n                                    if store_credit > 0:\n                                        if loyalty_points > 0:\n                                            total = sum([i['price'] for i in items])\n                                            total = total - discount\n                                            total = total + tax\n                                            total = total + shipping\n                                            if coupon == \"SAVE10\":\n                                                total = total * 0.9\n                                            if gift_card:\n                                                total = total - gift_card\n                                            if store_credit:\n                                                total = total - store_credit\n                                            if loyalty_points:\n                                                total = total - (loyalty_points * 0.01)\n                                            return total\n    return 0\n\ndef calculate_tax(amount):\n    # duplicate logic \u2014 same as in payments.py\n    tax_rate = 0.18\n    return amount * tax_rate\n\ndef calculate_discount(amount):\n    # duplicate logic \u2014 same as in orders.py\n    discount_rate = 0.10\n    return amount * discount_rate\n\ndef validate_email(email):\n    # no actual validation\n    return True\n\ndef validate_phone(phone):\n    # no actual validation\n    return True\n\ndef validate_address(address):\n    # no actual validation\n    return True",
+        "size_bytes": 1927,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 50,
+          "code_lines": 37,
+          "blank_lines": 6,
+          "comment_lines": 7,
+          "comment_ratio": 0.14,
+          "max_indentation_depth": 12,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      }
+    ],
+    "analysis_summary": {
+      "total_debt_signals": 12,
+      "files_with_debt_signals": 4,
+      "cost_estimate": {
+        "chunks_to_analyze": 6,
+        "total_code_chars": 6229,
+        "approx_tokens": 1557
+      }
+    }
+  },
+  "summary": {
+    "repo_url": "aniketaggarwal/vulnerable-demo-app",
+    "repo_id": "efc09095",
+    "health_score": 100,
+    "total_security_issues": 0,
+    "total_debt_issues": 0,
+    "critical_issues": 0,
+    "quick_wins": 0
+  }
+}

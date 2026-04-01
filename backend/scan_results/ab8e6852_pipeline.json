@@ -1,0 +1,638 @@
+{
+  "status": "success",
+  "pipeline": "complete",
+  "execution_time_seconds": 10.572435,
+  "stages": {
+    "fetch": {
+      "repo_id": "ab8e6852",
+      "repo_url": "LLM-Fight-Club/Main.git",
+      "total_files": 5,
+      "categories": {
+        "config": 1,
+        "dependencies": 1,
+        "source_code": 3
+      },
+      "chunks": [
+        {
+          "file": "config/db.py",
+          "code": "AWS_SECRET_KEY = \"AKIAIOSFODNN7EXAMPLE\"",
+          "language": "python",
+          "char_count": 45
+        },
+        {
+          "file": "src/app.py",
+          "code": "query = \"SELECT * FROM users WHERE id = \" + user_input",
+          "language": "python",
+          "char_count": 55
+        },
+        {
+          "file": "src/utils.js",
+          "code": "const SECRET_TOKEN = \"sk-abc123xyz\";",
+          "language": "javascript",
+          "char_count": 38
+        }
+      ],
+      "files": [
+        {
+          "path": "config/db.py",
+          "language": "python",
+          "content": "import os\nAWS_SECRET_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nDB_PASSWORD = \"admin123\"",
+          "size_bytes": 250,
+          "debt_signals": [
+            "hardcoded_secrets"
+          ],
+          "debt_signal_count": 1,
+          "debt_category_hint": "architecture",
+          "metrics": {
+            "total_lines": 50,
+            "code_lines": 40,
+            "blank_lines": 5,
+            "comment_lines": 5,
+            "comment_ratio": 0.1,
+            "max_indentation_depth": 2,
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "requirements.txt",
+          "language": "text",
+          "content": "flask==0.12.0\nrequests==2.18.0\ndjango==2.0.0",
+          "size_bytes": 50,
+          "debt_signals": [
+            "outdated_dependencies"
+          ],
+          "debt_signal_count": 1,
+          "debt_category_hint": "dependencies",
+          "metrics": {
+            "total_lines": 3,
+            "code_lines": 3,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "src/app.py",
+          "language": "python",
+          "content": "def process_data(user_input):\n    query = \"SELECT * FROM users WHERE id = \" + user_input\n    return eval(user_input)\n\ndef long_function():\n    # This function is over 50 lines\n    x = 1\n    y = 2\n    z = x + y\n    a = z * 2\n    b = a + x\n    return b",
+          "size_bytes": 350,
+          "debt_signals": [
+            "sql_injection",
+            "eval"
+          ],
+          "debt_signal_count": 2,
+          "debt_category_hint": "code_quality",
+          "metrics": {
+            "total_lines": 120,
+            "code_lines": 95,
+            "blank_lines": 15,
+            "comment_lines": 10,
+            "comment_ratio": 0.08,
+            "max_indentation_depth": 3,
+            "long_function_count": 1
+          }
+        },
+        {
+          "path": "src/utils.js",
+          "language": "javascript",
+          "content": "const SECRET_TOKEN = \"sk-abc123xyz\";\nfunction validateUser(id) { return id > 0; }",
+          "size_bytes": 120,
+          "debt_signals": [
+            "hardcoded_secrets"
+          ],
+          "debt_signal_count": 1,
+          "debt_category_hint": "code_quality",
+          "metrics": {
+            "total_lines": 40,
+            "code_lines": 30,
+            "blank_lines": 5,
+            "comment_lines": 5,
+            "comment_ratio": 0.125,
+            "max_indentation_depth": 2,
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "tests/test_app.py",
+          "language": "python",
+          "content": "import unittest\nclass TestApp(unittest.TestCase):\n    def test_process(self):\n        assert process_data(\"test\") is not None",
+          "size_bytes": 200,
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "debt_category_hint": "testing",
+          "metrics": {
+            "total_lines": 60,
+            "code_lines": 50,
+            "blank_lines": 5,
+            "comment_lines": 5,
+            "comment_ratio": 0.083,
+            "max_indentation_depth": 2,
+            "long_function_count": 0
+          }
+        }
+      ]
+    },
+    "analyze": {
+      "repo_id": "ab8e6852",
+      "repo_url": "LLM-Fight-Club/Main.git",
+      "branch_name": "main",
+      "security_findings": [
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "config/db.py",
+          "line": 1,
+          "explanation": "AWS secret key directly embedded in source code. Visible to anyone with repo access.",
+          "fix": "Move to environment variable: AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')",
+          "remediated_code": "AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')",
+          "estimated_minutes": 10
+        },
+        {
+          "type": "SQL_INJECTION",
+          "severity": "CRITICAL",
+          "file": "src/app.py",
+          "line": 1,
+          "explanation": "User input is directly concatenated into SQL query, allowing attackers to inject malicious SQL code.",
+          "fix": "Use parameterized queries to separate SQL logic from data.",
+          "remediated_code": "query = \"SELECT * FROM users WHERE id = ?\"; cursor.execute(query, (user_input,))",
+          "estimated_minutes": 15
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "src/utils.js",
+          "line": 1,
+          "explanation": "API key directly embedded in source code. Visible to anyone with repo access.",
+          "fix": "Move to environment variable: const SECRET_TOKEN = process.env.SECRET_TOKEN;",
+          "remediated_code": "const SECRET_TOKEN = process.env.SECRET_TOKEN;",
+          "estimated_minutes": 10
+        }
+      ],
+      "debt_findings": [
+        {
+          "type": "HARDCODED_VALUE",
+          "severity": "HIGH",
+          "file": "config/db.py",
+          "explanation": "AWS_SECRET_KEY is hardcoded in the configuration file. This poses security risks and reduces maintainability.",
+          "fix": "Move sensitive values to environment variables or a secure secrets manager. Use os.environ.get() to retrieve configuration values.",
+          "remediated_code": "import os\n\nAWS_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')",
+          "estimated_minutes": 30
+        },
+        {
+          "type": "SQL_INJECTION_VULNERABILITY",
+          "severity": "CRITICAL",
+          "file": "src/app.py",
+          "explanation": "The query is constructed by concatenating user input directly into the SQL string, which makes it vulnerable to SQL injection attacks.",
+          "fix": "Use parameterized queries to safely include user input in the SQL statement.",
+          "remediated_code": "query = \"SELECT * FROM users WHERE id = %s\"",
+          "estimated_minutes": 15
+        },
+        {
+          "type": "HARDCODED_VALUE",
+          "severity": "MEDIUM",
+          "file": "src/app.py",
+          "explanation": "The SQL query contains a hardcoded table name 'users' which should be configurable or extracted into a constant.",
+          "fix": "Define the table name as a constant or configuration variable.",
+          "remediated_code": "TABLE_NAME = 'users'\nquery = f\"SELECT * FROM {TABLE_NAME} WHERE id = %s\"",
+          "estimated_minutes": 10
+        },
+        {
+          "type": "HARDCODED_VALUE",
+          "severity": "MEDIUM",
+          "file": "src/utils.js",
+          "explanation": "The SECRET_TOKEN is hardcoded directly in the code. This makes it difficult to manage secrets securely and poses a risk if the code is exposed.",
+          "fix": "Move the SECRET_TOKEN to an environment variable or a secure configuration file. Use a secrets management system in production environments.",
+          "remediated_code": "const SECRET_TOKEN = process.env.SECRET_TOKEN || 'default-secret';",
+          "estimated_minutes": 15
+        }
+      ],
+      "cost_tracker": {
+        "api_calls": 6,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "estimated_cost": 0.0
+      },
+      "chunks_scanned": 3,
+      "total_files": 5
+    },
+    "score": {
+      "repo_id": "ab8e6852",
+      "repo_url": "LLM-Fight-Club/Main.git",
+      "health_score": 28,
+      "chunks_scanned": 3,
+      "total_files": 5,
+      "analysis": {
+        "total_security_issues": 3,
+        "total_debt_issues": 4,
+        "critical_issues": 3,
+        "quick_wins": 3
+      },
+      "findings": {
+        "security_findings": [
+          {
+            "type": "HARDCODED_SECRET",
+            "severity": "CRITICAL",
+            "file": "config/db.py",
+            "line": 1,
+            "explanation": "AWS secret key directly embedded in source code. Visible to anyone with repo access.",
+            "fix": "Move to environment variable: AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')",
+            "remediated_code": "AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')",
+            "estimated_minutes": 10
+          },
+          {
+            "type": "SQL_INJECTION",
+            "severity": "CRITICAL",
+            "file": "src/app.py",
+            "line": 1,
+            "explanation": "User input is directly concatenated into SQL query, allowing attackers to inject malicious SQL code.",
+            "fix": "Use parameterized queries to separate SQL logic from data.",
+            "remediated_code": "query = \"SELECT * FROM users WHERE id = ?\"; cursor.execute(query, (user_input,))",
+            "estimated_minutes": 15
+          },
+          {
+            "type": "HARDCODED_SECRET",
+            "severity": "CRITICAL",
+            "file": "src/utils.js",
+            "line": 1,
+            "explanation": "API key directly embedded in source code. Visible to anyone with repo access.",
+            "fix": "Move to environment variable: const SECRET_TOKEN = process.env.SECRET_TOKEN;",
+            "remediated_code": "const SECRET_TOKEN = process.env.SECRET_TOKEN;",
+            "estimated_minutes": 10
+          }
+        ],
+        "debt_findings": [
+          {
+            "type": "HARDCODED_VALUE",
+            "severity": "HIGH",
+            "file": "config/db.py",
+            "explanation": "AWS_SECRET_KEY is hardcoded in the configuration file. This poses security risks and reduces maintainability.",
+            "fix": "Move sensitive values to environment variables or a secure secrets manager. Use os.environ.get() to retrieve configuration values.",
+            "remediated_code": "import os\n\nAWS_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')",
+            "estimated_minutes": 30
+          },
+          {
+            "type": "SQL_INJECTION_VULNERABILITY",
+            "severity": "CRITICAL",
+            "file": "src/app.py",
+            "explanation": "The query is constructed by concatenating user input directly into the SQL string, which makes it vulnerable to SQL injection attacks.",
+            "fix": "Use parameterized queries to safely include user input in the SQL statement.",
+            "remediated_code": "query = \"SELECT * FROM users WHERE id = %s\"",
+            "estimated_minutes": 15
+          },
+          {
+            "type": "HARDCODED_VALUE",
+            "severity": "MEDIUM",
+            "file": "src/app.py",
+            "explanation": "The SQL query contains a hardcoded table name 'users' which should be configurable or extracted into a constant.",
+            "fix": "Define the table name as a constant or configuration variable.",
+            "remediated_code": "TABLE_NAME = 'users'\nquery = f\"SELECT * FROM {TABLE_NAME} WHERE id = %s\"",
+            "estimated_minutes": 10
+          },
+          {
+            "type": "HARDCODED_VALUE",
+            "severity": "MEDIUM",
+            "file": "src/utils.js",
+            "explanation": "The SECRET_TOKEN is hardcoded directly in the code. This makes it difficult to manage secrets securely and poses a risk if the code is exposed.",
+            "fix": "Move the SECRET_TOKEN to an environment variable or a secure configuration file. Use a secrets management system in production environments.",
+            "remediated_code": "const SECRET_TOKEN = process.env.SECRET_TOKEN || 'default-secret';",
+            "estimated_minutes": 15
+          }
+        ],
+        "security_by_severity": {
+          "critical": 3,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "debt_by_severity": {
+          "critical": 1,
+          "high": 1,
+          "medium": 2,
+          "low": 0
+        },
+        "quick_wins": [
+          {
+            "type": "HARDCODED_SECRET",
+            "severity": "CRITICAL",
+            "file": "config/db.py",
+            "line": 1,
+            "explanation": "AWS secret key directly embedded in source code. Visible to anyone with repo access.",
+            "fix": "Move to environment variable: AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')",
+            "remediated_code": "AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')",
+            "estimated_minutes": 10
+          },
+          {
+            "type": "SQL_INJECTION",
+            "severity": "CRITICAL",
+            "file": "src/app.py",
+            "line": 1,
+            "explanation": "User input is directly concatenated into SQL query, allowing attackers to inject malicious SQL code.",
+            "fix": "Use parameterized queries to separate SQL logic from data.",
+            "remediated_code": "query = \"SELECT * FROM users WHERE id = ?\"; cursor.execute(query, (user_input,))",
+            "estimated_minutes": 15
+          },
+          {
+            "type": "HARDCODED_SECRET",
+            "severity": "CRITICAL",
+            "file": "src/utils.js",
+            "line": 1,
+            "explanation": "API key directly embedded in source code. Visible to anyone with repo access.",
+            "fix": "Move to environment variable: const SECRET_TOKEN = process.env.SECRET_TOKEN;",
+            "remediated_code": "const SECRET_TOKEN = process.env.SECRET_TOKEN;",
+            "estimated_minutes": 10
+          }
+        ],
+        "critical_issues": [
+          {
+            "type": "HARDCODED_SECRET",
+            "severity": "CRITICAL",
+            "file": "config/db.py",
+            "line": 1,
+            "explanation": "AWS secret key directly embedded in source code. Visible to anyone with repo access.",
+            "fix": "Move to environment variable: AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')",
+            "remediated_code": "AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')",
+            "estimated_minutes": 10
+          },
+          {
+            "type": "SQL_INJECTION",
+            "severity": "CRITICAL",
+            "file": "src/app.py",
+            "line": 1,
+            "explanation": "User input is directly concatenated into SQL query, allowing attackers to inject malicious SQL code.",
+            "fix": "Use parameterized queries to separate SQL logic from data.",
+            "remediated_code": "query = \"SELECT * FROM users WHERE id = ?\"; cursor.execute(query, (user_input,))",
+            "estimated_minutes": 15
+          },
+          {
+            "type": "HARDCODED_SECRET",
+            "severity": "CRITICAL",
+            "file": "src/utils.js",
+            "line": 1,
+            "explanation": "API key directly embedded in source code. Visible to anyone with repo access.",
+            "fix": "Move to environment variable: const SECRET_TOKEN = process.env.SECRET_TOKEN;",
+            "remediated_code": "const SECRET_TOKEN = process.env.SECRET_TOKEN;",
+            "estimated_minutes": 10
+          }
+        ]
+      },
+      "recommendations": [
+        {
+          "priority": "CRITICAL",
+          "action": "Address critical security issues immediately",
+          "count": 3
+        },
+        {
+          "priority": "HIGH",
+          "action": "Implement quick wins to improve score rapidly",
+          "count": 3
+        },
+        {
+          "priority": "MEDIUM",
+          "action": "Comprehensive code review and refactoring needed",
+          "score": 28
+        }
+      ],
+      "scoring_metadata": {
+        "scoring_version": "1.0",
+        "scoring_algorithm": "weighted_penalty",
+        "max_score": 100,
+        "min_score": 0
+      }
+    }
+  },
+  "data": {
+    "total_files_fetched": 5,
+    "config_files": 1,
+    "dependency_files": 1,
+    "source_files": 3,
+    "total_chunks": 3,
+    "files_by_category": {
+      "config": [
+        {
+          "path": "config/db.py",
+          "language": "python",
+          "content": "import os\nAWS_SECRET_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nDB_PASSWORD = \"admin123\"",
+          "size_bytes": 250,
+          "debt_signals": [
+            "hardcoded_secrets"
+          ],
+          "debt_signal_count": 1,
+          "debt_category_hint": "architecture",
+          "metrics": {
+            "total_lines": 50,
+            "code_lines": 40,
+            "blank_lines": 5,
+            "comment_lines": 5,
+            "comment_ratio": 0.1,
+            "max_indentation_depth": 2,
+            "long_function_count": 0
+          }
+        }
+      ],
+      "dependencies": [
+        {
+          "path": "requirements.txt",
+          "language": "text",
+          "content": "flask==0.12.0\nrequests==2.18.0\ndjango==2.0.0",
+          "size_bytes": 50,
+          "debt_signals": [
+            "outdated_dependencies"
+          ],
+          "debt_signal_count": 1,
+          "debt_category_hint": "dependencies",
+          "metrics": {
+            "total_lines": 3,
+            "code_lines": 3,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_function_count": 0
+          }
+        }
+      ],
+      "source_code": [
+        {
+          "path": "src/app.py",
+          "language": "python",
+          "content": "def process_data(user_input):\n    query = \"SELECT * FROM users WHERE id = \" + user_input\n    return eval(user_input)\n\ndef long_function():\n    # This function is over 50 lines\n    x = 1\n    y = 2\n    z = x + y\n    a = z * 2\n    b = a + x\n    return b",
+          "size_bytes": 350,
+          "debt_signals": [
+            "sql_injection",
+            "eval"
+          ],
+          "debt_signal_count": 2,
+          "debt_category_hint": "code_quality",
+          "metrics": {
+            "total_lines": 120,
+            "code_lines": 95,
+            "blank_lines": 15,
+            "comment_lines": 10,
+            "comment_ratio": 0.08,
+            "max_indentation_depth": 3,
+            "long_function_count": 1
+          }
+        },
+        {
+          "path": "src/utils.js",
+          "language": "javascript",
+          "content": "const SECRET_TOKEN = \"sk-abc123xyz\";\nfunction validateUser(id) { return id > 0; }",
+          "size_bytes": 120,
+          "debt_signals": [
+            "hardcoded_secrets"
+          ],
+          "debt_signal_count": 1,
+          "debt_category_hint": "code_quality",
+          "metrics": {
+            "total_lines": 40,
+            "code_lines": 30,
+            "blank_lines": 5,
+            "comment_lines": 5,
+            "comment_ratio": 0.125,
+            "max_indentation_depth": 2,
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "tests/test_app.py",
+          "language": "python",
+          "content": "import unittest\nclass TestApp(unittest.TestCase):\n    def test_process(self):\n        assert process_data(\"test\") is not None",
+          "size_bytes": 200,
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "debt_category_hint": "testing",
+          "metrics": {
+            "total_lines": 60,
+            "code_lines": 50,
+            "blank_lines": 5,
+            "comment_lines": 5,
+            "comment_ratio": 0.083,
+            "max_indentation_depth": 2,
+            "long_function_count": 0
+          }
+        }
+      ]
+    },
+    "detailed_files": [
+      {
+        "path": "config/db.py",
+        "language": "python",
+        "content": "import os\nAWS_SECRET_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nDB_PASSWORD = \"admin123\"",
+        "size_bytes": 250,
+        "debt_signals": [
+          "hardcoded_secrets"
+        ],
+        "debt_signal_count": 1,
+        "debt_category_hint": "architecture",
+        "metrics": {
+          "total_lines": 50,
+          "code_lines": 40,
+          "blank_lines": 5,
+          "comment_lines": 5,
+          "comment_ratio": 0.1,
+          "max_indentation_depth": 2,
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "requirements.txt",
+        "language": "text",
+        "content": "flask==0.12.0\nrequests==2.18.0\ndjango==2.0.0",
+        "size_bytes": 50,
+        "debt_signals": [
+          "outdated_dependencies"
+        ],
+        "debt_signal_count": 1,
+        "debt_category_hint": "dependencies",
+        "metrics": {
+          "total_lines": 3,
+          "code_lines": 3,
+          "blank_lines": 0,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 0,
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "src/app.py",
+        "language": "python",
+        "content": "def process_data(user_input):\n    query = \"SELECT * FROM users WHERE id = \" + user_input\n    return eval(user_input)\n\ndef long_function():\n    # This function is over 50 lines\n    x = 1\n    y = 2\n    z = x + y\n    a = z * 2\n    b = a + x\n    return b",
+        "size_bytes": 350,
+        "debt_signals": [
+          "sql_injection",
+          "eval"
+        ],
+        "debt_signal_count": 2,
+        "debt_category_hint": "code_quality",
+        "metrics": {
+          "total_lines": 120,
+          "code_lines": 95,
+          "blank_lines": 15,
+          "comment_lines": 10,
+          "comment_ratio": 0.08,
+          "max_indentation_depth": 3,
+          "long_function_count": 1
+        }
+      },
+      {
+        "path": "src/utils.js",
+        "language": "javascript",
+        "content": "const SECRET_TOKEN = \"sk-abc123xyz\";\nfunction validateUser(id) { return id > 0; }",
+        "size_bytes": 120,
+        "debt_signals": [
+          "hardcoded_secrets"
+        ],
+        "debt_signal_count": 1,
+        "debt_category_hint": "code_quality",
+        "metrics": {
+          "total_lines": 40,
+          "code_lines": 30,
+          "blank_lines": 5,
+          "comment_lines": 5,
+          "comment_ratio": 0.125,
+          "max_indentation_depth": 2,
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "tests/test_app.py",
+        "language": "python",
+        "content": "import unittest\nclass TestApp(unittest.TestCase):\n    def test_process(self):\n        assert process_data(\"test\") is not None",
+        "size_bytes": 200,
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "debt_category_hint": "testing",
+        "metrics": {
+          "total_lines": 60,
+          "code_lines": 50,
+          "blank_lines": 5,
+          "comment_lines": 5,
+          "comment_ratio": 0.083,
+          "max_indentation_depth": 2,
+          "long_function_count": 0
+        }
+      }
+    ],
+    "analysis_summary": {
+      "total_debt_signals": 5,
+      "files_with_debt_signals": 4,
+      "cost_estimate": {
+        "chunks_to_analyze": 3,
+        "total_code_chars": 138,
+        "approx_tokens": 34
+      }
+    }
+  },
+  "summary": {
+    "repo_url": "LLM-Fight-Club/Main.git",
+    "repo_id": "ab8e6852",
+    "health_score": 28,
+    "total_security_issues": 3,
+    "total_debt_issues": 4,
+    "critical_issues": 3,
+    "quick_wins": 3
+  }
+}
