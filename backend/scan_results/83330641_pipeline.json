@@ -1,0 +1,259 @@
+{
+  "status": "success",
+  "pipeline": "complete",
+  "execution_time_seconds": 6.946577,
+  "stages": {
+    "fetch": {
+      "repo_id": "83330641",
+      "repo_url": "ananyamehrotra/githoppermain.git",
+      "total_files": 2,
+      "categories": {
+        "config": 1,
+        "dependencies": 1,
+        "source_code": 1
+      },
+      "chunks": [
+        {
+          "filename": "config/db.py",
+          "content": "AWS_SECRET_KEY = \"AKIAIOSFODNN7EXAMPLE\"",
+          "language": "python",
+          "char_count": 45
+        },
+        {
+          "filename": "config/db.py",
+          "content": "query = \"SELECT * FROM users WHERE id = \" + user_id",
+          "language": "python",
+          "char_count": 55
+        }
+      ],
+      "files": [
+        {
+          "path": "config/db.py",
+          "language": "python",
+          "content": "\nimport requests\nimport os\n\n# Database config\nAWS_SECRET_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nDB_PASSWORD = \"admin123\"\nAPI_TOKEN = \"sk-proj-abc123xyz\"\n\ndef get_user(user_id):\n    query = \"SELECT * FROM users WHERE id = \" + user_id\n    return query\n\ndef process_data(data):\n    result = eval(data)\n    return result\n",
+          "size_bytes": 250,
+          "debt_signals": [
+            "hardcoded_secrets",
+            "sql_injection"
+          ],
+          "debt_signal_count": 2
+        },
+        {
+          "path": "requirements.txt",
+          "language": "text",
+          "content": "\nflask==0.12.0\nrequests==2.18.0\ndjango==2.0.0\n",
+          "size_bytes": 50,
+          "debt_signals": [
+            "outdated_dependencies"
+          ],
+          "debt_signal_count": 1
+        }
+      ]
+    },
+    "analyze": {
+      "repo_id": "83330641",
+      "repo_url": "ananyamehrotra/githoppermain.git",
+      "security_findings": [
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "config/db.py",
+          "line": 1,
+          "explanation": "The AWS_SECRET_KEY is hardcoded in the source code, which can lead to unauthorized access to AWS resources if the code is exposed or leaked.",
+          "fix": "Remove the hardcoded key and use environment variables or a secure secret management service to store and retrieve the key.",
+          "remediated_code": "import os\nAWS_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')",
+          "estimated_minutes": 10,
+          "business_impact": "If the hardcoded key is exposed, an attacker can use it to access and modify AWS resources, leading to potential data breaches, unauthorized transactions, or service disruptions."
+        },
+        {
+          "type": "SQL_INJECTION",
+          "severity": "CRITICAL",
+          "file": "config/db.py",
+          "line": 1,
+          "explanation": "The query is constructed by concatenating user input directly into the SQL statement, which allows an attacker to inject malicious SQL code and potentially access, modify, or delete sensitive data.",
+          "fix": "Use parameterized queries to ensure that user input is properly escaped and treated as data rather than executable code.",
+          "remediated_code": "query = \"SELECT * FROM users WHERE id = %s\"\ncursor.execute(query, (user_id,))",
+          "estimated_minutes": 10,
+          "business_impact": "An attacker could exploit this vulnerability to gain unauthorized access to sensitive data, modify or delete data, or even take control of the database server."
+        }
+      ],
+      "debt_findings": [
+        {
+          "type": "HIGH_COMPLEXITY",
+          "category": "CODE_QUALITY",
+          "severity": "MEDIUM",
+          "file": "config/db.py",
+          "explanation": "The file contains a hardcoded AWS_SECRET_KEY which is a security risk and violates the principle of keeping sensitive data out of source code. Hardcoded credentials can lead to accidental exposure and make it difficult to manage environment-specific configurations.",
+          "fix": "Move the AWS_SECRET_KEY to environment variables or a secure configuration management system like AWS Secrets Manager, and update the code to retrieve the key from these sources.",
+          "estimated_minutes": 15,
+          "business_impact": "Exposing credentials can lead to unauthorized access and security breaches, which can result in financial loss and damage to reputation. It also complicates deployment across different environments."
+        },
+        {
+          "type": "HIGH_COMPLEXITY",
+          "category": "CODE_QUALITY",
+          "severity": "MEDIUM",
+          "file": "config/db.py",
+          "explanation": "The code concatenates user input directly into a SQL query string, which is vulnerable to SQL injection attacks and violates secure coding practices.",
+          "fix": "Use parameterized queries to safely pass user input to the database.",
+          "estimated_minutes": 15,
+          "business_impact": "This vulnerability could lead to data breaches, unauthorized access, or system compromise, significantly impacting production stability and trust."
+        }
+      ],
+      "chunks_scanned": 2,
+      "total_files": 2
+    },
+    "score": {
+      "repo_id": "83330641",
+      "repo_url": "ananyamehrotra/githoppermain.git",
+      "health_score": 56,
+      "chunks_scanned": 2,
+      "total_files": 2,
+      "analysis": {
+        "total_security_issues": 2,
+        "total_debt_issues": 2,
+        "critical_issues": 2,
+        "quick_wins": 2
+      },
+      "findings": {
+        "security_findings": [
+          {
+            "type": "HARDCODED_SECRET",
+            "severity": "CRITICAL",
+            "file": "config/db.py",
+            "line": 1,
+            "explanation": "The AWS_SECRET_KEY is hardcoded in the source code, which can lead to unauthorized access to AWS resources if the code is exposed or leaked.",
+            "fix": "Remove the hardcoded key and use environment variables or a secure secret management service to store and retrieve the key.",
+            "remediated_code": "import os\nAWS_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')",
+            "estimated_minutes": 10,
+            "business_impact": "If the hardcoded key is exposed, an attacker can use it to access and modify AWS resources, leading to potential data breaches, unauthorized transactions, or service disruptions."
+          },
+          {
+            "type": "SQL_INJECTION",
+            "severity": "CRITICAL",
+            "file": "config/db.py",
+            "line": 1,
+            "explanation": "The query is constructed by concatenating user input directly into the SQL statement, which allows an attacker to inject malicious SQL code and potentially access, modify, or delete sensitive data.",
+            "fix": "Use parameterized queries to ensure that user input is properly escaped and treated as data rather than executable code.",
+            "remediated_code": "query = \"SELECT * FROM users WHERE id = %s\"\ncursor.execute(query, (user_id,))",
+            "estimated_minutes": 10,
+            "business_impact": "An attacker could exploit this vulnerability to gain unauthorized access to sensitive data, modify or delete data, or even take control of the database server."
+          }
+        ],
+        "debt_findings": [
+          {
+            "type": "HIGH_COMPLEXITY",
+            "category": "CODE_QUALITY",
+            "severity": "MEDIUM",
+            "file": "config/db.py",
+            "explanation": "The file contains a hardcoded AWS_SECRET_KEY which is a security risk and violates the principle of keeping sensitive data out of source code. Hardcoded credentials can lead to accidental exposure and make it difficult to manage environment-specific configurations.",
+            "fix": "Move the AWS_SECRET_KEY to environment variables or a secure configuration management system like AWS Secrets Manager, and update the code to retrieve the key from these sources.",
+            "estimated_minutes": 15,
+            "business_impact": "Exposing credentials can lead to unauthorized access and security breaches, which can result in financial loss and damage to reputation. It also complicates deployment across different environments."
+          },
+          {
+            "type": "HIGH_COMPLEXITY",
+            "category": "CODE_QUALITY",
+            "severity": "MEDIUM",
+            "file": "config/db.py",
+            "explanation": "The code concatenates user input directly into a SQL query string, which is vulnerable to SQL injection attacks and violates secure coding practices.",
+            "fix": "Use parameterized queries to safely pass user input to the database.",
+            "estimated_minutes": 15,
+            "business_impact": "This vulnerability could lead to data breaches, unauthorized access, or system compromise, significantly impacting production stability and trust."
+          }
+        ],
+        "security_by_severity": {
+          "critical": 2,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "debt_by_severity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 2,
+          "low": 0
+        },
+        "quick_wins": [
+          {
+            "type": "HARDCODED_SECRET",
+            "severity": "CRITICAL",
+            "file": "config/db.py",
+            "line": 1,
+            "explanation": "The AWS_SECRET_KEY is hardcoded in the source code, which can lead to unauthorized access to AWS resources if the code is exposed or leaked.",
+            "fix": "Remove the hardcoded key and use environment variables or a secure secret management service to store and retrieve the key.",
+            "remediated_code": "import os\nAWS_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')",
+            "estimated_minutes": 10,
+            "business_impact": "If the hardcoded key is exposed, an attacker can use it to access and modify AWS resources, leading to potential data breaches, unauthorized transactions, or service disruptions."
+          },
+          {
+            "type": "SQL_INJECTION",
+            "severity": "CRITICAL",
+            "file": "config/db.py",
+            "line": 1,
+            "explanation": "The query is constructed by concatenating user input directly into the SQL statement, which allows an attacker to inject malicious SQL code and potentially access, modify, or delete sensitive data.",
+            "fix": "Use parameterized queries to ensure that user input is properly escaped and treated as data rather than executable code.",
+            "remediated_code": "query = \"SELECT * FROM users WHERE id = %s\"\ncursor.execute(query, (user_id,))",
+            "estimated_minutes": 10,
+            "business_impact": "An attacker could exploit this vulnerability to gain unauthorized access to sensitive data, modify or delete data, or even take control of the database server."
+          }
+        ],
+        "critical_issues": [
+          {
+            "type": "HARDCODED_SECRET",
+            "severity": "CRITICAL",
+            "file": "config/db.py",
+            "line": 1,
+            "explanation": "The AWS_SECRET_KEY is hardcoded in the source code, which can lead to unauthorized access to AWS resources if the code is exposed or leaked.",
+            "fix": "Remove the hardcoded key and use environment variables or a secure secret management service to store and retrieve the key.",
+            "remediated_code": "import os\nAWS_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')",
+            "estimated_minutes": 10,
+            "business_impact": "If the hardcoded key is exposed, an attacker can use it to access and modify AWS resources, leading to potential data breaches, unauthorized transactions, or service disruptions."
+          },
+          {
+            "type": "SQL_INJECTION",
+            "severity": "CRITICAL",
+            "file": "config/db.py",
+            "line": 1,
+            "explanation": "The query is constructed by concatenating user input directly into the SQL statement, which allows an attacker to inject malicious SQL code and potentially access, modify, or delete sensitive data.",
+            "fix": "Use parameterized queries to ensure that user input is properly escaped and treated as data rather than executable code.",
+            "remediated_code": "query = \"SELECT * FROM users WHERE id = %s\"\ncursor.execute(query, (user_id,))",
+            "estimated_minutes": 10,
+            "business_impact": "An attacker could exploit this vulnerability to gain unauthorized access to sensitive data, modify or delete data, or even take control of the database server."
+          }
+        ]
+      },
+      "recommendations": [
+        {
+          "priority": "CRITICAL",
+          "action": "Address critical security issues immediately",
+          "count": 2
+        },
+        {
+          "priority": "HIGH",
+          "action": "Implement quick wins to improve score rapidly",
+          "count": 2
+        },
+        {
+          "priority": "MEDIUM",
+          "action": "Comprehensive code review and refactoring needed",
+          "score": 56
+        }
+      ],
+      "scoring_metadata": {
+        "scoring_version": "1.0",
+        "scoring_algorithm": "weighted_penalty",
+        "max_score": 100,
+        "min_score": 0
+      }
+    }
+  },
+  "summary": {
+    "repo_url": "ananyamehrotra/githoppermain.git",
+    "repo_id": "83330641",
+    "health_score": 56,
+    "total_security_issues": 2,
+    "total_debt_issues": 2,
+    "critical_issues": 2,
+    "quick_wins": 2
+  }
+}
