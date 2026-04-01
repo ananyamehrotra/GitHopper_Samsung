@@ -1,0 +1,176 @@
+import requests
+from urllib.parse import urlparse
+
+# Setup filtering constants
+ALLOWED_EXTENSIONS = {
+    '.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.go', '.rb', '.php', 
+    '.c', '.cpp', '.h', '.cs', '.md', '.json', '.yml', '.yaml', '.html', '.css'
+}
+
+CRITICAL_FILES = {
+    'package.json', 'requirements.txt', '.env.example', 'pom.xml', 
+    'go.mod', 'dockerfile', 'docker-compose.yml'
+}
+
+EXCLUDED_DIRS = {
+    'node_modules', 'venv', '.git', 'build', 'dist', 'out', 'bin', 
+    'obj', 'images', 'assets', '.next', '__pycache__', 'coverage'
+}
+
+EXT_MAP = {
+    "py": "python",
+    "js": "javascript",
+    "ts": "typescript",
+    "java": "java",
+    "go": "go",
+    "rb": "ruby",
+    "php": "php",
+    "c": "c",
+    "cpp": "cpp",
+    "cs": "csharp",
+    "md": "markdown",
+    "json": "json",
+    "yml": "yaml",
+    "yaml": "yaml",
+    "html": "html",
+    "css": "css"
+}
+
+def parse_repo_url(url):
+    """Extract owner and repo from https://github.com/user/repo"""
+    url = url.strip()
+    if url.endswith('/'):
+        url = url[:-1]
+    if url.endswith('.git'):
+        url = url[:-4]
+        
+    if url.startswith('http'):
+        path = urlparse(url).path.strip('/')
+    else:
+        path = url.strip('/')
+    
+    parts = path.split('/')
+    if len(parts) >= 2:
+        return parts[-2], parts[-1]
+    raise ValueError(f"Invalid GitHub URL: {url}")
+
+def should_keep_file(file_path):
+    """Determine if a file should be included in the AI scan."""
+    path_parts = file_path.split('/')
+    
+    # 1. Ignore excluded directories
+    if any(excluded in path_parts for excluded in EXCLUDED_DIRS):
+        return False
+        
+    filename = path_parts[-1].lower()
+    
+    # 2. Keep critical configuration and dependency files
+    if filename in CRITICAL_FILES:
+        return True
+        
+    # 3. Check allowed extensions
+    ext = '.' + filename.split('.')[-1] if '.' in filename else ''
+    if ext in ALLOWED_EXTENSIONS:
+        return True
+        
+    return False
+
+def get_default_branch(owner, repo, headers):
+    """Fetch the default branch of a GitHub repository."""
+    url = f"https://api.github.com/repos/{owner}/{repo}"
+    response = requests.get(url, headers=headers, timeout=10)
+    if response.status_code == 403:
+        raise Exception("GitHub rate limit exceeded")
+    if response.status_code == 200:
+        return response.json().get('default_branch', 'main')
+    return 'main' # Fallback
+
+def fetch_repo(url, github_token=None, max_files=30):
+    """
+    Fetch the useful files from a GitHub repository.
+    Uses GitHub Tree API directly then fetches Raw content to save API limit.
+    """
+    owner, repo = parse_repo_url(url)
+    
+    headers = {'Accept': 'application/vnd.github.v3+json'}
+    if github_token:
+        headers['Authorization'] = f'token {github_token}'
+        
+    branch = get_default_branch(owner, repo, headers)
+    
+    # Get the recursive tree
+    tree_url = f"https://api.github.com/repos/{owner}/{repo}/git/trees/{branch}?recursive=1"
+    response = requests.get(tree_url, headers=headers, timeout=10)
+    
+    if response.status_code == 403:
+        raise Exception("GitHub rate limit exceeded")
+    if response.status_code != 200:
+        raise Exception(f"Failed to fetch repo tree (Status {response.status_code}): {response.text}")
+        
+    tree = response.json().get('tree', [])
+    
+    # Filter tree
+    valid_files = [item for item in tree if item['type'] == 'blob' and should_keep_file(item['path'])]
+    
+    # Optional: Prioritize config files, then regular code. Cap at max_files to prevent massive payloads.
+    valid_files.sort(key=lambda x: 0 if x['path'].split('/')[-1].lower() in CRITICAL_FILES else 1)
+    valid_files = valid_files[:max_files]
+    
+    fetched_files = []
+    
+    for item in valid_files:
+        path = item['path']
+        raw_url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}"
+        
+        # We download via Raw endpoint as it rarely ratelimits compared to the API
+        try:
+            file_resp = requests.get(raw_url, timeout=10)
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to fetch {path}: {e}")
+            continue
+            
+        if file_resp.status_code == 403:
+            raise Exception("GitHub rate limit exceeded")
+            
+        if file_resp.status_code == 200:
+            content = file_resp.text
+            
+            if not content.strip():
+                continue
+                
+            if len(content) > 10000:
+                continue
+            
+            # Simple language detection based on extension
+            raw_ext = path.split('.')[-1] if '.' in path else 'text'
+            language = EXT_MAP.get(raw_ext.lower(), raw_ext)
+            
+            print(f"Fetched: {path}")
+            
+            fetched_files.append({
+                "path": path,
+                "language": language,
+                "content": content
+            })
+            
+    return fetched_files
+
+def categorize_files(files):
+    """
+    Groups fetched files into config, dependencies, and code
+    to allow for optimized, domain-specific AI processing.
+    """
+    config, deps, code = [], [], []
+
+    for f in files:
+        name = f["path"].lower()
+        basename = name.split('/')[-1]
+        
+        if basename in ["package.json", "requirements.txt", "dockerfile", "pom.xml", "go.mod"]:
+            deps.append(f)
+        elif basename.endswith((".yml", ".yaml", ".json", ".env", ".env.example")):
+            config.append(f)
+        else:
+            code.append(f)
+
+    return config, deps, code
