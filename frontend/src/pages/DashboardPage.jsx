@@ -19,6 +19,14 @@ export function DashboardPage() {
     const [watchId, setWatchId] = useState("");
     const [watchStatus, setWatchStatus] = useState(null);
     const [watchError, setWatchError] = useState("");
+    const [lastManualResult, setLastManualResult] = useState(() => {
+        try {
+            const saved = localStorage.getItem("githopper_last_scan");
+            return saved ? JSON.parse(saved) : null;
+        } catch (e) {
+            return null;
+        }
+    });
 
     useEffect(() => {
         if (!watchId) {
@@ -76,6 +84,12 @@ export function DashboardPage() {
 
             const data = await response.json();
             console.log("📊 Analysis complete:", data);
+            
+            setLastManualResult(data);
+            localStorage.setItem("githopper_last_scan", JSON.stringify(data));
+            localStorage.setItem("githopper_last_url", repoUrl);
+            localStorage.setItem("githopper_last_branch", branchName || "main");
+            localStorage.setItem("githopper_last_scan_mode", continuousMode ? "continuous" : "classic");
 
             // Navigate to analysis page with results
             navigate("/analyse-branches", {
@@ -423,25 +437,6 @@ export function DashboardPage() {
                                     )}
                                 </div>
                             )}
-                        </div>
-
-                        <div className="scan-features">
-                            <button className="feature-button" onClick={() => navigate('/analyse-branches')}>
-                                <span className="feature-dot"></span>
-                                ANALYSE BRANCHES
-                            </button>
-                            <button className="feature-button" onClick={() => navigate('/security-audit')}>
-                                <span className="feature-dot"></span>
-                                SECURITY AUDIT
-                            </button>
-                            <button className="feature-button" onClick={() => navigate('/debt-report')}>
-                                <span className="feature-dot"></span>
-                                DEBT REPORT
-                            </button>
-                            <button className="feature-button" onClick={() => navigate('/health-score')}>
-                                <span className="feature-dot"></span>
-                                HEALTH SCORE
-                            </button>
                         </div>
 
                         <p className="scan-tagline">
