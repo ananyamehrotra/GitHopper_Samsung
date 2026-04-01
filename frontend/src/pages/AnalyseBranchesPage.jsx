@@ -72,7 +72,7 @@ export function AnalyseBranchesPage() {
                             border: "1px solid #72ea1e",
                             borderRadius: "8px",
                             padding: "20px",
-                            marginBottom: "30px"
+                            marginBottom: "20px"
                         }}>
                             <p style={{ margin: "0 0 10px 0", color: "#a1d96a", fontSize: "12px" }}>Repository</p>
                             <p style={{ margin: "0 0 15px 0", color: "#d9ffb8", fontSize: "14px", fontFamily: "monospace", wordBreak: "break-all" }}>
@@ -82,6 +82,33 @@ export function AnalyseBranchesPage() {
                             <p style={{ margin: "0", color: "#d9ffb8", fontSize: "14px", fontFamily: "monospace" }}>
                                 {analyze.branch_name || "main"}
                             </p>
+                        </div>
+
+                        <div style={{ marginBottom: "30px", textAlign: "left" }}>
+                            <button
+                                onClick={() => navigate("/dashboard")}
+                                style={{
+                                    padding: "8px 20px",
+                                    background: "transparent",
+                                    color: "#72ea1e",
+                                    border: "1px solid #72ea1e",
+                                    borderRadius: "4px",
+                                    cursor: "pointer",
+                                    fontSize: "14px",
+                                    fontWeight: "bold",
+                                    transition: "all 0.2s ease-in-out"
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.background = "#72ea1e";
+                                    e.target.style.color = "#000";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.background = "transparent";
+                                    e.target.style.color = "#72ea1e";
+                                }}
+                            >
+                                ← Back to Dashboard
+                            </button>
                         </div>
 
                         {/* Summary Cards */}
