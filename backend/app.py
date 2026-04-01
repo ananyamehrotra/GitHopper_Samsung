@@ -5,13 +5,7 @@ from pathlib import Path
 import json
 import hashlib
 
-# Fix path to import sibling modules easily
-import sys
-sys.path.append(os.path.dirname(__file__))
-
-from github_client import fetch_repo, categorize_files
-from chunker import chunk_code
-from ai.bedrock_client import scan_chunk
+from pipeline import GitHopperPipeline
 
 # Initialize Flask app
 app = Flask(__name__, 
@@ -317,129 +311,42 @@ def get_scan_status(scan_id):
 @app.route('/api/analyze', methods=['POST'])
 def analyze_repo():
     """
-    Analyze code using Bedrock AI
-    Scans all chunks and returns security + debt findings
+    Analyze code using the complete GitHopper pipeline:
+    1. Fetch repository
+    2. AI analysis with Bedrock
+    3. Scoring and recommendations
     """
     try:
-        print("[ANALYZE] Starting AI analysis...")
+        print("[ANALYZE] Starting complete pipeline...")
         data = request.get_json()
         repo_url = data.get('repo_url')
-        
+
         if not repo_url:
             return jsonify({'error': 'repo_url is required'}), 400
-        
+
         print(f"[ANALYZE] Repository: {repo_url}")
-        
-        # Generate repo ID hash
-        repo_id = hashlib.md5(repo_url.encode()).hexdigest()[:8]
-        
-        # 1. Fetch repo
-        print(f"[ANALYZE] Step 1: Fetching repo...")
+
+        # Use the full pipeline
+        pipeline = GitHopperPipeline()
         github_token = os.environ.get('GITHUB_TOKEN')
-        files = fetch_repo(repo_url, github_token=github_token)
-        print(f"[ANALYZE] Fetched {len(files)} files")
-        
-        # 2. Chunk code
-        print(f"[ANALYZE] Step 2: Chunking code...")
-        chunks = chunk_code(files)
-        print(f"[ANALYZE] Created {len(chunks)} chunks")
-        
-        # 3. Scan each chunk with Bedrock
-        print(f"[ANALYZE] Step 3: Scanning with Bedrock...")
-        all_findings = {
-            'security_findings': [],
-            'debt_findings': [],
-            'chunks_scanned': 0,
-            'errors': []
-        }
-        
-        for i, chunk in enumerate(chunks, 1):
-            try:
-                print(f"[ANALYZE]   Scanning chunk {i}/{len(chunks)}: {chunk['file']}")
-                
-                # Convert chunk format for bedrock_client
-                bedrock_chunk = {
-                    'filename': chunk['file'],
-                    'content': chunk['code']
-                }
-                
-                result = scan_chunk(bedrock_chunk)
-                
-                if result.get('security_findings'):
-                    all_findings['security_findings'].extend(result['security_findings'])
-                
-                if result.get('debt_findings'):
-                    all_findings['debt_findings'].extend(result['debt_findings'])
-                
-                all_findings['chunks_scanned'] += 1
-                
-            except Exception as chunk_error:
-                print(f"[ANALYZE]   ERROR scanning chunk {i}: {str(chunk_error)[:100]}")
-                all_findings['errors'].append({
-                    'chunk': chunk['file'],
-                    'error': str(chunk_error)[:200]
-                })
-        
-        # 4. Calculate health score (100 - penalties)
-        health_score = 100
-        for finding in all_findings['security_findings']:
-            severity = finding.get('severity', 'LOW')
-            if severity == 'CRITICAL':
-                health_score -= 20
-            elif severity == 'HIGH':
-                health_score -= 10
-            elif severity == 'MEDIUM':
-                health_score -= 5
-            elif severity == 'LOW':
-                health_score -= 1
-        
-        health_score = max(0, min(100, health_score))
-        
-        # 5. Separate quick wins (estimated_minutes < 30)
-        quick_wins = [
-            f for f in all_findings['security_findings'] 
-            if f.get('estimated_minutes', 60) < 30
-        ]
-        
-        critical_issues = [
-            f for f in all_findings['security_findings']
-            if f.get('severity') == 'CRITICAL'
-        ]
-        
-        response_data = {
-            'status': 'success',
-            'repo_id': repo_id,
-            'repo_url': repo_url,
-            'health_score': health_score,
-            'chunks_scanned': all_findings['chunks_scanned'],
-            'total_files': len(files),
-            'analysis': {
-                'total_security_issues': len(all_findings['security_findings']),
-                'critical_issues': len(critical_issues),
-                'quick_wins': len(quick_wins),
-                'total_debt_issues': len(all_findings['debt_findings'])
-            },
-            'findings': {
-                'security_findings': all_findings['security_findings'],
-                'debt_findings': all_findings['debt_findings'],
-                'quick_wins': quick_wins,
-                'critical_issues': critical_issues
-            },
-            'errors': all_findings.get('errors', []) if all_findings.get('errors') else None
-        }
-        
-        # 6. Save results
-        results_dir = os.path.join(os.path.dirname(__file__), 'scan_results')
-        os.makedirs(results_dir, exist_ok=True)
-        
-        results_file = os.path.join(results_dir, f'{repo_id}_findings.json')
-        with open(results_file, 'w') as f:
-            json.dump(response_data, f, indent=2)
-        
-        print(f"[ANALYZE] COMPLETE: Health score {health_score}, {len(all_findings['security_findings'])} issues found")
-        
-        return jsonify(response_data), 200
-    
+        result = pipeline.run_full_pipeline(repo_url, github_token)
+
+        if result.get('status') == 'success':
+            # Save results
+            repo_id = result['summary']['repo_id']
+            results_dir = os.path.join(os.path.dirname(__file__), 'scan_results')
+            os.makedirs(results_dir, exist_ok=True)
+
+            results_file = os.path.join(results_dir, f'{repo_id}_pipeline.json')
+            with open(results_file, 'w') as f:
+                json.dump(result, f, indent=2)
+
+            print(f"[ANALYZE] Pipeline complete: Health score {result['summary']['health_score']}")
+        else:
+            print(f"[ANALYZE] Pipeline failed: {result.get('error', 'Unknown error')}")
+
+        return jsonify(result), 200
+
     except Exception as e:
         import traceback
         error_msg = str(e)

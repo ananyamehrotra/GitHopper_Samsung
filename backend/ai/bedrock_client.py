@@ -67,13 +67,15 @@ def classify_file(filename: str) -> str:
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-MODEL_ID = "anthropic.claude-sonnet-4-20250514"
-REGION = "ap-south-2"  # Hyderabad
+MODEL_ID = "nvidia.nemotron-nano-12b-v2"  # Use available model
+REGION = "us-east-1"  # Match CLI region
 MAX_TOKENS = 2048
 
 logger = logging.getLogger(__name__)
 
-bedrock = boto3.client("bedrock-runtime", region_name=REGION)
+# Use session with default profile to ensure correct credentials
+session = boto3.Session(profile_name="default")
+bedrock = session.client("bedrock-runtime", region_name=REGION)
 
 # ---------------------------------------------------------------------------
 # Bedrock invocation
@@ -81,24 +83,24 @@ bedrock = boto3.client("bedrock-runtime", region_name=REGION)
 
 def invoke_bedrock(prompt: str) -> dict:
     """
-    Sends a prompt to Claude 3 Sonnet via Bedrock.
+    Sends a prompt to NVIDIA Nemotron via Bedrock.
     Returns parsed JSON dict, or {"findings": []} on failure.
     """
     try:
         response = bedrock.invoke_model(
             modelId=MODEL_ID,
             body=json.dumps({
-                "anthropic_version": "bedrock-2023-05-31",
-                "max_tokens": MAX_TOKENS,
                 "messages": [
                     {"role": "user", "content": prompt}
-                ]
+                ],
+                "max_tokens": MAX_TOKENS,
+                "temperature": 0.1
             })
         )
         raw = json.loads(response["body"].read())
-        text = raw["content"][0]["text"].strip()
+        text = raw['choices'][0]['message']['content'].strip()
 
-        # strip markdown fences if Claude adds them despite instructions
+        # strip markdown fences if model adds them
         if text.startswith("```"):
             text = text.split("```")[1]
             if text.startswith("json"):
