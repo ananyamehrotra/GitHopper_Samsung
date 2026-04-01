@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "reposcan-continuous-intelligence": {
+      "command": "python",
+      "args": [
+        "../../backend/mcp_runtime_server.py"
+      ],
+      "cwd": "../../backend",
+      "env": {
+        "MCP_TRANSPORT": "stdio",
+        "GITHUB_TOKEN": "[SET_ME]"
+      }
+    }
+  }
+}

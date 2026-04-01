@@ -86,6 +86,40 @@ def get_default_branch(owner, repo, headers):
         return response.json().get('default_branch', 'main')
     return 'main' # Fallback
 
+
+def get_latest_commit_sha(url, github_token=None, branch_name=None):
+    """
+    Fetch the latest commit SHA for a repository branch.
+    Used by watch mode so scans trigger on actual repo changes, not polling alone.
+    """
+    owner, repo = parse_repo_url(url)
+
+    headers = {'Accept': 'application/vnd.github.v3+json'}
+    if github_token:
+        headers['Authorization'] = f'token {github_token}'
+
+    branch = branch_name or get_default_branch(owner, repo, headers)
+    commit_url = f"https://api.github.com/repos/{owner}/{repo}/commits/{branch}"
+
+    try:
+        response = requests.get(commit_url, headers=headers, timeout=10)
+    except requests.exceptions.Timeout:
+        raise Exception(f"GitHub commit request timed out for {owner}/{repo}@{branch}")
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"GitHub API error fetching commit SHA: {str(e)}")
+
+    if response.status_code == 403:
+        raise Exception("GitHub rate limit exceeded")
+    if response.status_code != 200:
+        raise Exception(f"Failed to fetch latest commit (Status {response.status_code}): {response.text[:200]}")
+
+    data = response.json()
+    return {
+        "branch_name": branch,
+        "commit_sha": data.get("sha"),
+        "commit_url": data.get("html_url"),
+    }
+
 def fetch_repo(url, github_token=None, max_files=30):
     """
     Fetch the useful files from a GitHub repository.

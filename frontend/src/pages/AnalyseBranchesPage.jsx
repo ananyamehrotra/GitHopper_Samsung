@@ -10,9 +10,10 @@ import "./AnalyseBranchesPage.css";
 export function AnalyseBranchesPage() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { isDark } = useTheme();
+    useTheme();
     const scanResult = location.state?.scanResult;
     const repoUrl = location.state?.repoUrl;
+    const scanMode = location.state?.scanMode;
     const [expandedVulnerability, setExpandedVulnerability] = useState(null);
 
     if (!scanResult) {
@@ -42,14 +43,19 @@ export function AnalyseBranchesPage() {
         );
     }
 
+    const isContinuous = scanResult.pipeline === "continuous_intelligence_extension" || scanMode === "continuous";
     const analyze = scanResult.stages?.analyze || {};
-    const vulnerableFiles = analyze.vulnerable_files || [];
-    const vulnerabilities = analyze.vulnerabilities || [];
+    const continuous = scanResult.continuous_intelligence || {};
+    const data = scanResult.data || {};
+    const vulnerableFiles = isContinuous ? (data.vulnerable_files || []) : (analyze.vulnerable_files || []);
+    const vulnerabilities = isContinuous ? (data.security_findings || []) : (analyze.vulnerabilities || []);
+    const debtFindings = isContinuous ? (data.debt_findings || []) : [];
+    const autofixSuggestions = isContinuous ? (data.autofix_suggestions || []) : [];
     const billing = analyze.billing || {};
     const filesSummary = {
-        total: analyze.total_files_analyzed || 0,
-        withIssues: analyze.files_with_issues || 0,
-        totalVulnerabilities: analyze.total_vulnerabilities || 0
+        total: isContinuous ? (data.total_files_fetched || 0) : (analyze.total_files_analyzed || 0),
+        withIssues: isContinuous ? vulnerableFiles.length : (analyze.files_with_issues || 0),
+        totalVulnerabilities: isContinuous ? vulnerabilities.length : (analyze.total_vulnerabilities || 0)
     };
 
     return (
@@ -72,16 +78,83 @@ export function AnalyseBranchesPage() {
                             border: "1px solid #72ea1e",
                             borderRadius: "8px",
                             padding: "20px",
-                            marginBottom: "30px"
+                            marginBottom: "20px"
                         }}>
                             <p style={{ margin: "0 0 10px 0", color: "#a1d96a", fontSize: "12px" }}>Repository</p>
                             <p style={{ margin: "0 0 15px 0", color: "#d9ffb8", fontSize: "14px", fontFamily: "monospace", wordBreak: "break-all" }}>
-                                {repoUrl || analyze.repo_url}
+                                {repoUrl || scanResult.repo_url || analyze.repo_url}
                             </p>
                             <p style={{ margin: "0 0 10px 0", color: "#a1d96a", fontSize: "12px" }}>Branch</p>
                             <p style={{ margin: "0", color: "#d9ffb8", fontSize: "14px", fontFamily: "monospace" }}>
-                                {analyze.branch_name || "main"}
+                                {scanResult.branch_name || analyze.branch_name || "main"}
                             </p>
+                        </div>
+
+                        {isContinuous && (
+                            <div style={{
+                                background: "rgba(76, 175, 80, 0.08)",
+                                border: "1px solid #4caf50",
+                                borderRadius: "8px",
+                                padding: "20px",
+                                marginBottom: "20px"
+                            }}>
+                                <h3 style={{ color: "#72ea1e", marginTop: 0 }}>Continuous Intelligence</h3>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "14px" }}>
+                                    <div style={{ background: "#000", border: "1px solid #4caf50", borderRadius: "6px", padding: "14px" }}>
+                                        <p style={{ margin: "0 0 6px 0", color: "#a1d96a", fontSize: "11px" }}>SCAN MODE</p>
+                                        <p style={{ margin: 0, color: "#d9ffb8", fontSize: "18px", fontWeight: "bold", textTransform: "uppercase" }}>{continuous.scan_mode || "full"}</p>
+                                    </div>
+                                    <div style={{ background: "#000", border: "1px solid #4caf50", borderRadius: "6px", padding: "14px" }}>
+                                        <p style={{ margin: "0 0 6px 0", color: "#a1d96a", fontSize: "11px" }}>NEW ISSUES</p>
+                                        <p style={{ margin: 0, color: "#ff9999", fontSize: "18px", fontWeight: "bold" }}>{continuous.new_issues ?? 0}</p>
+                                    </div>
+                                    <div style={{ background: "#000", border: "1px solid #4caf50", borderRadius: "6px", padding: "14px" }}>
+                                        <p style={{ margin: "0 0 6px 0", color: "#a1d96a", fontSize: "11px" }}>RESOLVED</p>
+                                        <p style={{ margin: 0, color: "#9ccc65", fontSize: "18px", fontWeight: "bold" }}>{continuous.resolved_issues ?? 0}</p>
+                                    </div>
+                                    <div style={{ background: "#000", border: "1px solid #4caf50", borderRadius: "6px", padding: "14px" }}>
+                                        <p style={{ margin: "0 0 6px 0", color: "#a1d96a", fontSize: "11px" }}>PERSISTING</p>
+                                        <p style={{ margin: 0, color: "#ffb74d", fontSize: "18px", fontWeight: "bold" }}>{continuous.persisting_issues ?? 0}</p>
+                                    </div>
+                                    <div style={{ background: "#000", border: "1px solid #4caf50", borderRadius: "6px", padding: "14px" }}>
+                                        <p style={{ margin: "0 0 6px 0", color: "#a1d96a", fontSize: "11px" }}>FIX TIME</p>
+                                        <p style={{ margin: 0, color: "#90caf9", fontSize: "18px", fontWeight: "bold" }}>{continuous.estimated_fix_minutes ?? 0}m</p>
+                                    </div>
+                                    <div style={{ background: "#000", border: "1px solid #4caf50", borderRadius: "6px", padding: "14px" }}>
+                                        <p style={{ margin: "0 0 6px 0", color: "#a1d96a", fontSize: "11px" }}>SCORE DELTA</p>
+                                        <p style={{ margin: 0, color: "#d9ffb8", fontSize: "18px", fontWeight: "bold" }}>
+                                            {continuous.trend?.delta == null ? "N/A" : `${continuous.trend.delta > 0 ? "+" : ""}${continuous.trend.delta}`}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div style={{ marginBottom: "30px", textAlign: "left" }}>
+                            <button
+                                onClick={() => navigate("/dashboard")}
+                                style={{
+                                    padding: "8px 20px",
+                                    background: "transparent",
+                                    color: "#72ea1e",
+                                    border: "1px solid #72ea1e",
+                                    borderRadius: "4px",
+                                    cursor: "pointer",
+                                    fontSize: "14px",
+                                    fontWeight: "bold",
+                                    transition: "all 0.2s ease-in-out"
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.background = "#72ea1e";
+                                    e.target.style.color = "#000";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.background = "transparent";
+                                    e.target.style.color = "#72ea1e";
+                                }}
+                            >
+                                ← Back to Dashboard
+                            </button>
                         </div>
 
                         {/* Summary Cards */}
@@ -117,6 +190,27 @@ export function AnalyseBranchesPage() {
                                 <p style={{ fontSize: "32px", color: "#ffb74d", margin: "10px 0" }}>{filesSummary.totalVulnerabilities}</p>
                             </div>
                         </div>
+
+                        {isContinuous && debtFindings.length > 0 && (
+                            <div style={{
+                                background: "rgba(114, 234, 30, 0.05)",
+                                border: "1px solid #72ea1e",
+                                borderRadius: "8px",
+                                padding: "20px",
+                                marginBottom: "30px"
+                            }}>
+                                <h3 style={{ color: "#72ea1e", marginTop: 0 }}>Technical Debt Signals ({debtFindings.length})</h3>
+                                <div style={{ display: "grid", gap: "12px" }}>
+                                    {debtFindings.slice(0, 8).map((item, idx) => (
+                                        <div key={idx} style={{ background: "#000", border: "1px solid #72ea1e", borderRadius: "6px", padding: "14px" }}>
+                                            <p style={{ margin: "0 0 4px 0", color: "#d9ffb8", fontFamily: "monospace", fontSize: "12px" }}>{item.file}</p>
+                                            <p style={{ margin: "0 0 6px 0", color: "#a1d96a", fontSize: "12px" }}>{item.type}</p>
+                                            <p style={{ margin: 0, color: "#d2ddb8", fontSize: "13px" }}>{item.summary}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Vulnerable Files List */}
                         {vulnerableFiles.length > 0 && (
@@ -237,6 +331,59 @@ export function AnalyseBranchesPage() {
                                                     )}
                                                 </div>
                                             )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {isContinuous && autofixSuggestions.length > 0 && (
+                            <div style={{
+                                background: "rgba(100, 181, 246, 0.06)",
+                                border: "1px solid #64b5f6",
+                                borderRadius: "8px",
+                                padding: "20px",
+                                marginBottom: "30px"
+                            }}>
+                                <h3 style={{ color: "#64b5f6", marginTop: 0 }}>AutoFix Suggestions ({autofixSuggestions.length})</h3>
+                                <div style={{ display: "grid", gap: "16px" }}>
+                                    {autofixSuggestions.slice(0, 6).map((fix, idx) => (
+                                        <div key={idx} style={{ background: "#000", border: "1px solid #64b5f6", borderRadius: "6px", padding: "16px" }}>
+                                            <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "start" }}>
+                                                <div>
+                                                    <p style={{ margin: "0 0 6px 0", color: "#d9ffb8", fontFamily: "monospace", fontSize: "12px" }}>{fix.file_path}</p>
+                                                    <p style={{ margin: 0, color: "#d2ddb8", fontSize: "13px" }}>{fix.issue}</p>
+                                                </div>
+                                                <div style={{
+                                                    padding: "4px 8px",
+                                                    borderRadius: "999px",
+                                                    background: fix.validation_status === "VALIDATED" ? "#4caf50" : "#ff9800",
+                                                    color: "#000",
+                                                    fontWeight: "bold",
+                                                    fontSize: "11px"
+                                                }}>
+                                                    {fix.validation_status}
+                                                </div>
+                                            </div>
+                                            <div style={{ marginTop: "12px" }}>
+                                                <p style={{ margin: "0 0 6px 0", color: "#90caf9", fontSize: "12px", fontWeight: "bold" }}>EXPLANATION</p>
+                                                <p style={{ margin: "0 0 10px 0", color: "#d2ddb8", fontSize: "13px" }}>{fix.explanation}</p>
+                                                <p style={{ margin: "0 0 6px 0", color: "#90caf9", fontSize: "12px", fontWeight: "bold" }}>PATCH PREVIEW</p>
+                                                <pre style={{
+                                                    margin: 0,
+                                                    whiteSpace: "pre-wrap",
+                                                    wordBreak: "break-word",
+                                                    fontSize: "11px",
+                                                    color: "#b3e5fc",
+                                                    background: "rgba(100, 181, 246, 0.08)",
+                                                    padding: "10px",
+                                                    borderRadius: "4px",
+                                                    maxHeight: "180px",
+                                                    overflow: "auto"
+                                                }}>
+                                                    {fix.diff || "No patch generated"}
+                                                </pre>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 from pipeline import GitHopperPipeline
+from mcp_server import ContinuousIntelligencePipeline, ContinuousWatchManager, MCPMemoryStore
 
 # Initialize Flask app
 app = Flask(__name__, 
@@ -19,6 +20,10 @@ app = Flask(__name__,
 
 # Enable CORS for frontend communication
 CORS(app)
+
+mcp_store = MCPMemoryStore()
+continuous_pipeline = ContinuousIntelligencePipeline(store=mcp_store)
+watch_manager = ContinuousWatchManager(pipeline=continuous_pipeline)
 
 # Add headers to allow Firebase auth popups
 @app.after_request
@@ -367,6 +372,120 @@ def analyze_repo():
         print(f"\n[ERROR] Exception in analyze_repo: {error_msg}")
         print(f"[ERROR] Traceback:\n{tb}\n")
         return jsonify({'error': error_msg, 'type': type(e).__name__}), 500
+
+
+@app.route('/api/analyze/continuous', methods=['POST'])
+def analyze_repo_continuous():
+    """
+    Continuous intelligence extension:
+    fetch -> diff -> MCP context injection -> optimized analysis -> scoring -> memory update
+    """
+    try:
+        data = request.get_json() or {}
+        repo_url = data.get('repo_url')
+        branch_name = data.get('branch_name', 'main')
+        generate_fixes = data.get('generate_fixes', True)
+
+        if not repo_url:
+            return jsonify({'error': 'repo_url is required'}), 400
+
+        github_token = os.environ.get('GITHUB_TOKEN')
+        result = continuous_pipeline.run(
+            repo_url=repo_url,
+            github_token=github_token,
+            branch_name=branch_name,
+            generate_fixes=generate_fixes,
+        )
+        return jsonify(result), 200
+
+    except Exception as e:
+        import traceback
+        error_msg = str(e)
+        tb = traceback.format_exc()
+        print(f"\n[ERROR] Exception in analyze_repo_continuous: {error_msg}")
+        print(f"[ERROR] Traceback:\n{tb}\n")
+        return jsonify({'error': error_msg, 'type': type(e).__name__}), 500
+
+
+@app.route('/api/continuous/start', methods=['POST'])
+def start_continuous_watch():
+    try:
+        data = request.get_json() or {}
+        repo_url = data.get('repo_url')
+        branch_name = data.get('branch_name', 'main')
+        interval_seconds = int(data.get('interval_seconds', 60))
+
+        if not repo_url:
+            return jsonify({'error': 'repo_url is required'}), 400
+
+        github_token = os.environ.get('GITHUB_TOKEN')
+        result = watch_manager.start(
+            repo_url=repo_url,
+            branch_name=branch_name,
+            interval_seconds=interval_seconds,
+            github_token=github_token,
+        )
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e), 'type': type(e).__name__}), 500
+
+
+@app.route('/api/continuous/status/<watch_id>', methods=['GET'])
+def get_continuous_watch_status(watch_id):
+    result = watch_manager.status(watch_id)
+    status_code = 404 if result.get('error') else 200
+    return jsonify(result), status_code
+
+
+@app.route('/api/continuous/stop/<watch_id>', methods=['POST'])
+def stop_continuous_watch(watch_id):
+    result = watch_manager.stop(watch_id)
+    status_code = 404 if result.get('error') else 200
+    return jsonify(result), status_code
+
+
+@app.route('/api/mcp/context/<repo_id>', methods=['GET'])
+def get_mcp_context(repo_id):
+    try:
+        return jsonify(mcp_store.get_context(repo_id)), 200
+    except Exception as e:
+        return jsonify({'error': str(e), 'type': type(e).__name__}), 500
+
+
+@app.route('/api/mcp/unresolved/<repo_id>', methods=['GET'])
+def get_mcp_unresolved(repo_id):
+    try:
+        return jsonify({
+            'repo_id': repo_id,
+            'unresolved_issues': mcp_store.get_unresolved_issues(repo_id)
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e), 'type': type(e).__name__}), 500
+
+
+@app.route('/api/mcp/fix-status', methods=['POST'])
+def update_mcp_fix_status():
+    try:
+        data = request.get_json() or {}
+        required = ['repo_id', 'issue_fingerprint', 'status', 'validation_status']
+        missing = [field for field in required if not data.get(field)]
+        if missing:
+            return jsonify({'error': f"Missing required fields: {', '.join(missing)}"}), 400
+
+        result = mcp_store.update_fix_status(
+            repo_id=data['repo_id'],
+            issue_fingerprint=data['issue_fingerprint'],
+            status=data['status'],
+            validation_status=data['validation_status'],
+            explanation=data.get('explanation', ''),
+            diff_patch=data.get('diff_patch', ''),
+            remediated_code=data.get('remediated_code', ''),
+        )
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e), 'type': type(e).__name__}), 500
 
 
 @app.route('/api/findings/<repo_id>', methods=['GET'])

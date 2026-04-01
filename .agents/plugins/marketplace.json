@@ -1,0 +1,20 @@
+{
+  "name": "antigravity-local-marketplace",
+  "interface": {
+    "displayName": "Antigravity Local Marketplace"
+  },
+  "plugins": [
+    {
+      "name": "antigravity-reposcan-mcp",
+      "source": {
+        "source": "local",
+        "path": "./plugins/antigravity-reposcan-mcp"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

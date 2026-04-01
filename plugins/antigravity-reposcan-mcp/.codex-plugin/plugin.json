@@ -1,0 +1,44 @@
+{
+  "name": "antigravity-reposcan-mcp",
+  "version": "1.0.0",
+  "description": "RepoScan continuous intelligence plugin for Antigravity with MCP-backed memory, incremental scans, and autofix signals.",
+  "author": {
+    "name": "GitHopper Team",
+    "email": "team@example.com",
+    "url": "https://github.com/example/githopper"
+  },
+  "homepage": "https://github.com/example/githopper",
+  "repository": "https://github.com/example/githopper",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "security"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks.json",
+  "mcpServers": "./.mcp.json",
+  "apps": "./.app.json",
+  "interface": {
+    "displayName": "Antigravity RepoScan MCP",
+    "shortDescription": "Continuous repo scanning with memory and autofix suggestions.",
+    "longDescription": "Adds MCP-powered continuous intelligence to RepoScan with history-aware analysis, incremental scans, unresolved issue memory, and patch suggestions.",
+    "developerName": "GitHopper Team",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/example/githopper",
+    "privacyPolicyURL": "https://github.com/example/githopper",
+    "termsOfServiceURL": "https://github.com/example/githopper",
+    "defaultPrompt": [
+      "Run a continuous scan on this GitHub repository.",
+      "Show unresolved security issues from memory.",
+      "Suggest validated autofix patches for critical findings."
+    ],
+    "brandColor": "#72EA1E",
+    "composerIcon": "../../frontend/public/assets/githopper.ico",
+    "logo": "../../frontend/public/assets/githopper.ico",
+    "screenshots": []
+  }
+}
