@@ -409,6 +409,252 @@ export function AnalyseBranchesPage() {
                             </div>
                         )}
 
+                        {/* ============== BEDROCK AI ANALYSIS RESULTS ============== */}
+                        {scanResult.stages && scanResult.stages.score && (
+                            <>
+                                {/* Health Score Card */}
+                                <div style={{
+                                    background: "rgba(114, 234, 30, 0.1)",
+                                    border: "2px solid #72ea1e",
+                                    borderRadius: "8px",
+                                    padding: "30px",
+                                    marginBottom: "30px",
+                                    textAlign: "center"
+                                }}>
+                                    <h2 style={{ color: "#72ea1e", marginTop: 0 }}>🏆 HEALTH SCORE</h2>
+                                    <div style={{
+                                        fontSize: "72px",
+                                        fontWeight: "bold",
+                                        color: scanResult.stages.score.health_score >= 70 ? "#72ea1e" : scanResult.stages.score.health_score >= 40 ? "#ffb74d" : "#ff6b6b",
+                                        margin: "20px 0"
+                                    }}>
+                                        {scanResult.stages.score.health_score}/100
+                                    </div>
+                                    <p style={{ color: "#d2ddb8", fontSize: "16px", margin: "15px 0" }}>
+                                        {scanResult.stages.score.health_score >= 70 ? "✅ Good overall health" : scanResult.stages.score.health_score >= 40 ? "⚠️  Needs attention" : "🚨 Critical issues detected"}
+                                    </p>
+                                </div>
+
+                                {/* Architecture Archetype & Risk Radar */}
+                                {scanResult.stages.score.archetype && (
+                                    <div style={{
+                                        background: "rgba(114, 234, 30, 0.05)",
+                                        border: "1px solid #72ea1e",
+                                        borderRadius: "8px",
+                                        padding: "20px",
+                                        marginBottom: "30px"
+                                    }}>
+                                        <h3 style={{ color: "#72ea1e", marginTop: 0 }}>📊 Repository Archetype</h3>
+                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                                            <div>
+                                                <p style={{ margin: "0 0 10px 0", color: "#a1d96a", fontWeight: "bold" }}>Type: {scanResult.stages.score.archetype}</p>
+                                                <p style={{ margin: "0", color: "#d2ddb8", fontSize: "14px", lineHeight: "1.6" }}>
+                                                    {scanResult.stages.score.archetype_description}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p style={{ margin: "0 0 10px 0", color: "#a1d96a", fontWeight: "bold" }}>Risk Radar</p>
+                                                {scanResult.stages.score.risk_radar && (
+                                                    <div style={{ fontSize: "13px", fontFamily: "monospace" }}>
+                                                        {Object.entries(scanResult.stages.score.risk_radar).map(([key, value]) => (
+                                                            <div key={key} style={{ marginBottom: "8px" }}>
+                                                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                                                                    <span style={{ color: "#d2ddb8", textTransform: "capitalize" }}>{key}:</span>
+                                                                    <span style={{ color: "#72ea1e", fontWeight: "bold" }}>{value}%</span>
+                                                                </div>
+                                                                <div style={{
+                                                                    background: "#333",
+                                                                    borderRadius: "4px",
+                                                                    height: "6px",
+                                                                    overflow: "hidden"
+                                                                }}>
+                                                                    <div style={{
+                                                                        background: value >= 70 ? "#ff6b6b" : value >= 40 ? "#ffb74d" : "#72ea1e",
+                                                                        height: "100%",
+                                                                        width: `${value}%`,
+                                                                        transition: "width 0.3s"
+                                                                    }} />
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Top 5 Recommended Actions */}
+                                {scanResult.stages.score.top_5_actions && scanResult.stages.score.top_5_actions.length > 0 && (
+                                    <div style={{
+                                        background: "rgba(114, 234, 30, 0.05)",
+                                        border: "1px solid #72ea1e",
+                                        borderRadius: "8px",
+                                        padding: "20px",
+                                        marginBottom: "30px"
+                                    }}>
+                                        <h3 style={{ color: "#72ea1e", marginTop: 0 }}>🎯 Top 5 Priority Actions</h3>
+                                        {scanResult.stages.score.top_5_actions.map((action, idx) => {
+                                            const severityColor = {
+                                                'CRITICAL': '#ff6b6b',
+                                                'HIGH': '#ffb74d',
+                                                'MEDIUM': '#ffd54f',
+                                                'LOW': '#72ea1e'
+                                            }[action.severity] || '#d2ddb8';
+
+                                            return (
+                                                <div key={idx} style={{
+                                                    background: "rgba(0,0,0,0.3)",
+                                                    border: `1px solid ${severityColor}`,
+                                                    borderRadius: "6px",
+                                                    padding: "15px",
+                                                    marginBottom: "15px"
+                                                }}>
+                                                    <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
+                                                        <div style={{
+                                                            background: severityColor,
+                                                            color: "#000",
+                                                            padding: "4px 10px",
+                                                            borderRadius: "4px",
+                                                            fontWeight: "bold",
+                                                            fontSize: "12px",
+                                                            minWidth: "80px",
+                                                            textAlign: "center"
+                                                        }}>
+                                                            #{action.rank} {action.severity}
+                                                        </div>
+                                                        <span style={{ color: "#72ea1e", fontWeight: "bold" }}>{action.type}</span>
+                                                        <span style={{ color: "#8f9a79", marginLeft: "auto" }}>{action.estimated_minutes} min</span>
+                                                    </div>
+                                                    <p style={{ margin: "8px 0", color: "#d2ddb8", fontSize: "14px" }}>
+                                                        <strong>File:</strong> {action.file}
+                                                    </p>
+                                                    <p style={{ margin: "8px 0", color: "#d2ddb8", fontSize: "14px", lineHeight: "1.5" }}>
+                                                        {action.explanation}
+                                                    </p>
+                                                    <p style={{ margin: "8px 0", color: "#a1d96a", fontSize: "13px" }}>
+                                                        <strong>Fix:</strong> {action.fix}
+                                                    </p>
+                                                    {action.remediated_code && (
+                                                        <pre style={{
+                                                            background: "#000",
+                                                            padding: "10px",
+                                                            borderRadius: "4px",
+                                                            overflow: "auto",
+                                                            fontSize: "11px",
+                                                            color: "#72ea1e",
+                                                            margin: "8px 0"
+                                                        }}>
+{action.remediated_code}
+                                                        </pre>
+                                                    )}
+                                                    <p style={{ margin: "8px 0", color: "#ffb74d", fontSize: "12px" }}>
+                                                        💼 Business Impact: {action.business_impact}
+                                                    </p>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+
+                                {/* Security Findings */}
+                                {scanResult.stages.analyze && scanResult.stages.analyze.security_findings && scanResult.stages.analyze.security_findings.length > 0 && (
+                                    <div style={{
+                                        background: "rgba(114, 234, 30, 0.05)",
+                                        border: "1px solid #ff6b6b",
+                                        borderRadius: "8px",
+                                        padding: "20px",
+                                        marginBottom: "30px"
+                                    }}>
+                                        <h3 style={{ color: "#ff6b6b", marginTop: 0 }}>🔓 Security Findings ({scanResult.stages.analyze.security_findings.length})</h3>
+                                        {scanResult.stages.analyze.security_findings.map((finding, idx) => {
+                                            const severityColor = {
+                                                'CRITICAL': '#ff6b6b',
+                                                'HIGH': '#ff9100',
+                                                'MEDIUM': '#ffb74d',
+                                                'LOW': '#ffd54f'
+                                            }[finding.severity] || '#d2ddb8';
+
+                                            return (
+                                                <div key={idx} style={{
+                                                    background: "rgba(0,0,0,0.2)",
+                                                    border: `1px solid ${severityColor}`,
+                                                    borderRadius: "6px",
+                                                    padding: "12px",
+                                                    marginBottom: "12px"
+                                                }}>
+                                                    <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "8px" }}>
+                                                        <span style={{
+                                                            background: severityColor,
+                                                            color: "#000",
+                                                            padding: "2px 8px",
+                                                            borderRadius: "3px",
+                                                            fontSize: "11px",
+                                                            fontWeight: "bold"
+                                                        }}>
+                                                            {finding.severity}
+                                                        </span>
+                                                        <span style={{ color: "#ff9100", fontWeight: "bold", fontSize: "13px" }}>{finding.type}</span>
+                                                        <span style={{ color: "#8f9a79", fontSize: "12px", marginLeft: "auto" }}>{finding.file}:{finding.line}</span>
+                                                    </div>
+                                                    <p style={{ margin: "6px 0", color: "#d2ddb8", fontSize: "13px" }}>{finding.explanation}</p>
+                                                    {finding.fix && <p style={{ margin: "6px 0", color: "#a1d96a", fontSize: "12px" }}><strong>Fix:</strong> {finding.fix}</p>}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+
+                                {/* Debt Findings */}
+                                {scanResult.stages.analyze && scanResult.stages.analyze.debt_findings && scanResult.stages.analyze.debt_findings.length > 0 && (
+                                    <div style={{
+                                        background: "rgba(114, 234, 30, 0.05)",
+                                        border: "1px solid #ffb74d",
+                                        borderRadius: "8px",
+                                        padding: "20px",
+                                        marginBottom: "30px"
+                                    }}>
+                                        <h3 style={{ color: "#ffb74d", marginTop: 0 }}>💸 Technical Debt ({scanResult.stages.analyze.debt_findings.length})</h3>
+                                        {scanResult.stages.analyze.debt_findings.map((finding, idx) => {
+                                            const severityColor = {
+                                                'CRITICAL': '#ff6b6b',
+                                                'HIGH': '#ff9100',
+                                                'MEDIUM': '#ffb74d',
+                                                'LOW': '#ffd54f'
+                                            }[finding.severity] || '#d2ddb8';
+
+                                            return (
+                                                <div key={idx} style={{
+                                                    background: "rgba(0,0,0,0.2)",
+                                                    border: `1px solid ${severityColor}`,
+                                                    borderRadius: "6px",
+                                                    padding: "12px",
+                                                    marginBottom: "12px"
+                                                }}>
+                                                    <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "8px" }}>
+                                                        <span style={{
+                                                            background: severityColor,
+                                                            color: "#000",
+                                                            padding: "2px 8px",
+                                                            borderRadius: "3px",
+                                                            fontSize: "11px",
+                                                            fontWeight: "bold"
+                                                        }}>
+                                                            {finding.severity}
+                                                        </span>
+                                                        <span style={{ color: "#ffb74d", fontWeight: "bold", fontSize: "13px" }}>{finding.type}</span>
+                                                        <span style={{ color: "#8f9a79", fontSize: "12px", marginLeft: "auto" }}>{finding.file}</span>
+                                                    </div>
+                                                    <p style={{ margin: "6px 0", color: "#d2ddb8", fontSize: "13px" }}>{finding.explanation}</p>
+                                                    {finding.fix && <p style={{ margin: "6px 0", color: "#a1d96a", fontSize: "12px" }}><strong>Fix:</strong> {finding.fix}</p>}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </>
+                        )}
+
                         {/* Full JSON Response */}
                         <div style={{
                             background: "rgba(114, 234, 30, 0.05)",
@@ -417,7 +663,7 @@ export function AnalyseBranchesPage() {
                             padding: "20px",
                             marginBottom: "30px"
                         }}>
-                            <h3 style={{ color: "#72ea1e", marginTop: 0 }}>Full JSON Response</h3>
+                            <h3 style={{ color: "#72ea1e", marginTop: 0 }}>📋 Full JSON Response</h3>
                             <pre style={{
                                 background: "#000",
                                 padding: "15px",

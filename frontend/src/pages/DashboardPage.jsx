@@ -25,7 +25,7 @@ export function DashboardPage() {
         setError("");
 
         try {
-            const response = await fetch("http://localhost:5000/api/scan", {
+            const response = await fetch("http://localhost:5000/api/analyze", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -40,7 +40,7 @@ export function DashboardPage() {
             }
 
             const data = await response.json();
-            console.log("Scan results:", data);
+            console.log("📊 Analysis complete:", data);
 
             // Navigate to analysis page with results
             navigate("/analyse-branches", {

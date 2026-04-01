@@ -126,8 +126,8 @@ def scan_chunk(chunk: dict) -> dict:
 
     Input:
         chunk = {
-            "filename": "config/db.py",
-            "content": "...raw code..."
+            "file": "config/db.py",
+            "code": "...raw code..."
         }
 
     Output:
@@ -136,8 +136,8 @@ def scan_chunk(chunk: dict) -> dict:
             "debt_findings": [...]
         }
     """
-    filename = chunk["filename"]
-    content = chunk["content"]
+    filename = chunk.get("file") or chunk.get("filename")
+    content = chunk.get("code") or chunk.get("content")
     file_type = classify_file(filename)
 
     security_findings = []
@@ -188,8 +188,8 @@ def scan_all_chunks(chunks: list) -> dict:
 
     Input:
         chunks = [
-            {"filename": "app.py", "content": "..."},
-            {"filename": "terraform.tf", "content": "..."},
+            {"file": "app.py", "code": "..."},
+            {"file": "terraform.tf", "code": "..."},
             ...
         ]
 
@@ -203,7 +203,8 @@ def scan_all_chunks(chunks: list) -> dict:
     all_debt = []
 
     for chunk in chunks:
-        logger.info(f"Scanning: {chunk['filename']}")
+        filename = chunk.get("file") or chunk.get("filename", "unknown")
+        logger.info(f"Scanning: {filename}")
         result = scan_chunk(chunk)
         all_security.extend(result["security_findings"])
         all_debt.extend(result["debt_findings"])
