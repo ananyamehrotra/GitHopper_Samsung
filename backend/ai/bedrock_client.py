@@ -11,6 +11,8 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from aggregator import aggregate_all
+
 # ---------------------------------------------------------------------------
 # File Classification
 # ---------------------------------------------------------------------------
@@ -335,6 +337,9 @@ def scan_all_chunks(chunks: list, branch_name: str = "main") -> dict:
     print(f"Estimated cost: ${cost_tracker['estimated_cost']:.4f}")
     print(f"{'='*60}\n")
 
+    # STEP 2: Aggregate findings into category-specific reports for scorers
+    aggregated_data = aggregate_all(all_vulnerabilities, cost_tracker.copy(), branch_name)
+
     return {
         "vulnerable_files": vulnerable_files,
         "vulnerabilities": all_vulnerabilities,
@@ -353,5 +358,7 @@ def scan_all_chunks(chunks: list, branch_name: str = "main") -> dict:
                 {"name": "Snyk", "cost": "$50+/month", "url": "https://snyk.io/"},
                 {"name": "Checkmarx", "cost": "Enterprise pricing", "url": "https://checkmarx.com/"}
             ]
-        }
+        },
+        # NEW: Aggregated data for the 4 scorers
+        "aggregated": aggregated_data
     }
