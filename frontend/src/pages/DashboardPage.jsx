@@ -5,6 +5,7 @@ import { ThemeToggle } from "../components/ThemeToggle";
 import { UserProfile } from "../components/UserProfile";
 import { Plasma } from "../components/Plasma";
 import { useTheme } from "../context/ThemeContext";
+import { LiveChangesModal } from "./LiveChangesModal";
 import "./HomePage.css";
 import "./DashboardPage.css";
 
@@ -16,6 +17,7 @@ export function DashboardPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [continuousMode, setContinuousMode] = useState(true);
+    const [showLiveModal, setShowLiveModal] = useState(false);
     const [watchId, setWatchId] = useState("");
     const [watchStatus, setWatchStatus] = useState(null);
     const [watchError, setWatchError] = useState("");
@@ -50,23 +52,25 @@ export function DashboardPage() {
             return;
         }
 
+        // Continuous mode → open Live Changes Modal (watch-based live feed)
+        if (continuousMode) {
+            setError("");
+            setShowLiveModal(true);
+            return;
+        }
+
+        // Classic mode → one-shot scan then navigate to results page
         setLoading(true);
         setError("");
 
         try {
-            const endpoint = continuousMode
-                ? "http://localhost:5000/api/analyze/continuous"
-                : "http://localhost:5000/api/analyze";
-
-            const response = await fetch(endpoint, {
+            const response = await fetch("http://localhost:5000/api/analyze", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     repo_url: repoUrl,
                     branch_name: branchName || "main",
-                    generate_fixes: continuousMode
+                    generate_fixes: false
                 })
             });
 
@@ -75,14 +79,13 @@ export function DashboardPage() {
             }
 
             const data = await response.json();
-            console.log("📊 Analysis complete:", data);
+            console.log("📊 Classic analysis complete:", data);
 
-            // Navigate to analysis page with results
             navigate("/analyse-branches", {
                 state: {
                     scanResult: data,
                     repoUrl: repoUrl,
-                    scanMode: continuousMode ? "continuous" : "classic"
+                    scanMode: "classic"
                 }
             });
         } catch (err) {
@@ -146,6 +149,13 @@ export function DashboardPage() {
 
     return (
         <>
+            {showLiveModal && (
+                <LiveChangesModal
+                    repoUrl={repoUrl}
+                    branchName={branchName || "main"}
+                    onClose={() => setShowLiveModal(false)}
+                />
+            )}
             <Plasma
                 color="#72ea1e"
                 speed={0.6}
@@ -260,8 +270,13 @@ export function DashboardPage() {
                                     className="analyse-button"
                                     onClick={handleAnalyse}
                                     disabled={loading}
+                                    style={continuousMode ? {
+                                        background: "linear-gradient(90deg, #72ea1e, #89ff35)",
+                                        position: "relative",
+                                        overflow: "hidden"
+                                    } : {}}
                                 >
-                                    {loading ? "SCANNING..." : "ANALYSE"}
+                                    {loading ? "SCANNING..." : continuousMode ? "▶ WATCH LIVE" : "ANALYSE"}
                                 </button>
                             </div>
                             
@@ -291,7 +306,7 @@ export function DashboardPage() {
                             {error && <div style={{ color: "#ff6b6b", marginTop: "10px", fontSize: "14px" }}>{error}</div>}
                             <div style={{ marginTop: "10px", color: "#a1d96a", fontSize: "12px", maxWidth: "720px" }}>
                                 {continuousMode
-                                    ? "Continuous mode adds MCP memory, incremental scanning, context injection, and auto-fix suggestions."
+                                    ? "▶ WATCH LIVE opens a real-time dialog that polls every commit — new issues, resolved & persisting are shown live as they happen."
                                     : "Classic mode uses the original RepoScan pipeline without the MCP extension layer."}
                             </div>
 
