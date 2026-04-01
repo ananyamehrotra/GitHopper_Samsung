@@ -285,10 +285,6 @@ def invoke_bedrock(prompt: str) -> dict:
     except Exception as e:
         logger.error(f"Bedrock error: {e}")
         return {"vulnerabilities": []}
-        "input_tokens": 0,
-        "output_tokens": 0,
-        "estimated_cost": 0.0
-    }
 
 def invoke_bedrock(prompt: str) -> dict:
     """
@@ -391,26 +387,36 @@ def scan_all_chunks(chunks: list, branch_name: str = "main") -> dict:
     
     vulnerable_files = []
     all_vulnerabilities = []
+    unique_files_analyzed = set()  # Track unique files (not chunks)
     
     for chunk in chunks:
         filename = chunk.get("file") or chunk.get("filename", "unknown")
+        unique_files_analyzed.add(filename)
         logger.info(f"Analyzing: {filename}")
         
         result = scan_chunk(chunk, branch_name)
         
-        # Collect vulnerable files
+        # Collect vulnerable files (deduplicate by filename)
         if result["has_issues"]:
-            vulnerable_files.append({
-                "file": filename,
-                "type": result["file_type"],
-                "count": result["vulnerability_count"]
-            })
-            all_vulnerabilities.extend(result["vulnerabilities"])
+            # Check if this file is already in the list
+            existing = next((f for f in vulnerable_files if f["file"] == filename), None)
+            if existing:
+                # Add to count for this file
+                existing["count"] += result["vulnerability_count"]
+                all_vulnerabilities.extend(result["vulnerabilities"])
+            else:
+                # New file with issues
+                vulnerable_files.append({
+                    "file": filename,
+                    "type": result["file_type"],
+                    "count": result["vulnerability_count"]
+                })
+                all_vulnerabilities.extend(result["vulnerabilities"])
     
     return {
         "vulnerable_files": vulnerable_files,
         "vulnerabilities": all_vulnerabilities,
-        "total_files_analyzed": len(chunks),
+        "total_files_analyzed": len(unique_files_analyzed),
         "files_with_issues": len(vulnerable_files),
         "total_vulnerabilities": len(all_vulnerabilities),
         "cost_tracker": cost_tracker.copy(),
