@@ -12,6 +12,7 @@ export function DashboardPage() {
     const { isDark } = useTheme();
     const navigate = useNavigate();
     const [repoUrl, setRepoUrl] = useState("");
+    const [branchName, setBranchName] = useState("main");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -31,7 +32,8 @@ export function DashboardPage() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    repo_url: repoUrl
+                    repo_url: repoUrl,
+                    branch_name: branchName || "main"
                 })
             });
 
@@ -141,6 +143,30 @@ export function DashboardPage() {
                                     {loading ? "SCANNING..." : "ANALYSE"}
                                 </button>
                             </div>
+                            
+                            <div style={{ marginTop: "12px", display: "flex", gap: "10px", alignItems: "center" }}>
+                                <label htmlFor="branch-input" style={{ color: "#72ea1e", fontSize: "12px", fontWeight: "600" }}>BRANCH (optional):</label>
+                                <input
+                                    id="branch-input"
+                                    type="text"
+                                    placeholder="main"
+                                    value={branchName}
+                                    onChange={(e) => setBranchName(e.target.value)}
+                                    style={{
+                                        padding: "6px 10px",
+                                        background: "rgba(114, 234, 30, 0.1)",
+                                        border: "1px solid #72ea1e",
+                                        borderRadius: "4px",
+                                        color: "#d9ffb8",
+                                        fontSize: "13px",
+                                        fontFamily: "monospace",
+                                        width: "150px",
+                                        disabled: loading
+                                    }}
+                                    disabled={loading}
+                                />
+                            </div>
+                            
                             {error && <div style={{ color: "#ff6b6b", marginTop: "10px", fontSize: "14px" }}>{error}</div>}
                         </div>
 
