@@ -296,6 +296,23 @@ export function AnalyseBranchesPage() {
                                             {/* Expanded Details */}
                                             {expandedVulnerability === idx && (
                                                 <div style={{ paddingLeft: "12px", color: "#d2ddb8" }}>
+                                                    {/* Hot Insight */}
+                                                    {vuln.hot_insight && (
+                                                        <div style={{
+                                                            marginBottom: "20px",
+                                                            padding: "15px",
+                                                            background: "linear-gradient(45deg, rgba(255,107,107,0.1), rgba(255,152,0,0.15))",
+                                                            borderLeft: "4px solid #ff4757",
+                                                            borderRadius: "6px",
+                                                            boxShadow: "0 4px 15px rgba(255, 71, 87, 0.15)"
+                                                        }}>
+                                                            <p style={{ margin: "0 0 8px 0", color: "#ff4757", fontSize: "13px", fontWeight: "900", letterSpacing: "1px", textTransform: "uppercase" }}>🔥 THE HOT INSIGHT</p>
+                                                            <p style={{ margin: "0", color: "#ffeaa7", fontSize: "14px", lineHeight: "1.6", fontStyle: "italic", textShadow: "0 0 2px rgba(255, 234, 167, 0.3)" }}>
+                                                                "{vuln.hot_insight}"
+                                                            </p>
+                                                        </div>
+                                                    )}
+
                                                     {/* Explanation */}
                                                     <div style={{ marginBottom: "15px" }}>
                                                         <p style={{ margin: "0 0 5px 0", color: "#a1d96a", fontSize: "12px", fontWeight: "bold" }}>EXPLANATION</p>

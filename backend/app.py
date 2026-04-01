@@ -34,6 +34,8 @@ def add_cors_headers(response):
 
 # ==================== API ROUTES ====================
 
+# Remove the custom OPTIONS handler as CORS(app) handles it natively.
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
