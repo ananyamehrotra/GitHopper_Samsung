@@ -1,0 +1,1306 @@
+{
+  "status": "success",
+  "pipeline": "complete",
+  "execution_time_seconds": 37.352944,
+  "stages": {
+    "fetch": {
+      "repo_id": "86118e6d",
+      "repo_url": "https://github.com/ananyamehrotra/PathfinderAI",
+      "total_files": 11,
+      "categories": {
+        "config": 0,
+        "dependencies": 1,
+        "source_code": 10
+      },
+      "chunks": [
+        {
+          "chunk_id": "requirements.txt::chunk_0",
+          "file": "requirements.txt",
+          "language": "txt",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 11,
+          "code": "Flask==2.3.3\r\npymongo[srv]==4.5.0\r\nflask-bcrypt==1.0.1\r\npython-dotenv==1.0.0\r\npandas==2.1.1\r\nnumpy==1.25.2\r\nplotly==5.17.0\r\nflask-dance==7.0.0\r\nrequests-oauthlib==1.3.1\r\npytz==2023.3\r\ngunicorn==22.0.0\r\n",
+          "char_count": 202,
+          "debt_category_hint": "dependencies",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 11,
+            "code_lines": 11,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: requirements.txt (txt) | Lines 1\u201311 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "README.md::chunk_0",
+          "file": "README.md",
+          "language": "markdown",
+          "chunk_index": 0,
+          "total_chunks": 2,
+          "start_line": 1,
+          "end_line": 46,
+          "code": "# \ud83d\ude80 PathfinderAI - Stage 1\r\n\r\nA learning companion designed to help students and developers organize, track, and improve their learning journey. This project starts as a simple study tracker and will evolve into a full-fledged AI-powered study assistant.\r\n\r\n---\r\n\r\n## \u2705 Core Features (Stage 1)\r\n\r\n* **Secure User Authentication:** Users can register, log in, and log out. Passwords are fully hashed and secured.\r\n* **Session Management:** The app remembers users while they are logged in.\r\n* **Subject Management (CRUD):** Users can create, update, and delete their study subjects.\r\n* **Progress Tracking:** Marks and time spent can be logged for each subject.\r\n* **Performance Dashboard:** Visual charts show a user's performance and time allocation across subjects.\r\n* **Activity Logging:** Key user actions are logged in the database.\r\n\r\n---\r\n\r\n## \u2699\ufe0f Technology Stack\r\n\r\n* **Backend:** Python (Flask)\r\n* **Database:** MongoDB (via MongoDB Atlas)\r\n* **Frontend:** HTML, CSS, JavaScript\r\n* **Data Visualization:** Plotly & Pandas\r\n* **Security:** Flask-Bcrypt for password hashing\r\n\r\n---\r\n\r\n## How We Built Stage 1: Our Approach\r\n\r\nWe built Stage 1 by focusing on a solid foundation, following a \"backend-first\" approach to ensure the core logic was working before building out the full user interface.\r\n\r\n### 1. Setting the Foundation (The Backend)\r\nWe started by setting up a **Flask** web server. The first critical step was establishing a reliable connection to our **MongoDB Atlas** database. We chose to use the `PyMongo` library directly for a robust and modern connection, wrapping the initial connection logic in a `try...except` block to gracefully handle any potential database outages.\r\n\r\n### 2. Building the Front Door (User Authentication)\r\nWith the database connected, we built the user authentication system. This involved:\r\n* **Creating Routes:** We defined Flask routes for `/register`, `/login`, and `/logout`.\r\n* **Handling Forms:** The register and login routes were built to handle `POST` requests, taking the user's details from the HTML form.\r\n* **Securing Passwords:** We implemented **Bcrypt** to one-way hash all user passwords before storing them in the `users` collection. This ensures we never store plain-text passwords, a critical security practice.\r\n\r\n### 3. Adding the Core Functionality (Subject Management)\r\nOnce a user could log in, we built the main feature of the app.\r\n* **CRUD Operations:** We created routes (`/add`, `/update`, `/delete`) and functions that allow a logged-in user to Create, Read, Update, and Delete subjects.\r\n* **Session-Based Logic:** Every action is tied to the logged-in user. We use the `user_id` stored in the Flask **session** to ensure users can only see and manage their own subjects.\r\n* **Activity Logging:** We also created an `activities` collection to log key events, like a user viewing their dashboard, by linking the action to their `user_id`.\r\n\r\n",
+          "char_count": 2924,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 50,
+            "code_lines": 28,
+            "blank_lines": 14,
+            "comment_lines": 8,
+            "comment_ratio": 0.16,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: README.md (markdown) | Lines 1\u201346 (chunk 1 of 2)."
+        },
+        {
+          "chunk_id": "README.md::chunk_1",
+          "file": "README.md",
+          "language": "markdown",
+          "chunk_index": 1,
+          "total_chunks": 2,
+          "start_line": 47,
+          "end_line": 50,
+          "code": "### 4. Making it Visual (Frontend & Charts)\r\nFinally, with all the backend logic in place, we created the frontend.\r\n* **HTML Templates:** We built several HTML pages (`dashboard.html`, `login.html`, etc.) using the Jinja2 templating engine to dynamically display user-specific data.\r\n* **Data Visualization:** To give users immediate feedback, we used **Plotly** and **Pandas** to read their subject data from the database and generate simple, effective charts for the performance and time-tracking pages.",
+          "char_count": 506,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "TEMP",
+              "line_number": 49,
+              "line_snippet": "* **HTML Templates:** We built several HTML pages (`dashboard.html`, `login.html`, etc.) using the Jinja2 templating eng"
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 50,
+            "code_lines": 28,
+            "blank_lines": 14,
+            "comment_lines": 8,
+            "comment_ratio": 0.16,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": false,
+          "contains_tests": false,
+          "context_note": "File: README.md (markdown) | Lines 47\u201350 (chunk 2 of 2). | Debt signals in this chunk: line 49: * **HTML Templates:** We built several HTML pages (`dashboar"
+        },
+        {
+          "chunk_id": "templates/add.html::chunk_0",
+          "file": "templates/add.html",
+          "language": "html",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 52,
+          "code": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Add Subject - PathfinderAI</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n<div class=\"addcard-page\">\r\n    <div class=\"addcard\">\r\n        <h1>Add New Subject</h1>\r\n        <form action=\"/add\" method=\"POST\">\r\n            <div class=\"form-group\">\r\n                <label for=\"subject\">Subject Name</label>\r\n                <input type=\"text\" id=\"subject\" name=\"subject\" required>\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"marks\">Current Marks (%)</label>\r\n                <input type=\"number\" id=\"marks\" name=\"marks\" required min=\"0\" max=\"100\">\r\n            </div>\r\n\r\n            <div class=\"form-group\">\r\n               <label for=\"priority\">Choose the Priority</label>\r\n                    <select id=\"priority\" name=\"priority\">\r\n                        <option value=\"High\">High</option>\r\n                        <option value=\"Medium\">Medium</option>\r\n                        <option value=\"Low\">Low</option>\r\n                    </select>\r\n            </div>\r\n            <div class=\"form-group\">\r\n               <label for=\"category\">Choose the Category</label>\r\n                    <select id=\"category\" name=\"category\">\r\n                        <option value=\"core\">Core</option>\r\n                        <option value=\"elective\">Elective</option>\r\n                        <option value=\"optional\">Optional</option>\r\n                        <option value=\"hobby\">Hobby</option>\r\n                    </select>\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"description\">Subject Description</label>\r\n                <textarea id=\"description\" name=\"description\" rows=\"10\" cols=\"50\" placeholder=\"Enter the description of the Subject\"></textarea>\r\n            </div>\r\n            <button type=\"submit\" class=\"btn-secondary\" style=\"width:100%\">Add Subject</button>\r\n        </form>\r\n        <div class=\"logout-container\"><a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a> </div>\r\n    </div></div>\r\n</body>\r\n</html>",
+          "char_count": 2418,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 52,
+            "code_lines": 50,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: templates/add.html (html) | Lines 1\u201352 (chunk 1 of 1). | Max nesting depth: 6 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "templates/add_goal.html::chunk_0",
+          "file": "templates/add_goal.html",
+          "language": "html",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 44,
+          "code": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Set a New Goal</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n            <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n <div class=\"addcard-page\">\r\n    <div class=\"addcard\">\r\n        <h1>Set a Time-Based Goal</h1>\r\n        <form action=\"{{ url_for('add_goal') }}\" method=\"POST\">\r\n            <div class=\"form-group\">\r\n                <label for=\"subject_id\">Which subject do you want to set a goal for?</label>\r\n                <select id=\"subject_id\" name=\"subject_id\" required>\r\n                    <option value=\"\" disabled selected>Select a subject...</option>\r\n                    {% for subject in subjects %}\r\n                        <option value=\"{{ subject._id }}\">{{ subject.subject|capitalize }}</option>\r\n                    {% endfor %}\r\n                </select>\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"target_duration\">How many hours do you want to study?</label>\r\n                <input type=\"number\" id=\"target_duration\" name=\"target_duration\" required min=\"1\" step=\"0.5\">\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"period\">Over what period?</label>\r\n                <select id=\"period\" name=\"period\" required>\r\n                    <option value=\"weekly\" selected>This Week</option>\r\n                    <option value=\"monthly\">This Month</option>\r\n                </select>\r\n            </div>\r\n            <button type=\"submit\">Set Goal</button>\r\n        </form>\r\n        <a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a>\r\n    </div></div>\r\n</body>\r\n</html>",
+          "char_count": 1975,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 44,
+            "code_lines": 42,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: templates/add_goal.html (html) | Lines 1\u201344 (chunk 1 of 1). | Max nesting depth: 6 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "templates/history.html::chunk_0",
+          "file": "templates/history.html",
+          "language": "html",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 42,
+          "code": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Study History</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n    <div class=\"container\">\r\n       <div class=\"summary-card\">\r\n            <h1>Study Session History</h1>\r\n\r\n            {% if sessions %}\r\n                {% for session in sessions %}\r\n                    <div class=\"history-item\">\r\n                        <h3>{{ session.subject_name|capitalize }}</h3>\r\n                        <p><strong>Week of:</strong> {{ session.week_start }}</p>\r\n\r\n                        {% set total_seconds = session.get('mon', 0) + session.get('tue', 0) + session.get('wed', 0) + session.get('thu', 0) + session.get('fri', 0) + session.get('sat', 0) + session.get('sun', 0) %}\r\n                        {% set hours = total_seconds // 3600 %}\r\n                        {% set minutes = (total_seconds % 3600) // 60 %}\r\n\r\n                        <p><strong>Total Time Studied this Week:</strong> {{ hours }}h {{ minutes }}m</p>\r\n                    </div>\r\n                {% endfor %}\r\n            {% else %}\r\n                <p class=\"text-center\">No study history found.</p>\r\n            {% endif %}\r\n\r\n            <div class=\"text-center mt-4\">\r\n                <div class=\"logout-container\"><a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a> </div>\r\n            </div>\r\n        </div>\r\n    </div>\r\n</body>\r\n</html>",
+          "char_count": 1768,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 42,
+            "code_lines": 36,
+            "blank_lines": 6,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: templates/history.html (html) | Lines 1\u201342 (chunk 1 of 1). | Max nesting depth: 6 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "templates/layout.html::chunk_0",
+          "file": "templates/layout.html",
+          "language": "html",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 39,
+          "code": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n    <title>{% block title %}PathfinderAI{% endblock %}</title>\r\n    <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n    {% block head_styles %}{% endblock %}\r\n</head>\r\n<body>\r\n    <div class=\"container\">\r\n        <div class=\"header-card\">\r\n            {% block header_content %}\r\n            <h1>\r\n                <a href=\"{{ url_for('dashboard') }}\" style=\"text-decoration: none; color: inherit;\">PathfinderAI</a>\r\n            </h1>\r\n            <p>Welcome, {{ session.get('username', 'Guest') }}!</p>\r\n            {% endblock %}\r\n        </div>\r\n\r\n        {% with messages = get_flashed_messages(with_categories=true) %}\r\n            {% if messages %}\r\n                {% for category, message in messages %}\r\n                    <div class=\"flash-message {{ category }}\">{{ message }}</div>\r\n                {% endfor %}\r\n            {% endif %}\r\n        {% endwith %}\r\n\r\n        <div class=\"main-content-card\">\r\n            {% block content %}\r\n            {% endblock %}\r\n        </div>\r\n    </div>\r\n    <div class=\"text-center mt-4\">\r\n                <a href=\"{{ url_for('dashboard') }}\" class=\"btn btn-secondary\">Back to Dashboard</a>\r\n    </div>\r\n    {% block scripts %}{% endblock %}\r\n</body>\r\n</html>",
+          "char_count": 1392,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 39,
+            "code_lines": 37,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 5,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: templates/layout.html (html) | Lines 1\u201339 (chunk 1 of 1). | Max nesting depth: 5 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "templates/login.html::chunk_0",
+          "file": "templates/login.html",
+          "language": "html",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 55,
+          "code": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Login</title>\r\n      <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n    <div class=\"login-container\">\r\n        <div class=\"login-card\">\r\n            <h1>Login</h1>\r\n\r\n            {% with messages = get_flashed_messages() %}\r\n                {% if messages %}\r\n                    {% for message in messages %}\r\n                        <div class=\"flash\">{{ message }}</div>\r\n                    {% endfor %}\r\n                {% endif %}\r\n            {% endwith %}\r\n\r\n            <form method=\"POST\" action=\"/login\">\r\n                <label>Email:</label>\r\n                <input type=\"email\" name=\"email\" required><br>\r\n\r\n                <label>Password:</label>\r\n                <input type=\"password\" name=\"password\" required id=\"password-input\"><br>\r\n                <input type=\"checkbox\" onclick=\"togglePasswordVisibility()\"> Show Password<br><br>\r\n                <button type=\"submit\">Login</button>\r\n            </form>\r\n\r\n            <!-- In your existing login.html, change the Google OAuth link to: -->\r\n<a href=\"{{ url_for('google_login') }}\" class=\"btn-danger\" style=\"text-decoration: none; display: block; margin-top: 10px;\">\r\n    Sign in with Google\r\n</a>\r\n\r\n\r\n            <a href=\"/register\">Don't have an account? Register</a>\r\n        </div>\r\n    </div>\r\n</body>\r\n\r\n<script>\r\nfunction togglePasswordVisibility() {\r\n    const passwordInput = document.getElementById('password-input');\r\n    if (passwordInput.type === \"password\") {\r\n        passwordInput.type = \"text\";\r\n    } else {\r\n        passwordInput.type = \"password\";\r\n    }\r\n}\r\n</script>\r\n</html>",
+          "char_count": 1952,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 55,
+            "code_lines": 48,
+            "blank_lines": 7,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: templates/login.html (html) | Lines 1\u201355 (chunk 1 of 1). | Max nesting depth: 6 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "templates/performance.html::chunk_0",
+          "file": "templates/performance.html",
+          "language": "html",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 37,
+          "code": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Performance Dashboard</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n    <script src=\"https://cdn.plot.ly/plotly-latest.min.js\"></script>\r\n    <style>\r\n        body { background-color: #E7EFC7; font-family: Arial; }\r\n        .chart { background-color: #AEC8A4; padding: 20px; margin: 20px; }\r\n        .list { background-color: white; margin: 20px; padding: 20px; }\r\n        .item { border-bottom: 1px solid #AEC8A4; padding: 10px; }\r\n        button { background-color: #8A784E; color: white; border: none; padding: 5px 10px; margin: 2px; }\r\n    </style>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n  <div class=\"dashboard\">\r\n    <div class=\"container\">\r\n    <div class=\"chartt\">\r\n        {{ chart1|safe }}\r\n    </div>\r\n<div class=\"summary-card\">\r\n\r\n        <h3>Subjects</h3>\r\n        {% for subject in subjects %}\r\n        <div class=\"item\">\r\n            {{ subject.subject }} - {{ subject.marks }}% - {{ subject.time_spent }}m\r\n        </div>\r\n        {% endfor %}\r\n    </div>\r\n    </div><div class=\"logout-container\"><a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a> </div></div>\r\n</body>\r\n</html>",
+          "char_count": 1476,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 37,
+            "code_lines": 35,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: templates/performance.html (html) | Lines 1\u201337 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "templates/register.html::chunk_0",
+          "file": "templates/register.html",
+          "language": "html",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 55,
+          "code": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Register</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n        <div class=\"login-container\">\r\n             <div class=\"login-card\">\r\n        <h1>Register</h1>\r\n\r\n        {% with messages = get_flashed_messages() %}\r\n            {% if messages %}\r\n                {% for message in messages %}\r\n                    <div class=\"flash error\">{{ message }}</div>\r\n                {% endfor %}\r\n            {% endif %}\r\n        {% endwith %}\r\n\r\n        <form method=\"POST\" action=\"/register\">\r\n            <label>Username:</label>\r\n            <input type=\"text\" name=\"username\" required><br>\r\n\r\n            <label>Email:</label>\r\n            <input type=\"email\" name=\"email\" required><br>\r\n\r\n            <label>Password:</label>\r\n            <input type=\"password\" name=\"password\" required id=\"password-input\"><br>\r\n            <input type=\"checkbox\" onclick=\"togglePasswordVisibility()\"> Show Password<br><br>\r\n            <button type=\"submit\" class=\"secondary\">Register</button>\r\n        </form>\r\n\r\n        <a href=\"/login\">Already have an account? Login</a>\r\n        </div></div>\r\n</body>\r\n<script>\r\n    function togglePasswordVisibility() {\r\n    // Step A: Find the password input field on the page using its ID\r\n    const passwordInput = document.getElementById('password-input');\r\n\r\n    // Step B: Check what type the input field currently is\r\n    if (passwordInput.type === \"password\") {\r\n        // Step C: If it's a password (hidden), change its type to text (visible)\r\n        passwordInput.type = \"text\";\r\n    } else {\r\n        // Step D: If it's already text, change it back to a password (hidden)\r\n        passwordInput.type = \"password\";\r\n    }\r\n}\r\n</script>\r\n</html>",
+          "char_count": 2073,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 55,
+            "code_lines": 45,
+            "blank_lines": 6,
+            "comment_lines": 4,
+            "comment_ratio": 0.073,
+            "max_indentation_depth": 5,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: templates/register.html (html) | Lines 1\u201355 (chunk 1 of 1). | Max nesting depth: 5 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "templates/time.html::chunk_0",
+          "file": "templates/time.html",
+          "language": "html",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 34,
+          "code": "<html><head>\r\n    <title>Time Tracking - PathfinderAI</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n    <script src=\"https://cdn.plot.ly/plotly-latest.min.js\"></script><style id=\"plotly.js-style-global\"></style>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n    <div class=\"container\">\r\n        <div class=\"header-card\">\r\n            <h1>Time Analytics</h1>\r\n            <p>How your study time is distributed.</p>\r\n        </div>\r\n        <div class=\"cardd\" style=\"max-width: 900px;\">\r\n            <div class=\"chartt\">\r\n            {{ chart2|safe }}\r\n        </div></div>\r\n        <div class=\"summary-card\">\r\n    {% if max_subject and min_subject %}\r\n        <p><strong>Most time spent on:</strong> {{ max_subject.name }} ({{ max_subject.hours }} hrs)</p>\r\n        <p><strong>Least time spent on:</strong> {{ min_subject.name }} ({{ min_subject.hours }} hrs)</p>\r\n    {% else %}\r\n        <p>No study data available.</p>\r\n    {% endif %}\r\n</div>\r\n\r\n        <div class=\"logout-container\">\r\n            <a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a>\r\n        </div>\r\n    </div>\r\n\r\n</body></html>",
+          "char_count": 1425,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 34,
+            "code_lines": 32,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: templates/time.html (html) | Lines 1\u201334 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "test_db.py::chunk_0",
+          "file": "test_db.py",
+          "language": "python",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 36,
+          "code": "import os\r\nfrom pymongo import MongoClient\r\nfrom pymongo.errors import ConnectionFailure\r\nfrom dotenv import load_dotenv\r\n\r\n# Load environment variables from .env file\r\nload_dotenv()\r\n\r\n# Get the connection string from your .env file\r\nMONGO_URI = os.getenv('MONGO_URI')\r\n\r\nprint(\"--- Database Connection Test ---\")\r\nprint(f\"Attempting to connect with URI: {MONGO_URI}\")\r\n\r\n# Check if the URI was even found\r\nif not MONGO_URI:\r\n    print(\"\\n[FATAL ERROR]: The MONGO_URI was not found in your .env file.\")\r\n    print(\"Please ensure the .env file exists and the variable is named MONGO_URI.\")\r\nelse:\r\n    try:\r\n        # Try to create a new client and connect to the server\r\n        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)\r\n        \r\n        # The ismaster command is cheap and does not require auth.\r\n        # It will trigger a connection attempt\r\n        client.admin.command('ismaster')\r\n        \r\n        print(\"\\n[SUCCESS]: MongoDB connection established successfully!\")\r\n        \r\n    except ConnectionFailure as e:\r\n        print(f\"\\n[CONNECTION FAILED]: Could not connect to MongoDB.\")\r\n        print(f\"Reason: {e}\")\r\n    except Exception as e:\r\n        print(f\"\\n[UNEXPECTED ERROR]: An error occurred: {e}\")\r\n\r\nprint(\"--- Test Finished ---\")",
+          "char_count": 1271,
+          "debt_category_hint": "testing",
+          "debt_signals": [
+            {
+              "pattern": "print\\(",
+              "line_number": 12,
+              "line_snippet": "print(\"--- Database Connection Test ---\")"
+            },
+            {
+              "pattern": "TEMP",
+              "line_number": 13,
+              "line_snippet": "print(f\"Attempting to connect with URI: {MONGO_URI}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 17,
+              "line_snippet": "print(\"\\n[FATAL ERROR]: The MONGO_URI was not found in your .env file.\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 18,
+              "line_snippet": "print(\"Please ensure the .env file exists and the variable is named MONGO_URI.\")"
+            },
+            {
+              "pattern": "TEMP",
+              "line_number": 25,
+              "line_snippet": "# It will trigger a connection attempt"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 28,
+              "line_snippet": "print(\"\\n[SUCCESS]: MongoDB connection established successfully!\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 31,
+              "line_snippet": "print(f\"\\n[CONNECTION FAILED]: Could not connect to MongoDB.\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 32,
+              "line_snippet": "print(f\"Reason: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 34,
+              "line_snippet": "print(f\"\\n[UNEXPECTED ERROR]: An error occurred: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 36,
+              "line_snippet": "print(\"--- Test Finished ---\")"
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 36,
+            "code_lines": 22,
+            "blank_lines": 8,
+            "comment_lines": 6,
+            "comment_ratio": 0.167,
+            "max_indentation_depth": 2,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": true,
+          "context_note": "File: test_db.py (python) | Lines 1\u201336 (chunk 1 of 1). | This is a TEST file \u2014 focus on coverage gaps and mock quality. | Debt signals in this chunk: line 12: print(\"--- Database Connection Test ---\"); line 13: print(f\"Attempting to connect with URI: {MONGO_URI}\"); line 17: print(\"\\n[FATAL ERROR]: The MONGO_URI was not found in your ; line 18: print(\"Please ensure the .env file exists and the variable i; line 25: # It will trigger a connection attempt"
+        }
+      ],
+      "files": [
+        {
+          "path": "requirements.txt",
+          "language": "txt",
+          "content": "Flask==2.3.3\r\npymongo[srv]==4.5.0\r\nflask-bcrypt==1.0.1\r\npython-dotenv==1.0.0\r\npandas==2.1.1\r\nnumpy==1.25.2\r\nplotly==5.17.0\r\nflask-dance==7.0.0\r\nrequests-oauthlib==1.3.1\r\npytz==2023.3\r\ngunicorn==22.0.0\r\n",
+          "size_bytes": 202,
+          "debt_category_hint": "dependencies",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 11,
+            "code_lines": 11,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "README.md",
+          "language": "markdown",
+          "content": "# \ud83d\ude80 PathfinderAI - Stage 1\r\n\r\nA learning companion designed to help students and developers organize, track, and improve their learning journey. This project starts as a simple study tracker and will evolve into a full-fledged AI-powered study assistant.\r\n\r\n---\r\n\r\n## \u2705 Core Features (Stage 1)\r\n\r\n* **Secure User Authentication:** Users can register, log in, and log out. Passwords are fully hashed and secured.\r\n* **Session Management:** The app remembers users while they are logged in.\r\n* **Subject Management (CRUD):** Users can create, update, and delete their study subjects.\r\n* **Progress Tracking:** Marks and time spent can be logged for each subject.\r\n* **Performance Dashboard:** Visual charts show a user's performance and time allocation across subjects.\r\n* **Activity Logging:** Key user actions are logged in the database.\r\n\r\n---\r\n\r\n## \u2699\ufe0f Technology Stack\r\n\r\n* **Backend:** Python (Flask)\r\n* **Database:** MongoDB (via MongoDB Atlas)\r\n* **Frontend:** HTML, CSS, JavaScript\r\n* **Data Visualization:** Plotly & Pandas\r\n* **Security:** Flask-Bcrypt for password hashing\r\n\r\n---\r\n\r\n## How We Built Stage 1: Our Approach\r\n\r\nWe built Stage 1 by focusing on a solid foundation, following a \"backend-first\" approach to ensure the core logic was working before building out the full user interface.\r\n\r\n### 1. Setting the Foundation (The Backend)\r\nWe started by setting up a **Flask** web server. The first critical step was establishing a reliable connection to our **MongoDB Atlas** database. We chose to use the `PyMongo` library directly for a robust and modern connection, wrapping the initial connection logic in a `try...except` block to gracefully handle any potential database outages.\r\n\r\n### 2. Building the Front Door (User Authentication)\r\nWith the database connected, we built the user authentication system. This involved:\r\n* **Creating Routes:** We defined Flask routes for `/register`, `/login`, and `/logout`.\r\n* **Handling Forms:** The register and login routes were built to handle `POST` requests, taking the user's details from the HTML form.\r\n* **Securing Passwords:** We implemented **Bcrypt** to one-way hash all user passwords before storing them in the `users` collection. This ensures we never store plain-text passwords, a critical security practice.\r\n\r\n### 3. Adding the Core Functionality (Subject Management)\r\nOnce a user could log in, we built the main feature of the app.\r\n* **CRUD Operations:** We created routes (`/add`, `/update`, `/delete`) and functions that allow a logged-in user to Create, Read, Update, and Delete subjects.\r\n* **Session-Based Logic:** Every action is tied to the logged-in user. We use the `user_id` stored in the Flask **session** to ensure users can only see and manage their own subjects.\r\n* **Activity Logging:** We also created an `activities` collection to log key events, like a user viewing their dashboard, by linking the action to their `user_id`.\r\n\r\n### 4. Making it Visual (Frontend & Charts)\r\nFinally, with all the backend logic in place, we created the frontend.\r\n* **HTML Templates:** We built several HTML pages (`dashboard.html`, `login.html`, etc.) using the Jinja2 templating engine to dynamically display user-specific data.\r\n* **Data Visualization:** To give users immediate feedback, we used **Plotly** and **Pandas** to read their subject data from the database and generate simple, effective charts for the performance and time-tracking pages.",
+          "size_bytes": 3439,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "TEMP",
+              "line_number": 49,
+              "line_snippet": "* **HTML Templates:** We built several HTML pages (`dashboard.html`, `login.html`, etc.) using the Jinja2 templating eng"
+            }
+          ],
+          "debt_signal_count": 1,
+          "metrics": {
+            "total_lines": 50,
+            "code_lines": 28,
+            "blank_lines": 14,
+            "comment_lines": 8,
+            "comment_ratio": 0.16,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/add.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Add Subject - PathfinderAI</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n<div class=\"addcard-page\">\r\n    <div class=\"addcard\">\r\n        <h1>Add New Subject</h1>\r\n        <form action=\"/add\" method=\"POST\">\r\n            <div class=\"form-group\">\r\n                <label for=\"subject\">Subject Name</label>\r\n                <input type=\"text\" id=\"subject\" name=\"subject\" required>\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"marks\">Current Marks (%)</label>\r\n                <input type=\"number\" id=\"marks\" name=\"marks\" required min=\"0\" max=\"100\">\r\n            </div>\r\n\r\n            <div class=\"form-group\">\r\n               <label for=\"priority\">Choose the Priority</label>\r\n                    <select id=\"priority\" name=\"priority\">\r\n                        <option value=\"High\">High</option>\r\n                        <option value=\"Medium\">Medium</option>\r\n                        <option value=\"Low\">Low</option>\r\n                    </select>\r\n            </div>\r\n            <div class=\"form-group\">\r\n               <label for=\"category\">Choose the Category</label>\r\n                    <select id=\"category\" name=\"category\">\r\n                        <option value=\"core\">Core</option>\r\n                        <option value=\"elective\">Elective</option>\r\n                        <option value=\"optional\">Optional</option>\r\n                        <option value=\"hobby\">Hobby</option>\r\n                    </select>\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"description\">Subject Description</label>\r\n                <textarea id=\"description\" name=\"description\" rows=\"10\" cols=\"50\" placeholder=\"Enter the description of the Subject\"></textarea>\r\n            </div>\r\n            <button type=\"submit\" class=\"btn-secondary\" style=\"width:100%\">Add Subject</button>\r\n        </form>\r\n        <div class=\"logout-container\"><a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a> </div>\r\n    </div></div>\r\n</body>\r\n</html>",
+          "size_bytes": 2421,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 52,
+            "code_lines": 50,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/add_goal.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Set a New Goal</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n            <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n <div class=\"addcard-page\">\r\n    <div class=\"addcard\">\r\n        <h1>Set a Time-Based Goal</h1>\r\n        <form action=\"{{ url_for('add_goal') }}\" method=\"POST\">\r\n            <div class=\"form-group\">\r\n                <label for=\"subject_id\">Which subject do you want to set a goal for?</label>\r\n                <select id=\"subject_id\" name=\"subject_id\" required>\r\n                    <option value=\"\" disabled selected>Select a subject...</option>\r\n                    {% for subject in subjects %}\r\n                        <option value=\"{{ subject._id }}\">{{ subject.subject|capitalize }}</option>\r\n                    {% endfor %}\r\n                </select>\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"target_duration\">How many hours do you want to study?</label>\r\n                <input type=\"number\" id=\"target_duration\" name=\"target_duration\" required min=\"1\" step=\"0.5\">\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"period\">Over what period?</label>\r\n                <select id=\"period\" name=\"period\" required>\r\n                    <option value=\"weekly\" selected>This Week</option>\r\n                    <option value=\"monthly\">This Month</option>\r\n                </select>\r\n            </div>\r\n            <button type=\"submit\">Set Goal</button>\r\n        </form>\r\n        <a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a>\r\n    </div></div>\r\n</body>\r\n</html>",
+          "size_bytes": 1978,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 44,
+            "code_lines": 42,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/history.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Study History</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n    <div class=\"container\">\r\n       <div class=\"summary-card\">\r\n            <h1>Study Session History</h1>\r\n\r\n            {% if sessions %}\r\n                {% for session in sessions %}\r\n                    <div class=\"history-item\">\r\n                        <h3>{{ session.subject_name|capitalize }}</h3>\r\n                        <p><strong>Week of:</strong> {{ session.week_start }}</p>\r\n\r\n                        {% set total_seconds = session.get('mon', 0) + session.get('tue', 0) + session.get('wed', 0) + session.get('thu', 0) + session.get('fri', 0) + session.get('sat', 0) + session.get('sun', 0) %}\r\n                        {% set hours = total_seconds // 3600 %}\r\n                        {% set minutes = (total_seconds % 3600) // 60 %}\r\n\r\n                        <p><strong>Total Time Studied this Week:</strong> {{ hours }}h {{ minutes }}m</p>\r\n                    </div>\r\n                {% endfor %}\r\n            {% else %}\r\n                <p class=\"text-center\">No study history found.</p>\r\n            {% endif %}\r\n\r\n            <div class=\"text-center mt-4\">\r\n                <div class=\"logout-container\"><a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a> </div>\r\n            </div>\r\n        </div>\r\n    </div>\r\n</body>\r\n</html>",
+          "size_bytes": 1771,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 42,
+            "code_lines": 36,
+            "blank_lines": 6,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/layout.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n    <title>{% block title %}PathfinderAI{% endblock %}</title>\r\n    <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n    {% block head_styles %}{% endblock %}\r\n</head>\r\n<body>\r\n    <div class=\"container\">\r\n        <div class=\"header-card\">\r\n            {% block header_content %}\r\n            <h1>\r\n                <a href=\"{{ url_for('dashboard') }}\" style=\"text-decoration: none; color: inherit;\">PathfinderAI</a>\r\n            </h1>\r\n            <p>Welcome, {{ session.get('username', 'Guest') }}!</p>\r\n            {% endblock %}\r\n        </div>\r\n\r\n        {% with messages = get_flashed_messages(with_categories=true) %}\r\n            {% if messages %}\r\n                {% for category, message in messages %}\r\n                    <div class=\"flash-message {{ category }}\">{{ message }}</div>\r\n                {% endfor %}\r\n            {% endif %}\r\n        {% endwith %}\r\n\r\n        <div class=\"main-content-card\">\r\n            {% block content %}\r\n            {% endblock %}\r\n        </div>\r\n    </div>\r\n    <div class=\"text-center mt-4\">\r\n                <a href=\"{{ url_for('dashboard') }}\" class=\"btn btn-secondary\">Back to Dashboard</a>\r\n    </div>\r\n    {% block scripts %}{% endblock %}\r\n</body>\r\n</html>",
+          "size_bytes": 1392,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 39,
+            "code_lines": 37,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 5,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/login.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Login</title>\r\n      <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n    <div class=\"login-container\">\r\n        <div class=\"login-card\">\r\n            <h1>Login</h1>\r\n\r\n            {% with messages = get_flashed_messages() %}\r\n                {% if messages %}\r\n                    {% for message in messages %}\r\n                        <div class=\"flash\">{{ message }}</div>\r\n                    {% endfor %}\r\n                {% endif %}\r\n            {% endwith %}\r\n\r\n            <form method=\"POST\" action=\"/login\">\r\n                <label>Email:</label>\r\n                <input type=\"email\" name=\"email\" required><br>\r\n\r\n                <label>Password:</label>\r\n                <input type=\"password\" name=\"password\" required id=\"password-input\"><br>\r\n                <input type=\"checkbox\" onclick=\"togglePasswordVisibility()\"> Show Password<br><br>\r\n                <button type=\"submit\">Login</button>\r\n            </form>\r\n\r\n            <!-- In your existing login.html, change the Google OAuth link to: -->\r\n<a href=\"{{ url_for('google_login') }}\" class=\"btn-danger\" style=\"text-decoration: none; display: block; margin-top: 10px;\">\r\n    Sign in with Google\r\n</a>\r\n\r\n\r\n            <a href=\"/register\">Don't have an account? Register</a>\r\n        </div>\r\n    </div>\r\n</body>\r\n\r\n<script>\r\nfunction togglePasswordVisibility() {\r\n    const passwordInput = document.getElementById('password-input');\r\n    if (passwordInput.type === \"password\") {\r\n        passwordInput.type = \"text\";\r\n    } else {\r\n        passwordInput.type = \"password\";\r\n    }\r\n}\r\n</script>\r\n</html>",
+          "size_bytes": 1955,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 55,
+            "code_lines": 48,
+            "blank_lines": 7,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/performance.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Performance Dashboard</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n    <script src=\"https://cdn.plot.ly/plotly-latest.min.js\"></script>\r\n    <style>\r\n        body { background-color: #E7EFC7; font-family: Arial; }\r\n        .chart { background-color: #AEC8A4; padding: 20px; margin: 20px; }\r\n        .list { background-color: white; margin: 20px; padding: 20px; }\r\n        .item { border-bottom: 1px solid #AEC8A4; padding: 10px; }\r\n        button { background-color: #8A784E; color: white; border: none; padding: 5px 10px; margin: 2px; }\r\n    </style>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n  <div class=\"dashboard\">\r\n    <div class=\"container\">\r\n    <div class=\"chartt\">\r\n        {{ chart1|safe }}\r\n    </div>\r\n<div class=\"summary-card\">\r\n\r\n        <h3>Subjects</h3>\r\n        {% for subject in subjects %}\r\n        <div class=\"item\">\r\n            {{ subject.subject }} - {{ subject.marks }}% - {{ subject.time_spent }}m\r\n        </div>\r\n        {% endfor %}\r\n    </div>\r\n    </div><div class=\"logout-container\"><a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a> </div></div>\r\n</body>\r\n</html>",
+          "size_bytes": 1479,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 37,
+            "code_lines": 35,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/register.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Register</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n        <div class=\"login-container\">\r\n             <div class=\"login-card\">\r\n        <h1>Register</h1>\r\n\r\n        {% with messages = get_flashed_messages() %}\r\n            {% if messages %}\r\n                {% for message in messages %}\r\n                    <div class=\"flash error\">{{ message }}</div>\r\n                {% endfor %}\r\n            {% endif %}\r\n        {% endwith %}\r\n\r\n        <form method=\"POST\" action=\"/register\">\r\n            <label>Username:</label>\r\n            <input type=\"text\" name=\"username\" required><br>\r\n\r\n            <label>Email:</label>\r\n            <input type=\"email\" name=\"email\" required><br>\r\n\r\n            <label>Password:</label>\r\n            <input type=\"password\" name=\"password\" required id=\"password-input\"><br>\r\n            <input type=\"checkbox\" onclick=\"togglePasswordVisibility()\"> Show Password<br><br>\r\n            <button type=\"submit\" class=\"secondary\">Register</button>\r\n        </form>\r\n\r\n        <a href=\"/login\">Already have an account? Login</a>\r\n        </div></div>\r\n</body>\r\n<script>\r\n    function togglePasswordVisibility() {\r\n    // Step A: Find the password input field on the page using its ID\r\n    const passwordInput = document.getElementById('password-input');\r\n\r\n    // Step B: Check what type the input field currently is\r\n    if (passwordInput.type === \"password\") {\r\n        // Step C: If it's a password (hidden), change its type to text (visible)\r\n        passwordInput.type = \"text\";\r\n    } else {\r\n        // Step D: If it's already text, change it back to a password (hidden)\r\n        passwordInput.type = \"password\";\r\n    }\r\n}\r\n</script>\r\n</html>",
+          "size_bytes": 2076,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 55,
+            "code_lines": 45,
+            "blank_lines": 6,
+            "comment_lines": 4,
+            "comment_ratio": 0.073,
+            "max_indentation_depth": 5,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/time.html",
+          "language": "html",
+          "content": "<html><head>\r\n    <title>Time Tracking - PathfinderAI</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n    <script src=\"https://cdn.plot.ly/plotly-latest.min.js\"></script><style id=\"plotly.js-style-global\"></style>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n    <div class=\"container\">\r\n        <div class=\"header-card\">\r\n            <h1>Time Analytics</h1>\r\n            <p>How your study time is distributed.</p>\r\n        </div>\r\n        <div class=\"cardd\" style=\"max-width: 900px;\">\r\n            <div class=\"chartt\">\r\n            {{ chart2|safe }}\r\n        </div></div>\r\n        <div class=\"summary-card\">\r\n    {% if max_subject and min_subject %}\r\n        <p><strong>Most time spent on:</strong> {{ max_subject.name }} ({{ max_subject.hours }} hrs)</p>\r\n        <p><strong>Least time spent on:</strong> {{ min_subject.name }} ({{ min_subject.hours }} hrs)</p>\r\n    {% else %}\r\n        <p>No study data available.</p>\r\n    {% endif %}\r\n</div>\r\n\r\n        <div class=\"logout-container\">\r\n            <a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a>\r\n        </div>\r\n    </div>\r\n\r\n</body></html>",
+          "size_bytes": 1428,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 34,
+            "code_lines": 32,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "test_db.py",
+          "language": "python",
+          "content": "import os\r\nfrom pymongo import MongoClient\r\nfrom pymongo.errors import ConnectionFailure\r\nfrom dotenv import load_dotenv\r\n\r\n# Load environment variables from .env file\r\nload_dotenv()\r\n\r\n# Get the connection string from your .env file\r\nMONGO_URI = os.getenv('MONGO_URI')\r\n\r\nprint(\"--- Database Connection Test ---\")\r\nprint(f\"Attempting to connect with URI: {MONGO_URI}\")\r\n\r\n# Check if the URI was even found\r\nif not MONGO_URI:\r\n    print(\"\\n[FATAL ERROR]: The MONGO_URI was not found in your .env file.\")\r\n    print(\"Please ensure the .env file exists and the variable is named MONGO_URI.\")\r\nelse:\r\n    try:\r\n        # Try to create a new client and connect to the server\r\n        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)\r\n        \r\n        # The ismaster command is cheap and does not require auth.\r\n        # It will trigger a connection attempt\r\n        client.admin.command('ismaster')\r\n        \r\n        print(\"\\n[SUCCESS]: MongoDB connection established successfully!\")\r\n        \r\n    except ConnectionFailure as e:\r\n        print(f\"\\n[CONNECTION FAILED]: Could not connect to MongoDB.\")\r\n        print(f\"Reason: {e}\")\r\n    except Exception as e:\r\n        print(f\"\\n[UNEXPECTED ERROR]: An error occurred: {e}\")\r\n\r\nprint(\"--- Test Finished ---\")",
+          "size_bytes": 1271,
+          "debt_category_hint": "testing",
+          "debt_signals": [
+            {
+              "pattern": "print\\(",
+              "line_number": 12,
+              "line_snippet": "print(\"--- Database Connection Test ---\")"
+            },
+            {
+              "pattern": "TEMP",
+              "line_number": 13,
+              "line_snippet": "print(f\"Attempting to connect with URI: {MONGO_URI}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 17,
+              "line_snippet": "print(\"\\n[FATAL ERROR]: The MONGO_URI was not found in your .env file.\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 18,
+              "line_snippet": "print(\"Please ensure the .env file exists and the variable is named MONGO_URI.\")"
+            },
+            {
+              "pattern": "TEMP",
+              "line_number": 25,
+              "line_snippet": "# It will trigger a connection attempt"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 28,
+              "line_snippet": "print(\"\\n[SUCCESS]: MongoDB connection established successfully!\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 31,
+              "line_snippet": "print(f\"\\n[CONNECTION FAILED]: Could not connect to MongoDB.\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 32,
+              "line_snippet": "print(f\"Reason: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 34,
+              "line_snippet": "print(f\"\\n[UNEXPECTED ERROR]: An error occurred: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 36,
+              "line_snippet": "print(\"--- Test Finished ---\")"
+            }
+          ],
+          "debt_signal_count": 10,
+          "metrics": {
+            "total_lines": 36,
+            "code_lines": 22,
+            "blank_lines": 8,
+            "comment_lines": 6,
+            "comment_ratio": 0.167,
+            "max_indentation_depth": 2,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        }
+      ]
+    },
+    "analyze": {
+      "repo_id": "86118e6d",
+      "repo_url": "https://github.com/ananyamehrotra/PathfinderAI",
+      "branch_name": "main",
+      "vulnerabilities": [],
+      "vulnerable_files": [],
+      "total_files_analyzed": 12,
+      "files_with_issues": 0,
+      "total_vulnerabilities": 0,
+      "cost_tracker": {
+        "api_calls": 12,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "estimated_cost": 0.0
+      },
+      "billing": {
+        "calls_made": 12,
+        "free_calls_remaining": 88,
+        "estimated_cost": 0.0,
+        "will_be_charged": false,
+        "alternatives": [
+          {
+            "name": "SonarQube Community",
+            "cost": "Free",
+            "url": "https://www.sonarqube.org/"
+          },
+          {
+            "name": "GitHub CodeQL",
+            "cost": "Free (open source)",
+            "url": "https://codeql.github.com/"
+          },
+          {
+            "name": "Snyk",
+            "cost": "$50+/month",
+            "url": "https://snyk.io/"
+          },
+          {
+            "name": "Checkmarx",
+            "cost": "Enterprise pricing",
+            "url": "https://checkmarx.com/"
+          }
+        ]
+      },
+      "chunks_scanned": 12,
+      "total_files": 11
+    },
+    "score": {
+      "repo_id": "86118e6d",
+      "repo_url": "https://github.com/ananyamehrotra/PathfinderAI",
+      "health_score": 100,
+      "chunks_scanned": 12,
+      "total_files": 11,
+      "analysis": {
+        "total_security_issues": 0,
+        "total_debt_issues": 0,
+        "critical_issues": 0,
+        "quick_wins": 0
+      },
+      "findings": {
+        "security_findings": [],
+        "debt_findings": [],
+        "security_by_severity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "debt_by_severity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "quick_wins": [],
+        "critical_issues": []
+      },
+      "recommendations": [],
+      "scoring_metadata": {
+        "scoring_version": "1.0",
+        "scoring_algorithm": "weighted_penalty",
+        "max_score": 100,
+        "min_score": 0
+      }
+    }
+  },
+  "data": {
+    "total_files_fetched": 11,
+    "config_files": 0,
+    "dependency_files": 1,
+    "source_files": 10,
+    "total_chunks": 12,
+    "files_by_category": {
+      "config": [],
+      "dependencies": [
+        {
+          "path": "requirements.txt",
+          "language": "txt",
+          "content": "Flask==2.3.3\r\npymongo[srv]==4.5.0\r\nflask-bcrypt==1.0.1\r\npython-dotenv==1.0.0\r\npandas==2.1.1\r\nnumpy==1.25.2\r\nplotly==5.17.0\r\nflask-dance==7.0.0\r\nrequests-oauthlib==1.3.1\r\npytz==2023.3\r\ngunicorn==22.0.0\r\n",
+          "size_bytes": 202,
+          "debt_category_hint": "dependencies",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 11,
+            "code_lines": 11,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        }
+      ],
+      "source_code": [
+        {
+          "path": "README.md",
+          "language": "markdown",
+          "content": "# \ud83d\ude80 PathfinderAI - Stage 1\r\n\r\nA learning companion designed to help students and developers organize, track, and improve their learning journey. This project starts as a simple study tracker and will evolve into a full-fledged AI-powered study assistant.\r\n\r\n---\r\n\r\n## \u2705 Core Features (Stage 1)\r\n\r\n* **Secure User Authentication:** Users can register, log in, and log out. Passwords are fully hashed and secured.\r\n* **Session Management:** The app remembers users while they are logged in.\r\n* **Subject Management (CRUD):** Users can create, update, and delete their study subjects.\r\n* **Progress Tracking:** Marks and time spent can be logged for each subject.\r\n* **Performance Dashboard:** Visual charts show a user's performance and time allocation across subjects.\r\n* **Activity Logging:** Key user actions are logged in the database.\r\n\r\n---\r\n\r\n## \u2699\ufe0f Technology Stack\r\n\r\n* **Backend:** Python (Flask)\r\n* **Database:** MongoDB (via MongoDB Atlas)\r\n* **Frontend:** HTML, CSS, JavaScript\r\n* **Data Visualization:** Plotly & Pandas\r\n* **Security:** Flask-Bcrypt for password hashing\r\n\r\n---\r\n\r\n## How We Built Stage 1: Our Approach\r\n\r\nWe built Stage 1 by focusing on a solid foundation, following a \"backend-first\" approach to ensure the core logic was working before building out the full user interface.\r\n\r\n### 1. Setting the Foundation (The Backend)\r\nWe started by setting up a **Flask** web server. The first critical step was establishing a reliable connection to our **MongoDB Atlas** database. We chose to use the `PyMongo` library directly for a robust and modern connection, wrapping the initial connection logic in a `try...except` block to gracefully handle any potential database outages.\r\n\r\n### 2. Building the Front Door (User Authentication)\r\nWith the database connected, we built the user authentication system. This involved:\r\n* **Creating Routes:** We defined Flask routes for `/register`, `/login`, and `/logout`.\r\n* **Handling Forms:** The register and login routes were built to handle `POST` requests, taking the user's details from the HTML form.\r\n* **Securing Passwords:** We implemented **Bcrypt** to one-way hash all user passwords before storing them in the `users` collection. This ensures we never store plain-text passwords, a critical security practice.\r\n\r\n### 3. Adding the Core Functionality (Subject Management)\r\nOnce a user could log in, we built the main feature of the app.\r\n* **CRUD Operations:** We created routes (`/add`, `/update`, `/delete`) and functions that allow a logged-in user to Create, Read, Update, and Delete subjects.\r\n* **Session-Based Logic:** Every action is tied to the logged-in user. We use the `user_id` stored in the Flask **session** to ensure users can only see and manage their own subjects.\r\n* **Activity Logging:** We also created an `activities` collection to log key events, like a user viewing their dashboard, by linking the action to their `user_id`.\r\n\r\n### 4. Making it Visual (Frontend & Charts)\r\nFinally, with all the backend logic in place, we created the frontend.\r\n* **HTML Templates:** We built several HTML pages (`dashboard.html`, `login.html`, etc.) using the Jinja2 templating engine to dynamically display user-specific data.\r\n* **Data Visualization:** To give users immediate feedback, we used **Plotly** and **Pandas** to read their subject data from the database and generate simple, effective charts for the performance and time-tracking pages.",
+          "size_bytes": 3439,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "TEMP",
+              "line_number": 49,
+              "line_snippet": "* **HTML Templates:** We built several HTML pages (`dashboard.html`, `login.html`, etc.) using the Jinja2 templating eng"
+            }
+          ],
+          "debt_signal_count": 1,
+          "metrics": {
+            "total_lines": 50,
+            "code_lines": 28,
+            "blank_lines": 14,
+            "comment_lines": 8,
+            "comment_ratio": 0.16,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/add.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Add Subject - PathfinderAI</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n<div class=\"addcard-page\">\r\n    <div class=\"addcard\">\r\n        <h1>Add New Subject</h1>\r\n        <form action=\"/add\" method=\"POST\">\r\n            <div class=\"form-group\">\r\n                <label for=\"subject\">Subject Name</label>\r\n                <input type=\"text\" id=\"subject\" name=\"subject\" required>\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"marks\">Current Marks (%)</label>\r\n                <input type=\"number\" id=\"marks\" name=\"marks\" required min=\"0\" max=\"100\">\r\n            </div>\r\n\r\n            <div class=\"form-group\">\r\n               <label for=\"priority\">Choose the Priority</label>\r\n                    <select id=\"priority\" name=\"priority\">\r\n                        <option value=\"High\">High</option>\r\n                        <option value=\"Medium\">Medium</option>\r\n                        <option value=\"Low\">Low</option>\r\n                    </select>\r\n            </div>\r\n            <div class=\"form-group\">\r\n               <label for=\"category\">Choose the Category</label>\r\n                    <select id=\"category\" name=\"category\">\r\n                        <option value=\"core\">Core</option>\r\n                        <option value=\"elective\">Elective</option>\r\n                        <option value=\"optional\">Optional</option>\r\n                        <option value=\"hobby\">Hobby</option>\r\n                    </select>\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"description\">Subject Description</label>\r\n                <textarea id=\"description\" name=\"description\" rows=\"10\" cols=\"50\" placeholder=\"Enter the description of the Subject\"></textarea>\r\n            </div>\r\n            <button type=\"submit\" class=\"btn-secondary\" style=\"width:100%\">Add Subject</button>\r\n        </form>\r\n        <div class=\"logout-container\"><a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a> </div>\r\n    </div></div>\r\n</body>\r\n</html>",
+          "size_bytes": 2421,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 52,
+            "code_lines": 50,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/add_goal.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Set a New Goal</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n            <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n <div class=\"addcard-page\">\r\n    <div class=\"addcard\">\r\n        <h1>Set a Time-Based Goal</h1>\r\n        <form action=\"{{ url_for('add_goal') }}\" method=\"POST\">\r\n            <div class=\"form-group\">\r\n                <label for=\"subject_id\">Which subject do you want to set a goal for?</label>\r\n                <select id=\"subject_id\" name=\"subject_id\" required>\r\n                    <option value=\"\" disabled selected>Select a subject...</option>\r\n                    {% for subject in subjects %}\r\n                        <option value=\"{{ subject._id }}\">{{ subject.subject|capitalize }}</option>\r\n                    {% endfor %}\r\n                </select>\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"target_duration\">How many hours do you want to study?</label>\r\n                <input type=\"number\" id=\"target_duration\" name=\"target_duration\" required min=\"1\" step=\"0.5\">\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"period\">Over what period?</label>\r\n                <select id=\"period\" name=\"period\" required>\r\n                    <option value=\"weekly\" selected>This Week</option>\r\n                    <option value=\"monthly\">This Month</option>\r\n                </select>\r\n            </div>\r\n            <button type=\"submit\">Set Goal</button>\r\n        </form>\r\n        <a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a>\r\n    </div></div>\r\n</body>\r\n</html>",
+          "size_bytes": 1978,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 44,
+            "code_lines": 42,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/history.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Study History</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n    <div class=\"container\">\r\n       <div class=\"summary-card\">\r\n            <h1>Study Session History</h1>\r\n\r\n            {% if sessions %}\r\n                {% for session in sessions %}\r\n                    <div class=\"history-item\">\r\n                        <h3>{{ session.subject_name|capitalize }}</h3>\r\n                        <p><strong>Week of:</strong> {{ session.week_start }}</p>\r\n\r\n                        {% set total_seconds = session.get('mon', 0) + session.get('tue', 0) + session.get('wed', 0) + session.get('thu', 0) + session.get('fri', 0) + session.get('sat', 0) + session.get('sun', 0) %}\r\n                        {% set hours = total_seconds // 3600 %}\r\n                        {% set minutes = (total_seconds % 3600) // 60 %}\r\n\r\n                        <p><strong>Total Time Studied this Week:</strong> {{ hours }}h {{ minutes }}m</p>\r\n                    </div>\r\n                {% endfor %}\r\n            {% else %}\r\n                <p class=\"text-center\">No study history found.</p>\r\n            {% endif %}\r\n\r\n            <div class=\"text-center mt-4\">\r\n                <div class=\"logout-container\"><a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a> </div>\r\n            </div>\r\n        </div>\r\n    </div>\r\n</body>\r\n</html>",
+          "size_bytes": 1771,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 42,
+            "code_lines": 36,
+            "blank_lines": 6,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/layout.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n    <title>{% block title %}PathfinderAI{% endblock %}</title>\r\n    <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n    {% block head_styles %}{% endblock %}\r\n</head>\r\n<body>\r\n    <div class=\"container\">\r\n        <div class=\"header-card\">\r\n            {% block header_content %}\r\n            <h1>\r\n                <a href=\"{{ url_for('dashboard') }}\" style=\"text-decoration: none; color: inherit;\">PathfinderAI</a>\r\n            </h1>\r\n            <p>Welcome, {{ session.get('username', 'Guest') }}!</p>\r\n            {% endblock %}\r\n        </div>\r\n\r\n        {% with messages = get_flashed_messages(with_categories=true) %}\r\n            {% if messages %}\r\n                {% for category, message in messages %}\r\n                    <div class=\"flash-message {{ category }}\">{{ message }}</div>\r\n                {% endfor %}\r\n            {% endif %}\r\n        {% endwith %}\r\n\r\n        <div class=\"main-content-card\">\r\n            {% block content %}\r\n            {% endblock %}\r\n        </div>\r\n    </div>\r\n    <div class=\"text-center mt-4\">\r\n                <a href=\"{{ url_for('dashboard') }}\" class=\"btn btn-secondary\">Back to Dashboard</a>\r\n    </div>\r\n    {% block scripts %}{% endblock %}\r\n</body>\r\n</html>",
+          "size_bytes": 1392,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 39,
+            "code_lines": 37,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 5,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/login.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Login</title>\r\n      <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n    <div class=\"login-container\">\r\n        <div class=\"login-card\">\r\n            <h1>Login</h1>\r\n\r\n            {% with messages = get_flashed_messages() %}\r\n                {% if messages %}\r\n                    {% for message in messages %}\r\n                        <div class=\"flash\">{{ message }}</div>\r\n                    {% endfor %}\r\n                {% endif %}\r\n            {% endwith %}\r\n\r\n            <form method=\"POST\" action=\"/login\">\r\n                <label>Email:</label>\r\n                <input type=\"email\" name=\"email\" required><br>\r\n\r\n                <label>Password:</label>\r\n                <input type=\"password\" name=\"password\" required id=\"password-input\"><br>\r\n                <input type=\"checkbox\" onclick=\"togglePasswordVisibility()\"> Show Password<br><br>\r\n                <button type=\"submit\">Login</button>\r\n            </form>\r\n\r\n            <!-- In your existing login.html, change the Google OAuth link to: -->\r\n<a href=\"{{ url_for('google_login') }}\" class=\"btn-danger\" style=\"text-decoration: none; display: block; margin-top: 10px;\">\r\n    Sign in with Google\r\n</a>\r\n\r\n\r\n            <a href=\"/register\">Don't have an account? Register</a>\r\n        </div>\r\n    </div>\r\n</body>\r\n\r\n<script>\r\nfunction togglePasswordVisibility() {\r\n    const passwordInput = document.getElementById('password-input');\r\n    if (passwordInput.type === \"password\") {\r\n        passwordInput.type = \"text\";\r\n    } else {\r\n        passwordInput.type = \"password\";\r\n    }\r\n}\r\n</script>\r\n</html>",
+          "size_bytes": 1955,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 55,
+            "code_lines": 48,
+            "blank_lines": 7,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/performance.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Performance Dashboard</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n    <script src=\"https://cdn.plot.ly/plotly-latest.min.js\"></script>\r\n    <style>\r\n        body { background-color: #E7EFC7; font-family: Arial; }\r\n        .chart { background-color: #AEC8A4; padding: 20px; margin: 20px; }\r\n        .list { background-color: white; margin: 20px; padding: 20px; }\r\n        .item { border-bottom: 1px solid #AEC8A4; padding: 10px; }\r\n        button { background-color: #8A784E; color: white; border: none; padding: 5px 10px; margin: 2px; }\r\n    </style>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n  <div class=\"dashboard\">\r\n    <div class=\"container\">\r\n    <div class=\"chartt\">\r\n        {{ chart1|safe }}\r\n    </div>\r\n<div class=\"summary-card\">\r\n\r\n        <h3>Subjects</h3>\r\n        {% for subject in subjects %}\r\n        <div class=\"item\">\r\n            {{ subject.subject }} - {{ subject.marks }}% - {{ subject.time_spent }}m\r\n        </div>\r\n        {% endfor %}\r\n    </div>\r\n    </div><div class=\"logout-container\"><a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a> </div></div>\r\n</body>\r\n</html>",
+          "size_bytes": 1479,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 37,
+            "code_lines": 35,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/register.html",
+          "language": "html",
+          "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Register</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n        <div class=\"login-container\">\r\n             <div class=\"login-card\">\r\n        <h1>Register</h1>\r\n\r\n        {% with messages = get_flashed_messages() %}\r\n            {% if messages %}\r\n                {% for message in messages %}\r\n                    <div class=\"flash error\">{{ message }}</div>\r\n                {% endfor %}\r\n            {% endif %}\r\n        {% endwith %}\r\n\r\n        <form method=\"POST\" action=\"/register\">\r\n            <label>Username:</label>\r\n            <input type=\"text\" name=\"username\" required><br>\r\n\r\n            <label>Email:</label>\r\n            <input type=\"email\" name=\"email\" required><br>\r\n\r\n            <label>Password:</label>\r\n            <input type=\"password\" name=\"password\" required id=\"password-input\"><br>\r\n            <input type=\"checkbox\" onclick=\"togglePasswordVisibility()\"> Show Password<br><br>\r\n            <button type=\"submit\" class=\"secondary\">Register</button>\r\n        </form>\r\n\r\n        <a href=\"/login\">Already have an account? Login</a>\r\n        </div></div>\r\n</body>\r\n<script>\r\n    function togglePasswordVisibility() {\r\n    // Step A: Find the password input field on the page using its ID\r\n    const passwordInput = document.getElementById('password-input');\r\n\r\n    // Step B: Check what type the input field currently is\r\n    if (passwordInput.type === \"password\") {\r\n        // Step C: If it's a password (hidden), change its type to text (visible)\r\n        passwordInput.type = \"text\";\r\n    } else {\r\n        // Step D: If it's already text, change it back to a password (hidden)\r\n        passwordInput.type = \"password\";\r\n    }\r\n}\r\n</script>\r\n</html>",
+          "size_bytes": 2076,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 55,
+            "code_lines": 45,
+            "blank_lines": 6,
+            "comment_lines": 4,
+            "comment_ratio": 0.073,
+            "max_indentation_depth": 5,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "templates/time.html",
+          "language": "html",
+          "content": "<html><head>\r\n    <title>Time Tracking - PathfinderAI</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n    <script src=\"https://cdn.plot.ly/plotly-latest.min.js\"></script><style id=\"plotly.js-style-global\"></style>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n    <div class=\"container\">\r\n        <div class=\"header-card\">\r\n            <h1>Time Analytics</h1>\r\n            <p>How your study time is distributed.</p>\r\n        </div>\r\n        <div class=\"cardd\" style=\"max-width: 900px;\">\r\n            <div class=\"chartt\">\r\n            {{ chart2|safe }}\r\n        </div></div>\r\n        <div class=\"summary-card\">\r\n    {% if max_subject and min_subject %}\r\n        <p><strong>Most time spent on:</strong> {{ max_subject.name }} ({{ max_subject.hours }} hrs)</p>\r\n        <p><strong>Least time spent on:</strong> {{ min_subject.name }} ({{ min_subject.hours }} hrs)</p>\r\n    {% else %}\r\n        <p>No study data available.</p>\r\n    {% endif %}\r\n</div>\r\n\r\n        <div class=\"logout-container\">\r\n            <a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a>\r\n        </div>\r\n    </div>\r\n\r\n</body></html>",
+          "size_bytes": 1428,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 34,
+            "code_lines": 32,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "test_db.py",
+          "language": "python",
+          "content": "import os\r\nfrom pymongo import MongoClient\r\nfrom pymongo.errors import ConnectionFailure\r\nfrom dotenv import load_dotenv\r\n\r\n# Load environment variables from .env file\r\nload_dotenv()\r\n\r\n# Get the connection string from your .env file\r\nMONGO_URI = os.getenv('MONGO_URI')\r\n\r\nprint(\"--- Database Connection Test ---\")\r\nprint(f\"Attempting to connect with URI: {MONGO_URI}\")\r\n\r\n# Check if the URI was even found\r\nif not MONGO_URI:\r\n    print(\"\\n[FATAL ERROR]: The MONGO_URI was not found in your .env file.\")\r\n    print(\"Please ensure the .env file exists and the variable is named MONGO_URI.\")\r\nelse:\r\n    try:\r\n        # Try to create a new client and connect to the server\r\n        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)\r\n        \r\n        # The ismaster command is cheap and does not require auth.\r\n        # It will trigger a connection attempt\r\n        client.admin.command('ismaster')\r\n        \r\n        print(\"\\n[SUCCESS]: MongoDB connection established successfully!\")\r\n        \r\n    except ConnectionFailure as e:\r\n        print(f\"\\n[CONNECTION FAILED]: Could not connect to MongoDB.\")\r\n        print(f\"Reason: {e}\")\r\n    except Exception as e:\r\n        print(f\"\\n[UNEXPECTED ERROR]: An error occurred: {e}\")\r\n\r\nprint(\"--- Test Finished ---\")",
+          "size_bytes": 1271,
+          "debt_category_hint": "testing",
+          "debt_signals": [
+            {
+              "pattern": "print\\(",
+              "line_number": 12,
+              "line_snippet": "print(\"--- Database Connection Test ---\")"
+            },
+            {
+              "pattern": "TEMP",
+              "line_number": 13,
+              "line_snippet": "print(f\"Attempting to connect with URI: {MONGO_URI}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 17,
+              "line_snippet": "print(\"\\n[FATAL ERROR]: The MONGO_URI was not found in your .env file.\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 18,
+              "line_snippet": "print(\"Please ensure the .env file exists and the variable is named MONGO_URI.\")"
+            },
+            {
+              "pattern": "TEMP",
+              "line_number": 25,
+              "line_snippet": "# It will trigger a connection attempt"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 28,
+              "line_snippet": "print(\"\\n[SUCCESS]: MongoDB connection established successfully!\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 31,
+              "line_snippet": "print(f\"\\n[CONNECTION FAILED]: Could not connect to MongoDB.\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 32,
+              "line_snippet": "print(f\"Reason: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 34,
+              "line_snippet": "print(f\"\\n[UNEXPECTED ERROR]: An error occurred: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 36,
+              "line_snippet": "print(\"--- Test Finished ---\")"
+            }
+          ],
+          "debt_signal_count": 10,
+          "metrics": {
+            "total_lines": 36,
+            "code_lines": 22,
+            "blank_lines": 8,
+            "comment_lines": 6,
+            "comment_ratio": 0.167,
+            "max_indentation_depth": 2,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        }
+      ]
+    },
+    "detailed_files": [
+      {
+        "path": "requirements.txt",
+        "language": "txt",
+        "content": "Flask==2.3.3\r\npymongo[srv]==4.5.0\r\nflask-bcrypt==1.0.1\r\npython-dotenv==1.0.0\r\npandas==2.1.1\r\nnumpy==1.25.2\r\nplotly==5.17.0\r\nflask-dance==7.0.0\r\nrequests-oauthlib==1.3.1\r\npytz==2023.3\r\ngunicorn==22.0.0\r\n",
+        "size_bytes": 202,
+        "debt_category_hint": "dependencies",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 11,
+          "code_lines": 11,
+          "blank_lines": 0,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 0,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "README.md",
+        "language": "markdown",
+        "content": "# \ud83d\ude80 PathfinderAI - Stage 1\r\n\r\nA learning companion designed to help students and developers organize, track, and improve their learning journey. This project starts as a simple study tracker and will evolve into a full-fledged AI-powered study assistant.\r\n\r\n---\r\n\r\n## \u2705 Core Features (Stage 1)\r\n\r\n* **Secure User Authentication:** Users can register, log in, and log out. Passwords are fully hashed and secured.\r\n* **Session Management:** The app remembers users while they are logged in.\r\n* **Subject Management (CRUD):** Users can create, update, and delete their study subjects.\r\n* **Progress Tracking:** Marks and time spent can be logged for each subject.\r\n* **Performance Dashboard:** Visual charts show a user's performance and time allocation across subjects.\r\n* **Activity Logging:** Key user actions are logged in the database.\r\n\r\n---\r\n\r\n## \u2699\ufe0f Technology Stack\r\n\r\n* **Backend:** Python (Flask)\r\n* **Database:** MongoDB (via MongoDB Atlas)\r\n* **Frontend:** HTML, CSS, JavaScript\r\n* **Data Visualization:** Plotly & Pandas\r\n* **Security:** Flask-Bcrypt for password hashing\r\n\r\n---\r\n\r\n## How We Built Stage 1: Our Approach\r\n\r\nWe built Stage 1 by focusing on a solid foundation, following a \"backend-first\" approach to ensure the core logic was working before building out the full user interface.\r\n\r\n### 1. Setting the Foundation (The Backend)\r\nWe started by setting up a **Flask** web server. The first critical step was establishing a reliable connection to our **MongoDB Atlas** database. We chose to use the `PyMongo` library directly for a robust and modern connection, wrapping the initial connection logic in a `try...except` block to gracefully handle any potential database outages.\r\n\r\n### 2. Building the Front Door (User Authentication)\r\nWith the database connected, we built the user authentication system. This involved:\r\n* **Creating Routes:** We defined Flask routes for `/register`, `/login`, and `/logout`.\r\n* **Handling Forms:** The register and login routes were built to handle `POST` requests, taking the user's details from the HTML form.\r\n* **Securing Passwords:** We implemented **Bcrypt** to one-way hash all user passwords before storing them in the `users` collection. This ensures we never store plain-text passwords, a critical security practice.\r\n\r\n### 3. Adding the Core Functionality (Subject Management)\r\nOnce a user could log in, we built the main feature of the app.\r\n* **CRUD Operations:** We created routes (`/add`, `/update`, `/delete`) and functions that allow a logged-in user to Create, Read, Update, and Delete subjects.\r\n* **Session-Based Logic:** Every action is tied to the logged-in user. We use the `user_id` stored in the Flask **session** to ensure users can only see and manage their own subjects.\r\n* **Activity Logging:** We also created an `activities` collection to log key events, like a user viewing their dashboard, by linking the action to their `user_id`.\r\n\r\n### 4. Making it Visual (Frontend & Charts)\r\nFinally, with all the backend logic in place, we created the frontend.\r\n* **HTML Templates:** We built several HTML pages (`dashboard.html`, `login.html`, etc.) using the Jinja2 templating engine to dynamically display user-specific data.\r\n* **Data Visualization:** To give users immediate feedback, we used **Plotly** and **Pandas** to read their subject data from the database and generate simple, effective charts for the performance and time-tracking pages.",
+        "size_bytes": 3439,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [
+          {
+            "pattern": "TEMP",
+            "line_number": 49,
+            "line_snippet": "* **HTML Templates:** We built several HTML pages (`dashboard.html`, `login.html`, etc.) using the Jinja2 templating eng"
+          }
+        ],
+        "debt_signal_count": 1,
+        "metrics": {
+          "total_lines": 50,
+          "code_lines": 28,
+          "blank_lines": 14,
+          "comment_lines": 8,
+          "comment_ratio": 0.16,
+          "max_indentation_depth": 0,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "templates/add.html",
+        "language": "html",
+        "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Add Subject - PathfinderAI</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n<div class=\"addcard-page\">\r\n    <div class=\"addcard\">\r\n        <h1>Add New Subject</h1>\r\n        <form action=\"/add\" method=\"POST\">\r\n            <div class=\"form-group\">\r\n                <label for=\"subject\">Subject Name</label>\r\n                <input type=\"text\" id=\"subject\" name=\"subject\" required>\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"marks\">Current Marks (%)</label>\r\n                <input type=\"number\" id=\"marks\" name=\"marks\" required min=\"0\" max=\"100\">\r\n            </div>\r\n\r\n            <div class=\"form-group\">\r\n               <label for=\"priority\">Choose the Priority</label>\r\n                    <select id=\"priority\" name=\"priority\">\r\n                        <option value=\"High\">High</option>\r\n                        <option value=\"Medium\">Medium</option>\r\n                        <option value=\"Low\">Low</option>\r\n                    </select>\r\n            </div>\r\n            <div class=\"form-group\">\r\n               <label for=\"category\">Choose the Category</label>\r\n                    <select id=\"category\" name=\"category\">\r\n                        <option value=\"core\">Core</option>\r\n                        <option value=\"elective\">Elective</option>\r\n                        <option value=\"optional\">Optional</option>\r\n                        <option value=\"hobby\">Hobby</option>\r\n                    </select>\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"description\">Subject Description</label>\r\n                <textarea id=\"description\" name=\"description\" rows=\"10\" cols=\"50\" placeholder=\"Enter the description of the Subject\"></textarea>\r\n            </div>\r\n            <button type=\"submit\" class=\"btn-secondary\" style=\"width:100%\">Add Subject</button>\r\n        </form>\r\n        <div class=\"logout-container\"><a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a> </div>\r\n    </div></div>\r\n</body>\r\n</html>",
+        "size_bytes": 2421,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 52,
+          "code_lines": 50,
+          "blank_lines": 2,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 6,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "templates/add_goal.html",
+        "language": "html",
+        "content": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Set a New Goal</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n            <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n <div class=\"addcard-page\">\r\n    <div class=\"addcard\">\r\n        <h1>Set a Time-Based Goal</h1>\r\n        <form action=\"{{ url_for('add_goal') }}\" method=\"POST\">\r\n            <div class=\"form-group\">\r\n                <label for=\"subject_id\">Which subject do you want to set a goal for?</label>\r\n                <select id=\"subject_id\" name=\"subject_id\" required>\r\n                    <option value=\"\" disabled selected>Select a subject...</option>\r\n                    {% for subject in subjects %}\r\n                        <option value=\"{{ subject._id }}\">{{ subject.subject|capitalize }}</option>\r\n                    {% endfor %}\r\n                </select>\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"target_duration\">How many hours do you want to study?</label>\r\n                <input type=\"number\" id=\"target_duration\" name=\"target_duration\" required min=\"1\" step=\"0.5\">\r\n            </div>\r\n            <div class=\"form-group\">\r\n                <label for=\"period\">Over what period?</label>\r\n                <select id=\"period\" name=\"period\" required>\r\n                    <option value=\"weekly\" selected>This Week</option>\r\n                    <option value=\"monthly\">This Month</option>\r\n                </select>\r\n            </div>\r\n            <button type=\"submit\">Set Goal</button>\r\n        </form>\r\n        <a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a>\r\n    </div></div>\r\n</body>\r\n</html>",
+        "size_bytes": 1978,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 44,
+          "code_lines": 42,
+          "blank_lines": 2,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 6,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "templates/history.html",
+        "language": "html",
+        "content": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Study History</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n    <div class=\"container\">\r\n       <div class=\"summary-card\">\r\n            <h1>Study Session History</h1>\r\n\r\n            {% if sessions %}\r\n                {% for session in sessions %}\r\n                    <div class=\"history-item\">\r\n                        <h3>{{ session.subject_name|capitalize }}</h3>\r\n                        <p><strong>Week of:</strong> {{ session.week_start }}</p>\r\n\r\n                        {% set total_seconds = session.get('mon', 0) + session.get('tue', 0) + session.get('wed', 0) + session.get('thu', 0) + session.get('fri', 0) + session.get('sat', 0) + session.get('sun', 0) %}\r\n                        {% set hours = total_seconds // 3600 %}\r\n                        {% set minutes = (total_seconds % 3600) // 60 %}\r\n\r\n                        <p><strong>Total Time Studied this Week:</strong> {{ hours }}h {{ minutes }}m</p>\r\n                    </div>\r\n                {% endfor %}\r\n            {% else %}\r\n                <p class=\"text-center\">No study history found.</p>\r\n            {% endif %}\r\n\r\n            <div class=\"text-center mt-4\">\r\n                <div class=\"logout-container\"><a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a> </div>\r\n            </div>\r\n        </div>\r\n    </div>\r\n</body>\r\n</html>",
+        "size_bytes": 1771,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 42,
+          "code_lines": 36,
+          "blank_lines": 6,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 6,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "templates/layout.html",
+        "language": "html",
+        "content": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n    <title>{% block title %}PathfinderAI{% endblock %}</title>\r\n    <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n    {% block head_styles %}{% endblock %}\r\n</head>\r\n<body>\r\n    <div class=\"container\">\r\n        <div class=\"header-card\">\r\n            {% block header_content %}\r\n            <h1>\r\n                <a href=\"{{ url_for('dashboard') }}\" style=\"text-decoration: none; color: inherit;\">PathfinderAI</a>\r\n            </h1>\r\n            <p>Welcome, {{ session.get('username', 'Guest') }}!</p>\r\n            {% endblock %}\r\n        </div>\r\n\r\n        {% with messages = get_flashed_messages(with_categories=true) %}\r\n            {% if messages %}\r\n                {% for category, message in messages %}\r\n                    <div class=\"flash-message {{ category }}\">{{ message }}</div>\r\n                {% endfor %}\r\n            {% endif %}\r\n        {% endwith %}\r\n\r\n        <div class=\"main-content-card\">\r\n            {% block content %}\r\n            {% endblock %}\r\n        </div>\r\n    </div>\r\n    <div class=\"text-center mt-4\">\r\n                <a href=\"{{ url_for('dashboard') }}\" class=\"btn btn-secondary\">Back to Dashboard</a>\r\n    </div>\r\n    {% block scripts %}{% endblock %}\r\n</body>\r\n</html>",
+        "size_bytes": 1392,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 39,
+          "code_lines": 37,
+          "blank_lines": 2,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 5,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "templates/login.html",
+        "language": "html",
+        "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Login</title>\r\n      <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n    <div class=\"login-container\">\r\n        <div class=\"login-card\">\r\n            <h1>Login</h1>\r\n\r\n            {% with messages = get_flashed_messages() %}\r\n                {% if messages %}\r\n                    {% for message in messages %}\r\n                        <div class=\"flash\">{{ message }}</div>\r\n                    {% endfor %}\r\n                {% endif %}\r\n            {% endwith %}\r\n\r\n            <form method=\"POST\" action=\"/login\">\r\n                <label>Email:</label>\r\n                <input type=\"email\" name=\"email\" required><br>\r\n\r\n                <label>Password:</label>\r\n                <input type=\"password\" name=\"password\" required id=\"password-input\"><br>\r\n                <input type=\"checkbox\" onclick=\"togglePasswordVisibility()\"> Show Password<br><br>\r\n                <button type=\"submit\">Login</button>\r\n            </form>\r\n\r\n            <!-- In your existing login.html, change the Google OAuth link to: -->\r\n<a href=\"{{ url_for('google_login') }}\" class=\"btn-danger\" style=\"text-decoration: none; display: block; margin-top: 10px;\">\r\n    Sign in with Google\r\n</a>\r\n\r\n\r\n            <a href=\"/register\">Don't have an account? Register</a>\r\n        </div>\r\n    </div>\r\n</body>\r\n\r\n<script>\r\nfunction togglePasswordVisibility() {\r\n    const passwordInput = document.getElementById('password-input');\r\n    if (passwordInput.type === \"password\") {\r\n        passwordInput.type = \"text\";\r\n    } else {\r\n        passwordInput.type = \"password\";\r\n    }\r\n}\r\n</script>\r\n</html>",
+        "size_bytes": 1955,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 55,
+          "code_lines": 48,
+          "blank_lines": 7,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 6,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "templates/performance.html",
+        "language": "html",
+        "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Performance Dashboard</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n\r\n    <script src=\"https://cdn.plot.ly/plotly-latest.min.js\"></script>\r\n    <style>\r\n        body { background-color: #E7EFC7; font-family: Arial; }\r\n        .chart { background-color: #AEC8A4; padding: 20px; margin: 20px; }\r\n        .list { background-color: white; margin: 20px; padding: 20px; }\r\n        .item { border-bottom: 1px solid #AEC8A4; padding: 10px; }\r\n        button { background-color: #8A784E; color: white; border: none; padding: 5px 10px; margin: 2px; }\r\n    </style>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n  <div class=\"dashboard\">\r\n    <div class=\"container\">\r\n    <div class=\"chartt\">\r\n        {{ chart1|safe }}\r\n    </div>\r\n<div class=\"summary-card\">\r\n\r\n        <h3>Subjects</h3>\r\n        {% for subject in subjects %}\r\n        <div class=\"item\">\r\n            {{ subject.subject }} - {{ subject.marks }}% - {{ subject.time_spent }}m\r\n        </div>\r\n        {% endfor %}\r\n    </div>\r\n    </div><div class=\"logout-container\"><a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a> </div></div>\r\n</body>\r\n</html>",
+        "size_bytes": 1479,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 37,
+          "code_lines": 35,
+          "blank_lines": 2,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 3,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "templates/register.html",
+        "language": "html",
+        "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <title>Register</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n        <div class=\"login-container\">\r\n             <div class=\"login-card\">\r\n        <h1>Register</h1>\r\n\r\n        {% with messages = get_flashed_messages() %}\r\n            {% if messages %}\r\n                {% for message in messages %}\r\n                    <div class=\"flash error\">{{ message }}</div>\r\n                {% endfor %}\r\n            {% endif %}\r\n        {% endwith %}\r\n\r\n        <form method=\"POST\" action=\"/register\">\r\n            <label>Username:</label>\r\n            <input type=\"text\" name=\"username\" required><br>\r\n\r\n            <label>Email:</label>\r\n            <input type=\"email\" name=\"email\" required><br>\r\n\r\n            <label>Password:</label>\r\n            <input type=\"password\" name=\"password\" required id=\"password-input\"><br>\r\n            <input type=\"checkbox\" onclick=\"togglePasswordVisibility()\"> Show Password<br><br>\r\n            <button type=\"submit\" class=\"secondary\">Register</button>\r\n        </form>\r\n\r\n        <a href=\"/login\">Already have an account? Login</a>\r\n        </div></div>\r\n</body>\r\n<script>\r\n    function togglePasswordVisibility() {\r\n    // Step A: Find the password input field on the page using its ID\r\n    const passwordInput = document.getElementById('password-input');\r\n\r\n    // Step B: Check what type the input field currently is\r\n    if (passwordInput.type === \"password\") {\r\n        // Step C: If it's a password (hidden), change its type to text (visible)\r\n        passwordInput.type = \"text\";\r\n    } else {\r\n        // Step D: If it's already text, change it back to a password (hidden)\r\n        passwordInput.type = \"password\";\r\n    }\r\n}\r\n</script>\r\n</html>",
+        "size_bytes": 2076,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 55,
+          "code_lines": 45,
+          "blank_lines": 6,
+          "comment_lines": 4,
+          "comment_ratio": 0.073,
+          "max_indentation_depth": 5,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "templates/time.html",
+        "language": "html",
+        "content": "<html><head>\r\n    <title>Time Tracking - PathfinderAI</title>\r\n    <link rel=\"icon\" type=\"image/png\" href=\"{{ url_for('static', filename='favicon.png') }}\">\r\n        <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/styles.css') }}\">\r\n   <script src=\"{{ url_for('static', filename='js/script.js') }}\" defer></script>\r\n    <script src=\"https://cdn.plot.ly/plotly-latest.min.js\"></script><style id=\"plotly.js-style-global\"></style>\r\n</head>\r\n<body>\r\n<!-- Add this to your dashboard header -->\r\n<button id=\"themetoggle\" class=\"theme-toggle\">\ud83c\udf19</button>\r\n    <div class=\"container\">\r\n        <div class=\"header-card\">\r\n            <h1>Time Analytics</h1>\r\n            <p>How your study time is distributed.</p>\r\n        </div>\r\n        <div class=\"cardd\" style=\"max-width: 900px;\">\r\n            <div class=\"chartt\">\r\n            {{ chart2|safe }}\r\n        </div></div>\r\n        <div class=\"summary-card\">\r\n    {% if max_subject and min_subject %}\r\n        <p><strong>Most time spent on:</strong> {{ max_subject.name }} ({{ max_subject.hours }} hrs)</p>\r\n        <p><strong>Least time spent on:</strong> {{ min_subject.name }} ({{ min_subject.hours }} hrs)</p>\r\n    {% else %}\r\n        <p>No study data available.</p>\r\n    {% endif %}\r\n</div>\r\n\r\n        <div class=\"logout-container\">\r\n            <a href=\"{{ url_for('dashboard') }}\" class=\"logout\">Back to Dashboard</a>\r\n        </div>\r\n    </div>\r\n\r\n</body></html>",
+        "size_bytes": 1428,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 34,
+          "code_lines": 32,
+          "blank_lines": 2,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 3,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "test_db.py",
+        "language": "python",
+        "content": "import os\r\nfrom pymongo import MongoClient\r\nfrom pymongo.errors import ConnectionFailure\r\nfrom dotenv import load_dotenv\r\n\r\n# Load environment variables from .env file\r\nload_dotenv()\r\n\r\n# Get the connection string from your .env file\r\nMONGO_URI = os.getenv('MONGO_URI')\r\n\r\nprint(\"--- Database Connection Test ---\")\r\nprint(f\"Attempting to connect with URI: {MONGO_URI}\")\r\n\r\n# Check if the URI was even found\r\nif not MONGO_URI:\r\n    print(\"\\n[FATAL ERROR]: The MONGO_URI was not found in your .env file.\")\r\n    print(\"Please ensure the .env file exists and the variable is named MONGO_URI.\")\r\nelse:\r\n    try:\r\n        # Try to create a new client and connect to the server\r\n        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)\r\n        \r\n        # The ismaster command is cheap and does not require auth.\r\n        # It will trigger a connection attempt\r\n        client.admin.command('ismaster')\r\n        \r\n        print(\"\\n[SUCCESS]: MongoDB connection established successfully!\")\r\n        \r\n    except ConnectionFailure as e:\r\n        print(f\"\\n[CONNECTION FAILED]: Could not connect to MongoDB.\")\r\n        print(f\"Reason: {e}\")\r\n    except Exception as e:\r\n        print(f\"\\n[UNEXPECTED ERROR]: An error occurred: {e}\")\r\n\r\nprint(\"--- Test Finished ---\")",
+        "size_bytes": 1271,
+        "debt_category_hint": "testing",
+        "debt_signals": [
+          {
+            "pattern": "print\\(",
+            "line_number": 12,
+            "line_snippet": "print(\"--- Database Connection Test ---\")"
+          },
+          {
+            "pattern": "TEMP",
+            "line_number": 13,
+            "line_snippet": "print(f\"Attempting to connect with URI: {MONGO_URI}\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 17,
+            "line_snippet": "print(\"\\n[FATAL ERROR]: The MONGO_URI was not found in your .env file.\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 18,
+            "line_snippet": "print(\"Please ensure the .env file exists and the variable is named MONGO_URI.\")"
+          },
+          {
+            "pattern": "TEMP",
+            "line_number": 25,
+            "line_snippet": "# It will trigger a connection attempt"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 28,
+            "line_snippet": "print(\"\\n[SUCCESS]: MongoDB connection established successfully!\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 31,
+            "line_snippet": "print(f\"\\n[CONNECTION FAILED]: Could not connect to MongoDB.\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 32,
+            "line_snippet": "print(f\"Reason: {e}\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 34,
+            "line_snippet": "print(f\"\\n[UNEXPECTED ERROR]: An error occurred: {e}\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 36,
+            "line_snippet": "print(\"--- Test Finished ---\")"
+          }
+        ],
+        "debt_signal_count": 10,
+        "metrics": {
+          "total_lines": 36,
+          "code_lines": 22,
+          "blank_lines": 8,
+          "comment_lines": 6,
+          "comment_ratio": 0.167,
+          "max_indentation_depth": 2,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      }
+    ],
+    "analysis_summary": {
+      "total_debt_signals": 11,
+      "files_with_debt_signals": 2,
+      "cost_estimate": {
+        "chunks_to_analyze": 12,
+        "total_code_chars": 19382,
+        "approx_tokens": 4845
+      }
+    }
+  },
+  "summary": {
+    "repo_url": "ananyamehrotra/PathfinderAI",
+    "repo_id": "86118e6d",
+    "health_score": 100,
+    "total_security_issues": 0,
+    "total_debt_issues": 0,
+    "critical_issues": 0,
+    "quick_wins": 0
+  }
+}
