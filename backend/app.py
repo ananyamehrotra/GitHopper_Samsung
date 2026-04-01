@@ -320,16 +320,18 @@ def analyze_repo():
         print("[ANALYZE] Starting complete pipeline...")
         data = request.get_json()
         repo_url = data.get('repo_url')
+        branch_name = data.get('branch_name', 'main')
 
         if not repo_url:
             return jsonify({'error': 'repo_url is required'}), 400
 
         print(f"[ANALYZE] Repository: {repo_url}")
+        print(f"[ANALYZE] Branch: {branch_name}")
 
         # Use the full pipeline
         pipeline = GitHopperPipeline()
         github_token = os.environ.get('GITHUB_TOKEN')
-        result = pipeline.run_full_pipeline(repo_url, github_token)
+        result = pipeline.run_full_pipeline(repo_url, github_token, branch_name)
 
         if result.get('status') == 'success':
             # Save results

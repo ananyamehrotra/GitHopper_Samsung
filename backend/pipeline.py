@@ -27,12 +27,13 @@ class GitHopperPipeline:
         if self.use_lambda:
             self.lambda_client = boto3.client('lambda', region_name='us-east-1')
 
-    def run_full_pipeline(self, repo_url, github_token=None):
+    def run_full_pipeline(self, repo_url, github_token=None, branch_name="main"):
         """
         Execute the complete pipeline: Fetch → Analyze → Score
         """
         print("🚀 Starting GitHopper Full Pipeline")
         print(f"📦 Repository: {repo_url}")
+        print(f"📝 Branch: {branch_name}")
         print(f"🔧 Mode: {'Lambda' if self.use_lambda else 'Local'}")
 
         start_time = datetime.now()
@@ -52,7 +53,7 @@ class GitHopperPipeline:
             print("🤖 STAGE 2: AI ANALYSIS WITH BEDROCK")
             print("="*60)
 
-            analysis_result = self._stage_analyze(fetch_result)
+            analysis_result = self._stage_analyze(fetch_result, branch_name)
             if analysis_result.get('error'):
                 return analysis_result
 
@@ -283,7 +284,7 @@ def long_function():
             'files': mock_files
         }
 
-    def _stage_analyze(self, fetch_result):
+    def _stage_analyze(self, fetch_result, branch_name="main"):
         """Stage 2: Analyze with Bedrock"""
         try:
             chunks = fetch_result.get('chunks', [])
@@ -295,6 +296,7 @@ def long_function():
                     'repo_id': fetch_result['repo_id'],
                     'repo_url': fetch_result['repo_url'],
                     'chunks': chunks,
+                    'branch_name': branch_name,
                     'total_files': len(files)
                 }
 
@@ -308,14 +310,16 @@ def long_function():
                 analysis_data = json.loads(result['body'])
 
             else:
-                # Local execution - use existing scan_all_chunks
-                all_findings = scan_all_chunks(chunks)
+                # Local execution - use existing scan_all_chunks with branch_name
+                all_findings = scan_all_chunks(chunks, branch_name)
 
                 analysis_data = {
                     'repo_id': fetch_result['repo_id'],
                     'repo_url': fetch_result['repo_url'],
+                    'branch_name': branch_name,
                     'security_findings': all_findings.get('security_findings', []),
                     'debt_findings': all_findings.get('debt_findings', []),
+                    'cost_tracker': all_findings.get('cost_tracker', {}),
                     'chunks_scanned': len(chunks),
                     'total_files': len(files)
                 }

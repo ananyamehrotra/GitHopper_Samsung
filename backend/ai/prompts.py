@@ -1,26 +1,25 @@
 # =============================================================================
-# prompts.py — All Bedrock prompt templates for GitHopper
+# prompts.py — Branch-level code analysis for GitHopper
 # Owner: Ananya (AI / Bedrock Eng)
+# Focus: Pure code analysis without scoring
 # =============================================================================
 
 APP_SECURITY_PROMPT = """
-You are a senior security engineer performing a security audit.
-Analyze the following code carefully for security vulnerabilities.
+You are a senior security engineer analyzing code across a branch.
+Review the following code segment for actionable security issues.
 
-Look specifically for:
+Focus on:
 - Hardcoded secrets, API keys, tokens, passwords
-- SQL injection, command injection, LDAP injection
-- Insecure deserialization
-- Broken authentication or session management
-- Sensitive data exposure (PII, credentials in logs)
-- Use of dangerous functions (eval, exec, os.system)
+- SQL injection, command injection vulnerabilities
+- Unsafe deserialization
+- Broken authentication patterns
+- Sensitive data exposure
+- Dangerous functions (eval, exec, system calls)
 
 File: {filename}
+Branch scope: {branch_name}
 
-Return ONLY a valid JSON object with no preamble, explanation, or markdown fences.
-If no issues found, return {{"findings": []}}.
-
-Schema:
+Return ONLY valid JSON. No preamble or markdown.
 {{
   "findings": [
     {{
@@ -28,16 +27,13 @@ Schema:
       "severity": "CRITICAL",
       "file": "{filename}",
       "line": 14,
-      "explanation": "Plain English explanation of what is wrong and why it is dangerous. No CVE jargon.",
-      "fix": "Exact instruction on what the developer should do to fix this.",
-      "remediated_code": "The corrected version of the vulnerable code block.",
-      "estimated_minutes": 10,
-      "business_impact": "What can go wrong in production if this is not fixed."
+      "explanation": "AWS secret key directly embedded in source code. Visible to anyone with repo access.",
+      "fix": "Move to environment variable: AWS_KEY = os.getenv('AWS_SECRET_KEY')",
+      "remediated_code": "AWS_KEY = os.getenv('AWS_SECRET_KEY')",
+      "estimated_minutes": 10
     }}
   ]
 }}
-
-Severity levels: CRITICAL, HIGH, MEDIUM, LOW
 
 Code to analyze:
 {code_chunk}
@@ -45,41 +41,35 @@ Code to analyze:
 
 
 IAC_SECURITY_PROMPT = """
-You are a cloud security engineer specializing in infrastructure as code.
-Analyze the following infrastructure configuration for security misconfigurations.
+You are a cloud security engineer reviewing infrastructure code in a branch.
+Analyze this IaC configuration for misconfigurations.
 
-Look specifically for:
-- S3 buckets with public access (acl = "public-read" or public-read-write)
-- Security groups with ingress open to 0.0.0.0/0 on sensitive ports (22, 3389, 5432, 3306)
-- Unencrypted storage, databases, or volumes
-- Missing CloudTrail logging or access logging
-- Hardcoded credentials or secrets in config
-- Resources without deletion protection
-- Overly permissive network rules
+Check for:
+- Public S3 buckets or open access permissions
+- Security groups exposed to 0.0.0.0/0
+- Unencrypted storage or databases
+- Missing logging or monitoring
+- Hardcoded credentials
+- Overly permissive network access
 
 File: {filename}
+Branch: {branch_name}
 
-Return ONLY a valid JSON object with no preamble, explanation, or markdown fences.
-If no issues found, return {{"findings": []}}.
-
-Schema:
+Return ONLY valid JSON:
 {{
   "findings": [
     {{
       "type": "OPEN_S3_BUCKET",
       "severity": "CRITICAL",
       "file": "{filename}",
-      "resource": "aws_s3_bucket.my_bucket",
-      "explanation": "Plain English explanation of what is misconfigured and why it is dangerous.",
-      "fix": "Exact fix instruction for this specific resource.",
-      "remediated_code": "The corrected version of the misconfigured block.",
-      "estimated_minutes": 15,
-      "business_impact": "What an attacker could do with this misconfiguration."
+      "resource": "aws_s3_bucket.public",
+      "explanation": "S3 bucket configured with public read access. All objects are world-readable.",
+      "fix": "Set acl to private-read, use bucket policies to grant specific access.",
+      "remediated_code": "acl = \"private\"\nblock_public_acls = true",
+      "estimated_minutes": 15
     }}
   ]
 }}
-
-Severity levels: CRITICAL, HIGH, MEDIUM, LOW
 
 Config to analyze:
 {code_chunk}
@@ -87,40 +77,37 @@ Config to analyze:
 
 
 IAM_PROMPT = """
-You are an IAM security specialist.
-Analyze the following IAM policy or role definition for permission issues.
+You are an IAM security specialist reviewing permission policies in a branch.
+Analyze this policy configuration for overly permissive or dangerous permissions.
 
-Look specifically for:
-- Wildcard actions (Action: "*") or wildcard resources (Resource: "*")
-- Privilege escalation paths (iam:PassRole, iam:CreatePolicy, iam:AttachUserPolicy)
-- Overly broad managed policies (AdministratorAccess, PowerUserAccess)
-- Missing condition keys (no MFA condition, no IP restriction)
-- Cross-account trust without conditions
-- Unused or unnecessary permissions for the stated purpose
+Check for:
+- Wildcard actions (Action: "*")
+- Wildcard resources (Resource: "*")
+- Weak principal restrictions (Principal: "*")
+- Missing conditions on sensitive actions
+- Over-broad S3 or database access
+- NotPrincipal usage (deny-based instead of allow-based)
+- Service roles with excessive permissions
+- Cross-account access without proper restrictions
 
 File: {filename}
+Branch: {branch_name}
 
-Return ONLY a valid JSON object with no preamble, explanation, or markdown fences.
-If no issues found, return {{"findings": []}}.
-
-Schema:
+Return ONLY valid JSON:
 {{
   "findings": [
     {{
-      "type": "OVERLY_PERMISSIVE_ROLE",
-      "severity": "HIGH",
+      "type": "WILDCARD_PERMISSIONS",
+      "severity": "CRITICAL",
       "file": "{filename}",
-      "policy_name": "AdminPolicy",
-      "explanation": "Plain English explanation of what permission is excessive and why it is risky.",
-      "fix": "Exact fix — what permissions to remove or restrict, with principle of least privilege applied.",
-      "remediated_code": "The corrected policy JSON with minimal required permissions.",
-      "estimated_minutes": 20,
-      "business_impact": "What an attacker could do if this role is compromised."
+      "policy": "AssumeRolePolicy",
+      "explanation": "IAM policy grants all actions (*) on all resources (*). Anyone with this role can do everything.",
+      "fix": "Replace wildcards with specific actions and resources. Example: Action=['s3:GetObject'], Resource=['arn:aws:s3:::bucket/path/*']",
+      "remediated_code": "\"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::my-bucket/uploads/*\"",
+      "estimated_minutes": 30
     }}
   ]
 }}
-
-Severity levels: CRITICAL, HIGH, MEDIUM, LOW
 
 IAM policy to analyze:
 {code_chunk}
@@ -128,43 +115,36 @@ IAM policy to analyze:
 
 
 DEBT_PROMPT = """
-You are a senior software engineer performing a technical debt review.
-Analyze the following code for quality issues and technical debt.
+You are a code quality engineer reviewing technical debt in a branch.
+Analyze this code for quality issues and maintainability problems.
 
-Look specifically for:
-- Functions longer than 40 lines (high cyclomatic complexity)
-- Copy-pasted or duplicated logic blocks
-- Tight coupling — functions that do too many unrelated things
-- Missing or empty error handling (bare except, swallowed exceptions)
-- Magic numbers or hardcoded values that should be constants
-- God classes or modules that know too much
-- Missing tests or untestable code structure
+Check for:
+- Functions longer than 40 lines (complex functions)
+- Copy-pasted or duplicated code blocks
+- Tight coupling between components
+- Poor error handling (bare except, swallowed exceptions)
+- Hardcoded values that should be constants
+- God classes that do too much
 - Outdated patterns or deprecated API usage
-- No type hints or documentation on public functions
+- Missing type hints or documentation
 
 File: {filename}
+Branch: {branch_name}
 
-Return ONLY a valid JSON object with no preamble, explanation, or markdown fences.
-If no issues found, return {{"findings": []}}.
-
-Schema:
+Return ONLY valid JSON:
 {{
   "findings": [
     {{
       "type": "HIGH_COMPLEXITY",
-      "category": "CODE_QUALITY",
       "severity": "MEDIUM",
       "file": "{filename}",
-      "explanation": "Plain English explanation of what the debt is and why it slows teams down.",
-      "fix": "Exact refactoring instruction — what to split, extract, or rename.",
-      "estimated_minutes": 30,
-      "business_impact": "How this debt affects developer velocity or production stability."
+      "explanation": "This function is 65 lines with 8 nested branches. Hard to test and maintain.",
+      "fix": "Split into smaller functions. Extract validation logic, data processing, and response formatting into separate functions.",
+      "remediated_code": "def validate_input(data):\n    pass\n\ndef process_data(data):\n    pass\n\ndef format_response(result):\n    pass",
+      "estimated_minutes": 45
     }}
   ]
 }}
-
-Severity levels: HIGH, MEDIUM, LOW
-Categories: CODE_QUALITY, DEPENDENCY_RISK, ARCHITECTURE, TESTING
 
 Code to analyze:
 {code_chunk}
@@ -172,23 +152,21 @@ Code to analyze:
 
 
 DEPENDENCY_PROMPT = """
-You are a dependency security analyst.
-Analyze the following dependency file for risks.
+You are a dependency security analyst reviewing package requirements in a branch.
+Analyze this dependency file for outdated packages and security risks.
 
-Look specifically for:
+Check for:
 - Packages with known CVEs or security advisories
-- Packages that are severely outdated (major versions behind)
+- Packages severely outdated (major versions behind)
 - Packages that are unmaintained or deprecated
-- Packages with no version pinning (using * or latest)
-- Dev dependencies incorrectly in production dependencies
-- Packages with suspicious names (typosquatting patterns)
+- Unpinned versions (using * or latest)
+- Dev dependencies in production dependencies
+- Suspicious package names (typosquatting)
 
 File: {filename}
+Branch: {branch_name}
 
-Return ONLY a valid JSON object with no preamble, explanation, or markdown fences.
-If no issues found, return {{"findings": []}}.
-
-Schema:
+Return ONLY valid JSON:
 {{
   "findings": [
     {{
@@ -196,16 +174,13 @@ Schema:
       "severity": "HIGH",
       "file": "{filename}",
       "package": "requests==2.18.0",
-      "explanation": "Plain English explanation of why this dependency version is risky.",
-      "fix": "Exact upgrade instruction with the safe version to use.",
-      "estimated_minutes": 5,
-      "business_impact": "What vulnerability this exposes in production."
+      "explanation": "requests 2.18.0 has unpatched vulnerabilities in certificate validation. Upgrade immediately.",
+      "fix": "Update to requests>=2.25.1. Run: pip install --upgrade requests",
+      "estimated_minutes": 2
     }}
   ]
 }}
 
-Severity levels: CRITICAL, HIGH, MEDIUM, LOW
-
-Dependency file to analyze:
+Dependencies to analyze:
 {code_chunk}
 """

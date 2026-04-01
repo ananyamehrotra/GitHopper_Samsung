@@ -81,11 +81,37 @@ bedrock = session.client("bedrock-runtime", region_name=REGION)
 # Bedrock invocation
 # ---------------------------------------------------------------------------
 
+# Track cost metrics
+cost_tracker = {
+    "api_calls": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "estimated_cost": 0.0
+}
+
+# Opus 4.6 pricing (approximate): $3 per 1M input tokens, $15 per 1M output tokens
+CLAUDE_OPUS_INPUT_COST = 0.000003  # $3 per 1M tokens
+CLAUDE_OPUS_OUTPUT_COST = 0.000015  # $15 per 1M tokens
+
+def reset_cost_tracker():
+    """Reset cost metrics for new analysis"""
+    global cost_tracker
+    cost_tracker = {
+        "api_calls": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "estimated_cost": 0.0
+    }
+
 def invoke_bedrock(prompt: str) -> dict:
     """
-    Sends a prompt to NVIDIA Nemotron via Bedrock.
+    Sends a prompt to Claude via Bedrock.
     Returns parsed JSON dict, or {"findings": []} on failure.
+    Also tracks API calls and token usage for cost calculation.
     """
+    global cost_tracker
+    cost_tracker["api_calls"] += 1
+    
     try:
         response = bedrock.invoke_model(
             modelId=MODEL_ID,
@@ -99,6 +125,23 @@ def invoke_bedrock(prompt: str) -> dict:
         )
         raw = json.loads(response["body"].read())
         text = raw['choices'][0]['message']['content'].strip()
+        
+        # Track token usage if available in response
+        if 'usage' in raw:
+            cost_tracker["input_tokens"] += raw['usage'].get('input_tokens', 0)
+            cost_tracker["output_tokens"] += raw['usage'].get('output_tokens', 0)
+        else:
+            # Estimate token count (rough approximation)
+            prompt_tokens = len(prompt) // 4
+            response_tokens = len(text) // 4
+            cost_tracker["input_tokens"] += prompt_tokens
+            cost_tracker["output_tokens"] += response_tokens
+        
+        # Calculate estimated cost
+        cost_tracker["estimated_cost"] = (
+            (cost_tracker["input_tokens"] * CLAUDE_OPUS_INPUT_COST) +
+            (cost_tracker["output_tokens"] * CLAUDE_OPUS_OUTPUT_COST)
+        )
 
         # strip markdown fences if model adds them
         if text.startswith("```"):
@@ -120,7 +163,7 @@ def invoke_bedrock(prompt: str) -> dict:
 # Per-chunk scanning
 # ---------------------------------------------------------------------------
 
-def scan_chunk(chunk: dict) -> dict:
+def scan_chunk(chunk: dict, branch_name: str = "main") -> dict:
     """
     Scans a single code chunk and returns findings.
 
@@ -129,6 +172,7 @@ def scan_chunk(chunk: dict) -> dict:
             "file": "config/db.py",
             "code": "...raw code..."
         }
+        branch_name = "feature/auth" (optional, defaults to "main")
 
     Output:
         {
@@ -145,29 +189,29 @@ def scan_chunk(chunk: dict) -> dict:
 
     if file_type == "iam":
         result = invoke_bedrock(
-            IAM_PROMPT.format(filename=filename, code_chunk=content)
+            IAM_PROMPT.format(filename=filename, branch_name=branch_name, code_chunk=content)
         )
         security_findings = result.get("findings", [])
 
     elif file_type == "iac":
         result = invoke_bedrock(
-            IAC_SECURITY_PROMPT.format(filename=filename, code_chunk=content)
+            IAC_SECURITY_PROMPT.format(filename=filename, branch_name=branch_name, code_chunk=content)
         )
         security_findings = result.get("findings", [])
 
     elif file_type == "deps":
         result = invoke_bedrock(
-            DEPENDENCY_PROMPT.format(filename=filename, code_chunk=content)
+            DEPENDENCY_PROMPT.format(filename=filename, branch_name=branch_name, code_chunk=content)
         )
         security_findings = result.get("findings", [])
 
     else:
         # app code: run both security + debt scan
         sec = invoke_bedrock(
-            APP_SECURITY_PROMPT.format(filename=filename, code_chunk=content)
+            APP_SECURITY_PROMPT.format(filename=filename, branch_name=branch_name, code_chunk=content)
         )
         debt = invoke_bedrock(
-            DEBT_PROMPT.format(filename=filename, code_chunk=content)
+            DEBT_PROMPT.format(filename=filename, branch_name=branch_name, code_chunk=content)
         )
         security_findings = sec.get("findings", [])
         debt_findings = debt.get("findings", [])
@@ -182,7 +226,7 @@ def scan_chunk(chunk: dict) -> dict:
 # Full repo scan — called by lambda_processor
 # ---------------------------------------------------------------------------
 
-def scan_all_chunks(chunks: list) -> dict:
+def scan_all_chunks(chunks: list, branch_name: str = "main") -> dict:
     """
     Scans all chunks from a repo and aggregates findings.
 
@@ -192,24 +236,33 @@ def scan_all_chunks(chunks: list) -> dict:
             {"file": "terraform.tf", "code": "..."},
             ...
         ]
+        branch_name = "feature/auth" (optional, defaults to "main")
 
     Output:
         {
             "security_findings": [...],
-            "debt_findings": [...]
+            "debt_findings": [...],
+            "cost_tracker": {
+                "api_calls": 12,
+                "input_tokens": 45000,
+                "output_tokens": 12000,
+                "estimated_cost": 0.23
+            }
         }
     """
+    reset_cost_tracker()
     all_security = []
     all_debt = []
 
     for chunk in chunks:
         filename = chunk.get("file") or chunk.get("filename", "unknown")
         logger.info(f"Scanning: {filename}")
-        result = scan_chunk(chunk)
+        result = scan_chunk(chunk, branch_name)
         all_security.extend(result["security_findings"])
         all_debt.extend(result["debt_findings"])
 
     return {
         "security_findings": all_security,
-        "debt_findings": all_debt
+        "debt_findings": all_debt,
+        "cost_tracker": cost_tracker.copy()
     }
