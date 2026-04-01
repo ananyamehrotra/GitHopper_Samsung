@@ -6,11 +6,6 @@
 import boto3
 import json
 import logging
-import sys
-import os
-
-# Add ai directory to path for prompts imports
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from prompts import (
     APP_SECURITY_PROMPT,
@@ -21,59 +16,56 @@ from prompts import (
 )
 
 # ---------------------------------------------------------------------------
-# File Classification (copied from utils to avoid import issues)
+# Config
+# ---------------------------------------------------------------------------
+
+MODEL_ID = "anthropic.claude-sonnet-4-5-20251001"
+REGION = "us-east-1"
+MAX_TOKENS = 2048
+
+logger = logging.getLogger(__name__)
+
+bedrock = boto3.client("bedrock-runtime", region_name="ap-south-2")
+
+# ---------------------------------------------------------------------------
+# File classification
 # ---------------------------------------------------------------------------
 
 IAC_EXTENSIONS = {".tf", ".tfvars"}
 IAC_KEYWORDS = {"cloudformation", "template", "stack", "infra"}
 IAM_KEYWORDS = {"iam", "policy", "role", "permission", "trust"}
-DEP_FILES = {
-    "requirements.txt", "package.json", "pipfile",
-    "go.mod", "gemfile", "pom.xml"
-}
+DEP_FILES = {"requirements.txt", "package.json", "pipfile", "go.mod", "gemfile", "pom.xml"}
+SKIP_DEBT_FOR = {".tf", ".tfvars", ".json"}  # IaC/IAM files don't need debt scan
+
 
 def classify_file(filename: str) -> str:
     """
-    Routes a file to the correct scan prompt.
-    
-    Returns one of:
-        'iam'   → IAM policy scan
-        'iac'   → Infrastructure-as-code scan
-        'deps'  → Dependency health scan
-        'app'   → App code security + debt scan
+    Decides which prompt strategy to use for a given file.
+
+    Returns one of: 'iam', 'iac', 'deps', 'app'
     """
     name = filename.lower()
+    # get just the base filename (no path)
     base = name.rsplit("/", 1)[-1]
     ext = "." + base.rsplit(".", 1)[-1] if "." in base else ""
 
-    # dependency files
+    # dependency files — check base filename exactly
     if base in DEP_FILES:
         return "deps"
 
-    # IAM — JSON files with policy-related names
+    # IAM — JSON files that look like policies
     if ext == ".json" and any(kw in name for kw in IAM_KEYWORDS):
         return "iam"
 
-    # IaC — Terraform
+    # IaC — Terraform files or CloudFormation templates
     if ext in IAC_EXTENSIONS:
         return "iac"
-
-    # IaC — CloudFormation YAML
     if ext in {".yaml", ".yml"} and any(kw in name for kw in IAC_KEYWORDS):
         return "iac"
 
+    # everything else is app code
     return "app"
 
-# ---------------------------------------------------------------------------
-# Config
-# ---------------------------------------------------------------------------
-MODEL_ID = "anthropic.claude-sonnet-4-20250514"
-REGION = "ap-south-2"  # Hyderabad
-MAX_TOKENS = 2048
-
-logger = logging.getLogger(__name__)
-
-bedrock = boto3.client("bedrock-runtime", region_name=REGION)
 
 # ---------------------------------------------------------------------------
 # Bedrock invocation

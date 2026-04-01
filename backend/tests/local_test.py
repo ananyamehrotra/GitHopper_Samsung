@@ -9,7 +9,9 @@ import sys
 import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../ai"))
-from bedrock_client import scan_chunk, scan_all_chunks, classify_file
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
+from bedrock_client import scan_chunk, scan_all_chunks
+from utils.file_classifier import classify_file
 
 # ---------------------------------------------------------------------------
 # Test chunks — planted vulnerabilities across all 4 types

@@ -1,0 +1,154 @@
+{
+  "status": "success",
+  "repo_id": "51d13e65",
+  "repo_url": "https://github.com/ananyamehrotra/GitHopperMain",
+  "health_score": 100,
+  "chunks_scanned": 0,
+  "total_files": 25,
+  "analysis": {
+    "total_security_issues": 0,
+    "critical_issues": 0,
+    "quick_wins": 0,
+    "total_debt_issues": 0
+  },
+  "findings": {
+    "security_findings": [],
+    "debt_findings": [],
+    "quick_wins": [],
+    "critical_issues": []
+  },
+  "errors": [
+    {
+      "chunk": "backend/.env.example",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "backend/requirements.txt",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/package.json",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "README.md",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "backend/README.md",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "backend/README.md",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "backend/github_client.py",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "backend/github_client.py",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "backend/github_client.py",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/README.md",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/components.json",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/index.html",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/jsconfig.json",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/postcss.config.js",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/AppLayout.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/Plasma.css",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/Plasma.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/Plasma.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/Plasma.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/PlasmaBackground.css",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/PlasmaBackground.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/PlasmaBackground.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/ShinyText.css",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/ShinyText.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/ShinyText.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/ThemeToggle.css",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/ThemeToggle.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/UserProfile.css",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/components/UserProfile.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/context/ThemeContext.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/context/UserContext.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/main-home.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    },
+    {
+      "chunk": "frontend/src/main-home.jsx",
+      "error": "cannot import name 'classify_file' from 'utils.file_classifier' (C:\\Users\\ASUS VIVOBOOK\\Desktop\\GitHopperMain\\backend\\utils\\file_classifier.py)"
+    }
+  ]
+}
