@@ -1,0 +1,676 @@
+{
+  "flagged_files": [
+    {
+      "content": "{\n  \"name\": \"playground\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"dev\": \"cd ../.. && concurrently --kill-others -n compiler,runtime,playground \\\"yarn workspace babel-plugin-react-compiler run watch\\\" \\\"yarn workspace react-compiler-runtime run watch\\\" \\\"wait-on packages/babel-plugin-react-compiler/dist/index.js && cd apps/playground && NODE_ENV=development next dev\\\"\",\n    \"build:compiler\": \"cd ../.. && concurrently -n compiler,runtime \\\"yarn workspace babel-plugin-react-compiler run build --dts\\\" \\\"yarn workspace react-compiler-runtime run build\\\"\",\n    \"build\": \"yarn build:compiler && next build\",\n    \"postbuild\": \"node ./scripts/downloadFonts.js\",\n    \"preinstall\": \"cd ../.. && yarn install --frozen-lockfile\",\n    \"postinstall\": \"./scripts/link-compiler.sh\",\n    \"vercel-build\": \"yarn build\",\n    \"start\": \"next start\",\n    \"lint\": \"next lint\",\n    \"test\": \"playwright test --workers=4\"\n  },\n  \"dependencies\": {\n    \"@babel/core\": \"^7.18.9\",\n    \"@babel/generator\": \"^7.18.9\",\n    \"@babel/parser\": \"^7.18.9\",\n    \"@babel/plugin-syntax-typescript\": \"^7.18.9\",\n    \"@babel/plugin-transform-block-scoping\": \"^7.18.9\",\n    \"@babel/plugin-transform-modules-commonjs\": \"^7.18.9\",\n    \"@babel/preset-react\": \"^7.18.9\",\n    \"@babel/preset-typescript\": \"^7.26.0\",\n    \"@babel/traverse\": \"^7.18.9\",\n    \"@babel/types\": \"7.26.3\",\n    \"@heroicons/react\": \"^1.0.6\",\n    \"@monaco-editor/react\": \"^4.8.0-rc.2\",\n    \"@playwright/test\": \"^1.56.1\",\n    \"@use-gesture/react\": \"^10.2.22\",\n    \"hermes-eslint\": \"^0.25.0\",\n    \"hermes-parser\": \"^0.25.0\",\n    \"invariant\": \"^2.2.4\",\n    \"json5\": \"^2.2.3\",\n    \"lru-cache\": \"^11.2.2\",\n    \"lz-string\": \"^1.5.0\",\n    \"monaco-editor\": \"^0.52.0\",\n    \"next\": \"15.5.9\",\n    \"notistack\": \"^3.0.0-alpha.7\",\n    \"prettier\": \"^3.3.3\",\n    \"pretty-format\": \"^29.3.1\",\n    \"re-resizable\": \"^6.9.16\",\n    \"react\": \"19.2.3\",\n    \"react-dom\": \"19.2.3\"\n  },\n  \"devDependencies\": {\n    \"@types/node\": \"18.11.9\",\n    \"@types/react\": \"19.2\",\n    \"@types/react-dom\": \"19.2\",\n    \"autoprefixer\": \"^10.4.13\",\n    \"clsx\": \"^1.2.1\",\n    \"concurrently\": \"^7.4.0\",\n    \"eslint\": \"^8.28.0\",\n    \"eslint-config-next\": \"15.5.2\",\n    \"monaco-editor-webpack-plugin\": \"^7.1.0\",\n    \"postcss\": \"^8.4.31\",\n    \"tailwindcss\": \"^3.2.4\",\n    \"wait-on\": \"^7.2.0\"\n  },\n  \"resolutions\": {\n    \"@types/react\": \"19.2\",\n    \"@types/react-dom\": \"19.2\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 65,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 65
+      },
+      "path": "compiler/apps/playground/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 2376
+    },
+    {
+      "content": "{\n  \"private\": true,\n  \"workspaces\": {\n    \"packages\": [\n      \"packages/*\"\n    ]\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/facebook/react.git\"\n  },\n  \"scripts\": {\n    \"copyright\": \"node scripts/copyright.js\",\n    \"hash\": \"scripts/hash.sh\",\n    \"start\": \"yarn workspace playground run start\",\n    \"next\": \"yarn workspace playground run dev\",\n    \"build\": \"yarn workspaces run build\",\n    \"dev\": \"cd apps/playground && yarn dev\",\n    \"test\": \"yarn workspaces run test\",\n    \"snap\": \"yarn workspace babel-plugin-react-compiler run snap\",\n    \"snap:build\": \"yarn workspace snap run build\",\n    \"npm:publish\": \"node scripts/release/publish\",\n    \"eslint-docs\": \"yarn workspace babel-plugin-react-compiler build && node scripts/build-eslint-docs.js\"\n  },\n  \"dependencies\": {\n    \"fs-extra\": \"^4.0.2\",\n    \"react-is\": \"0.0.0-experimental-4beb1fd8-20241118\"\n  },\n  \"devDependencies\": {\n    \"@babel/types\": \"^7.26.0\",\n    \"@tsconfig/strictest\": \"^2.0.5\",\n    \"concurrently\": \"^7.4.0\",\n    \"esbuild\": \"^0.25.0\",\n    \"folder-hash\": \"^4.0.4\",\n    \"npm-dts\": \"^1.3.13\",\n    \"object-assign\": \"^4.1.1\",\n    \"ora\": \"5.4.1\",\n    \"prettier\": \"^3.3.3\",\n    \"prettier-plugin-hermes-parser\": \"^0.26.0\",\n    \"prompt-promise\": \"^1.0.3\",\n    \"rimraf\": \"^6.0.1\",\n    \"to-fast-properties\": \"^2.0.0\",\n    \"tsup\": \"^8.4.0\",\n    \"typescript\": \"^5.4.3\",\n    \"wait-on\": \"^7.2.0\",\n    \"yargs\": \"^17.7.2\"\n  },\n  \"resolutions\": {\n    \"@babel/types\": \"7.26.3\"\n  },\n  \"packageManager\": \"yarn@1.22.22\"\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 52,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 52
+      },
+      "path": "compiler/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 1503
+    },
+    {
+      "content": "{\n  \"name\": \"babel-plugin-react-compiler\",\n  \"version\": \"0.0.0-experimental-334f00b-20240725\",\n  \"description\": \"Babel plugin for React Compiler.\",\n  \"main\": \"dist/index.js\",\n  \"license\": \"MIT\",\n  \"files\": [\n    \"dist\",\n    \"!*.tsbuildinfo\"\n  ],\n  \"scripts\": {\n    \"build\": \"rimraf dist && tsup\",\n    \"test\": \"./scripts/link-react-compiler-runtime.sh && yarn snap:ci\",\n    \"jest\": \"yarn build && ts-node node_modules/.bin/jest\",\n    \"snap\": \"yarn workspace snap run snap\",\n    \"snap:build\": \"yarn workspace snap run build\",\n    \"snap:ci\": \"yarn snap:build && yarn snap\",\n    \"ts:analyze-trace\": \"scripts/ts-analyze-trace.sh\",\n    \"lint\": \"yarn eslint src\",\n    \"watch\": \"yarn build --dts --watch\"\n  },\n  \"dependencies\": {\n    \"@babel/types\": \"^7.26.0\"\n  },\n  \"devDependencies\": {\n    \"@babel/core\": \"^7.2.0\",\n    \"@babel/generator\": \"7.2.0\",\n    \"@babel/parser\": \"^7.2.0\",\n    \"@babel/plugin-syntax-typescript\": \"^7.18.6\",\n    \"@babel/plugin-transform-block-scoping\": \"^7.18.9\",\n    \"@babel/plugin-transform-modules-commonjs\": \"^7.18.6\",\n    \"@babel/preset-react\": \"^7.18.6\",\n    \"@babel/preset-typescript\": \"^7.18.6\",\n    \"@babel/traverse\": \"^7.2.0\",\n    \"@testing-library/react\": \"^13.4.0\",\n    \"@tsconfig/node18-strictest\": \"^1.0.0\",\n    \"@types/glob\": \"^8.1.0\",\n    \"@types/invariant\": \"^2.2.35\",\n    \"@types/jest\": \"^29.0.3\",\n    \"@types/node\": \"^18.7.18\",\n    \"@typescript-eslint/eslint-plugin\": \"^8.7.0\",\n    \"@typescript-eslint/parser\": \"^8.7.0\",\n    \"babel-jest\": \"^29.0.3\",\n    \"babel-plugin-fbt\": \"^1.0.0\",\n    \"babel-plugin-fbt-runtime\": \"^1.0.0\",\n    \"eslint\": \"^8.57.1\",\n    \"invariant\": \"^2.2.4\",\n    \"jest\": \"^29.0.3\",\n    \"jest-environment-jsdom\": \"^29.0.3\",\n    \"pretty-format\": \"^24\",\n    \"react\": \"0.0.0-experimental-4beb1fd8-20241118\",\n    \"react-dom\": \"0.0.0-experimental-4beb1fd8-20241118\",\n    \"ts-jest\": \"^29.1.1\",\n    \"ts-node\": \"^10.9.2\",\n    \"zod\": \"^3.25.0 || ^4.0.0\",\n    \"zod-validation-error\": \"^3.5.0 || ^4.0.0\"\n  },\n  \"resolutions\": {\n    \"./**/@babel/parser\": \"7.7.4\",\n    \"./**/@babel/plugin-syntax-flow\": \"7.7.4\",\n    \"./**/@babel/types\": \"7.7.4\",\n    \"@babel/core\": \"7.2.0\",\n    \"@babel/generator\": \"7.2.0\",\n    \"@babel/traverse\": \"7.7.4\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/facebook/react.git\",\n    \"directory\": \"compiler/packages/babel-plugin-react-compiler\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 71,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 71
+      },
+      "path": "compiler/packages/babel-plugin-react-compiler/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 2346
+    },
+    {
+      "content": "{\n  \"name\": \"eslint-plugin-react-compiler\",\n  \"version\": \"0.0.0-experimental-9ed098e-20240725\",\n  \"description\": \"ESLint plugin to display errors found by the React compiler.\",\n  \"main\": \"dist/index.js\",\n  \"scripts\": {\n    \"build\": \"rimraf dist && tsup\",\n    \"test\": \"jest\",\n    \"watch\": \"yarn build --watch\"\n  },\n  \"files\": [\n    \"dist\"\n  ],\n  \"dependencies\": {\n    \"@babel/core\": \"^7.24.4\",\n    \"@babel/parser\": \"^7.24.4\",\n    \"hermes-parser\": \"^0.25.1\",\n    \"zod\": \"^3.25.0 || ^4.0.0\",\n    \"zod-validation-error\": \"^3.5.0 || ^4.0.0\"\n  },\n  \"devDependencies\": {\n    \"@babel/preset-env\": \"^7.22.4\",\n    \"@babel/preset-typescript\": \"^7.18.6\",\n    \"@babel/types\": \"^7.26.0\",\n    \"@types/eslint\": \"^8.56.12\",\n    \"@types/jest\": \"^30.0.0\",\n    \"@types/node\": \"^20.2.5\",\n    \"babel-jest\": \"^29.0.3\",\n    \"eslint\": \"8.57.0\",\n    \"hermes-eslint\": \"^0.25.1\",\n    \"jest\": \"^29.5.0\",\n    \"regexp.escape\": \"^2.0.1\"\n  },\n  \"engines\": {\n    \"node\": \"^14.17.0 || ^16.0.0 || >= 18.0.0\"\n  },\n  \"peerDependencies\": {\n    \"eslint\": \">=7\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/facebook/react.git\",\n    \"directory\": \"compiler/packages/eslint-plugin-react-compiler\"\n  },\n  \"license\": \"MIT\"\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 46,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 46
+      },
+      "path": "compiler/packages/eslint-plugin-react-compiler/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 1211
+    },
+    {
+      "content": "{\n  \"name\": \"make-read-only-util\",\n  \"version\": \"0.0.1\",\n  \"license\": \"MIT\",\n  \"files\": [\n    \"src\"\n  ],\n  \"scripts\": {\n    \"build\": \"rimraf dist && tsup\",\n    \"test\": \"jest src\",\n    \"watch\": \"yarn build --watch\"\n  },\n  \"dependencies\": {\n    \"invariant\": \"^2.2.4\",\n    \"pretty-format\": \"^24\"\n  },\n  \"devDependencies\": {\n    \"@types/invariant\": \"^2.2.35\",\n    \"@types/jest\": \"^28.1.6\",\n    \"@types/node\": \"^20.2.5\",\n    \"jest\": \"^28.1.3\",\n    \"ts-jest\": \"^28.0.7\",\n    \"ts-node\": \"^10.9.2\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/facebook/react.git\",\n    \"directory\": \"compiler/packages/make-read-only-util\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 30,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 30
+      },
+      "path": "compiler/packages/make-read-only-util/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 651
+    },
+    {
+      "content": "{\n  \"name\": \"react-compiler-healthcheck\",\n  \"version\": \"0.0.0-experimental-ab3118d-20240725\",\n  \"description\": \"Health check script to test violations of the rules of react.\",\n  \"bin\": {\n    \"react-compiler-healthcheck\": \"dist/index.js\"\n  },\n  \"scripts\": {\n    \"build\": \"rimraf dist && tsup\",\n    \"test\": \"echo 'no tests'\",\n    \"watch\": \"yarn build --watch\"\n  },\n  \"dependencies\": {\n    \"@babel/core\": \"^7.24.4\",\n    \"@babel/parser\": \"^7.24.4\",\n    \"chalk\": \"4\",\n    \"fast-glob\": \"^3.3.2\",\n    \"ora\": \"5.4.1\",\n    \"yargs\": \"^17.7.2\",\n    \"zod\": \"^3.25.0 || ^4.0.0\",\n    \"zod-validation-error\": \"^3.5.0 || ^4.0.0\"\n  },\n  \"devDependencies\": {},\n  \"engines\": {\n    \"node\": \"^14.17.0 || ^16.0.0 || >= 18.0.0\"\n  },\n  \"license\": \"MIT\",\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/facebook/react.git\",\n    \"directory\": \"compiler/packages/react-compiler-healthcheck\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 33,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 33
+      },
+      "path": "compiler/packages/react-compiler-healthcheck/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 893
+    },
+    {
+      "content": "{\n  \"name\": \"react-compiler-runtime\",\n  \"version\": \"0.0.1\",\n  \"description\": \"Runtime for React Compiler\",\n  \"license\": \"MIT\",\n  \"main\": \"dist/index.js\",\n  \"typings\": \"dist/index.d.ts\",\n  \"files\": [\n    \"dist\",\n    \"src\"\n  ],\n  \"peerDependencies\": {\n    \"react\": \"^17.0.0 || ^18.0.0 || ^19.0.0 || ^0.0.0-experimental\"\n  },\n  \"scripts\": {\n    \"build\": \"rimraf dist && tsup\",\n    \"test\": \"echo 'no tests'\",\n    \"watch\": \"yarn build --watch\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/facebook/react.git\",\n    \"directory\": \"compiler/packages/react-compiler-runtime\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 25,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 25
+      },
+      "path": "compiler/packages/react-compiler-runtime/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 603
+    },
+    {
+      "content": "{\n  \"private\": \"true\",\n  \"name\": \"react-forgive-client\",\n  \"version\": \"0.0.0\",\n  \"description\": \"Experimental LSP client\",\n  \"license\": \"MIT\",\n  \"scripts\": {\n    \"build\": \"echo 'no build'\",\n    \"test\": \"echo 'no tests'\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/facebook/react.git\",\n    \"directory\": \"compiler/packages/react-forgive\"\n  },\n  \"dependencies\": {\n    \"vscode-languageclient\": \"^9.0.1\"\n  },\n  \"devDependencies\": {\n    \"@types/vscode\": \"^1.95.0\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 22,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 22
+      },
+      "path": "compiler/packages/react-forgive/client/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 497
+    },
+    {
+      "content": "{\n  \"name\": \"react-forgive\",\n  \"displayName\": \"React Analyzer\",\n  \"description\": \"React LSP\",\n  \"license\": \"MIT\",\n  \"version\": \"0.0.0\",\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/facebook/react.git\",\n    \"directory\": \"compiler/packages/react-forgive\"\n  },\n  \"categories\": [\n    \"Programming Languages\"\n  ],\n  \"keywords\": [\n    \"react\",\n    \"react analyzer\",\n    \"react compiler\"\n  ],\n  \"publisher\": \"Meta\",\n  \"engines\": {\n    \"vscode\": \"^1.96.0\"\n  },\n  \"activationEvents\": [\n    \"onLanguage:javascriptreact\",\n    \"onLanguage:typescriptreact\"\n  ],\n  \"main\": \"./dist/extension.js\",\n  \"contributes\": {\n    \"commands\": [\n      {\n        \"command\": \"react-forgive.toggleAll\",\n        \"title\": \"React Analyzer: Toggle on/off\"\n      }\n    ]\n  },\n  \"scripts\": {\n    \"build\": \"yarn run compile\",\n    \"build:compiler\": \"yarn workspace babel-plugin-react-compiler build --dts\",\n    \"compile\": \"rimraf dist && concurrently -n server,client \\\"scripts/build.mjs -t server\\\" \\\"scripts/build.mjs -t client\\\"\",\n    \"dev\": \"yarn run package && yarn run install-ext\",\n    \"install-ext\": \"code --install-extension react-forgive-0.0.0.vsix\",\n    \"lint\": \"echo 'no tests'\",\n    \"package\": \"rm -f react-forgive-0.0.0.vsix && vsce package --yarn\",\n    \"postinstall\": \"cd client && yarn install && cd ../server && yarn install && cd ..\",\n    \"pretest\": \"yarn run build:compiler && yarn run compile && yarn run lint\",\n    \"test\": \"vscode-test\",\n    \"vscode:prepublish\": \"yarn run compile\",\n    \"watch\": \"scripts/build.mjs --watch\"\n  },\n  \"devDependencies\": {\n    \"@eslint/js\": \"^9.13.0\",\n    \"@types/mocha\": \"^10.0.10\",\n    \"@types/node\": \"^20\",\n    \"@types/vscode\": \"^1.96.0\",\n    \"@vscode/test-cli\": \"^0.0.10\",\n    \"@vscode/test-electron\": \"^2.4.1\",\n    \"eslint\": \"^9.13.0\",\n    \"mocha\": \"^11.0.1\",\n    \"typescript-eslint\": \"^8.16.0\",\n    \"yargs\": \"^17.7.2\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 63,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 2,
+        "total_lines": 63
+      },
+      "path": "compiler/packages/react-forgive/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 1869
+    },
+    {
+      "content": "{\n  \"private\": \"true\",\n  \"name\": \"react-forgive-server\",\n  \"version\": \"0.0.0\",\n  \"description\": \"Experimental LSP server\",\n  \"license\": \"MIT\",\n  \"scripts\": {\n    \"build\": \"rimraf dist && rollup --config --bundleConfigAsCjs\",\n    \"test\": \"echo 'no tests'\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/facebook/react.git\",\n    \"directory\": \"compiler/packages/react-forgive\"\n  },\n  \"dependencies\": {\n    \"@babel/core\": \"^7.26.0\",\n    \"@babel/parser\": \"^7.26.0\",\n    \"@babel/plugin-syntax-typescript\": \"^7.25.9\",\n    \"@babel/types\": \"^7.26.0\",\n    \"prettier\": \"^3.3.3\",\n    \"vscode-languageserver\": \"^9.0.1\",\n    \"vscode-languageserver-textdocument\": \"^1.0.12\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 25,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 25
+      },
+      "path": "compiler/packages/react-forgive/server/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 695
+    },
+    {
+      "content": "{\n  \"name\": \"react-mcp-server\",\n  \"version\": \"0.0.0\",\n  \"description\": \"React MCP Server (experimental)\",\n  \"bin\": {\n    \"react-mcp-server\": \"./dist/index.js\"\n  },\n  \"scripts\": {\n    \"build\": \"rimraf dist && tsup\",\n    \"test\": \"echo 'no tests'\",\n    \"dev\": \"concurrently --kill-others -n build,inspect \\\"yarn run watch\\\" \\\"wait-on dist/index.js && yarn run inspect\\\"\",\n    \"inspect\": \"npx @modelcontextprotocol/inspector node dist/index.js\",\n    \"watch\": \"yarn build --watch\"\n  },\n  \"dependencies\": {\n    \"@babel/core\": \"^7.26.0\",\n    \"@babel/parser\": \"^7.26\",\n    \"@babel/preset-env\": \"^7.26.9\",\n    \"@babel/preset-react\": \"^7.18.6\",\n    \"@babel/preset-typescript\": \"^7.27.1\",\n    \"@modelcontextprotocol/sdk\": \"^1.9.0\",\n    \"algoliasearch\": \"^5.23.3\",\n    \"cheerio\": \"^1.0.0\",\n    \"html-to-text\": \"^9.0.5\",\n    \"prettier\": \"^3.3.3\",\n    \"puppeteer\": \"^24.7.2\",\n    \"zod\": \"^3.25.0 || ^4.0.0\"\n  },\n  \"devDependencies\": {\n    \"@types/html-to-text\": \"^9.0.4\",\n    \"@types/jest\": \"^29.5.14\",\n    \"jest\": \"^29.7.0\",\n    \"ts-jest\": \"^29.3.2\"\n  },\n  \"license\": \"MIT\",\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/facebook/react.git\",\n    \"directory\": \"compiler/packages/react-mcp-server\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 41,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 41
+      },
+      "path": "compiler/packages/react-mcp-server/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 1215
+    },
+    {
+      "content": "{\n  \"name\": \"snap\",\n  \"version\": \"0.0.1\",\n  \"public\": false,\n  \"description\": \"Snapshot testing CLI tool\",\n  \"main\": \"dist/main.js\",\n  \"license\": \"MIT\",\n  \"files\": [\n    \"src\"\n  ],\n  \"scripts\": {\n    \"postinstall\": \"./scripts/link-react-compiler-runtime.sh && perl -p -i -e 's/react\\\\.element/react.transitional.element/' ../../node_modules/fbt/lib/FbtReactUtil.js && perl -p -i -e 's/didWarnAboutUsingAct = false;/didWarnAboutUsingAct = true;/' ../../node_modules/react-dom/cjs/react-dom-test-utils.development.js\",\n    \"build\": \"rimraf dist && concurrently -n snap,runtime \\\"tsc --build\\\" \\\"yarn --silent workspace react-compiler-runtime build\\\"\",\n    \"snap\": \"node dist/main.js\",\n    \"test\": \"echo 'no tests'\",\n    \"prettier\": \"prettier --write 'src/**/*.ts'\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/facebook/react.git\",\n    \"directory\": \"compiler/packages/snap\"\n  },\n  \"dependencies\": {\n    \"@babel/code-frame\": \"^7.22.5\",\n    \"@babel/generator\": \"^7.19.1\",\n    \"@babel/plugin-syntax-jsx\": \"^7.18.6\",\n    \"@babel/preset-flow\": \"^7.7.4\",\n    \"@babel/preset-typescript\": \"^7.26.0\",\n    \"@parcel/watcher\": \"^2.1.0\",\n    \"@testing-library/react\": \"^13.4.0\",\n    \"babel-plugin-idx\": \"^3.0.3\",\n    \"babel-plugin-syntax-hermes-parser\": \"^0.25.1\",\n    \"chalk\": \"4\",\n    \"fbt\": \"^1.0.2\",\n    \"glob\": \"^10.3.10\",\n    \"hermes-parser\": \"^0.25.1\",\n    \"jsdom\": \"^22.1.0\",\n    \"react\": \"0.0.0-experimental-4beb1fd8-20241118\",\n    \"react-dom\": \"0.0.0-experimental-4beb1fd8-20241118\",\n    \"readline\": \"^1.3.0\",\n    \"yargs\": \"^17.7.1\",\n    \"zod\": \"^3.25.0 || ^4.0.0\",\n    \"zod-validation-error\": \"^3.5.0 || ^4.0.0\"\n  },\n  \"devDependencies\": {\n    \"@babel/core\": \"^7.19.1\",\n    \"@babel/parser\": \"^7.20.15\",\n    \"@babel/plugin-transform-modules-commonjs\": \"^7.18.6\",\n    \"@babel/preset-react\": \"^7.18.6\",\n    \"@babel/traverse\": \"^7.19.1\",\n    \"@types/babel__code-frame\": \"^7.0.6\",\n    \"@types/fbt\": \"^1.0.4\",\n    \"@types/glob\": \"^8.1.0\",\n    \"@types/node\": \"^18.7.18\",\n    \"@typescript-eslint/eslint-plugin\": \"^7.4.0\",\n    \"@typescript-eslint/parser\": \"^7.4.0\",\n    \"object-assign\": \"^4.1.1\"\n  },\n  \"resolutions\": {\n    \"./**/@babel/parser\": \"7.7.4\",\n    \"./**/@babel/types\": \"7.7.4\",\n    \"@babel/generator\": \"7.2.0\",\n    \"@babel/preset-flow\": \"7.22.5\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 65,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 65
+      },
+      "path": "compiler/packages/snap/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 2281
+    },
+    {
+      "content": "{\n  \"devDependencies\": {\n    \"@babel/core\": \"^7.10.5\",\n    \"@babel/plugin-proposal-class-properties\": \"^7.10.4\",\n    \"@babel/preset-env\": \"^7.10.4\",\n    \"@babel/preset-react\": \"^7.10.4\",\n    \"babel-loader\": \"^8.1.0\",\n    \"react\": \"^19.0.0\",\n    \"react-art\": \"^19.0.0\",\n    \"react-dom\": \"^19.0.0\",\n    \"webpack\": \"^1.14.0\"\n  },\n  \"scripts\": {\n    \"prebuild\": \"cp -r ../../build/oss-experimental/* ./node_modules/\",\n    \"build\": \"webpack app.js bundle.js\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 17,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 17
+      },
+      "path": "fixtures/art/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 460
+    },
+    {
+      "content": "{\n  \"name\": \"attribute-behavior\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"dependencies\": {\n    \"file-saver\": \"^1.3.3\",\n    \"glamor\": \"^2.20.40\",\n    \"react\": \"^15.6.1\",\n    \"react-dom\": \"^15.6.1\",\n    \"react-scripts\": \"1.0.11\",\n    \"react-virtualized\": \"^9.9.0\"\n  },\n  \"resolutions\": {\n    \"fsevents\": \"1.2.13\"\n  },\n  \"scripts\": {\n    \"predev\":\n      \"cp ../../build/oss-experimental/react/umd/react.development.js public/ && cp ../../build/oss-experimental/react-dom/umd/react-dom.development.js public/ && cp ../../build/oss-experimental/react-dom/umd/react-dom-server.browser.development.js public/\",\n    \"dev\": \"react-scripts start\",\n    \"build\": \"react-scripts build\",\n    \"test\": \"react-scripts test --env=jsdom\",\n    \"eject\": \"react-scripts eject\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 24,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 24
+      },
+      "path": "fixtures/attribute-behavior/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 765
+    },
+    {
+      "content": "{\n  \"name\": \"cpu-demo\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"dependencies\": {\n    \"glamor\": \"^2.20.40\",\n    \"react\": \"0.0.0-experimental-269dd6ec5\",\n    \"react-dom\": \"0.0.0-experimental-269dd6ec5\",\n    \"react-markdown\": \"^3.2.0\",\n    \"react-scripts\": \"^1.1.4\",\n    \"victory\": \"^0.25.6\"\n  },\n  \"scripts\": {\n    \"copy-source\": \"cp -r ../../../build/oss-experimental/* ./node_modules/\",\n    \"dev\": \"react-scripts start\",\n    \"build\": \"react-scripts build\",\n    \"test\": \"react-scripts test --env=jsdom\",\n    \"eject\": \"react-scripts eject\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 20,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 20
+      },
+      "path": "fixtures/concurrent/time-slicing/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 548
+    },
+    {
+      "content": "{\n  \"name\": \"react-fixtures\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"devDependencies\": {\n    \"react-scripts\": \"^1.0.11\"\n  },\n  \"dependencies\": {\n    \"@babel/standalone\": \"^7.0.0\",\n    \"art\": \"^0.10.3\",\n    \"classnames\": \"^2.2.5\",\n    \"codemirror\": \"^5.40.0\",\n    \"core-js\": \"^2.4.1\",\n    \"jest-diff\": \"^29.4.1\",\n    \"prop-types\": \"^15.6.0\",\n    \"query-string\": \"^4.2.3\",\n    \"react\": \"^19.0.0\",\n    \"react-dom\": \"^19.0.0\",\n    \"semver\": \"^5.5.0\"\n  },\n  \"scripts\": {\n    \"dev\": \"react-scripts start\",\n    \"predev\": \"cp -a ../../build/oss-experimental/. node_modules\",\n    \"build\": \"react-scripts build && cp build/index.html build/200.html\",\n    \"test\": \"react-scripts test --env=jsdom\",\n    \"eject\": \"react-scripts eject\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 28,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 28
+      },
+      "path": "fixtures/dom/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 733
+    },
+    {
+      "content": "{\n  \"private\": true,\n  \"name\": \"eslint-v10\",\n  \"dependencies\": {\n    \"eslint\": \"^10.0.0\",\n    \"eslint-plugin-react-hooks\": \"link:../../build/oss-stable/eslint-plugin-react-hooks\",\n    \"jiti\": \"^2.4.2\"\n  },\n  \"scripts\": {\n    \"build\": \"node build.mjs && yarn\",\n    \"lint\": \"tsc --noEmit && eslint index.js --report-unused-disable-directives\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"^5.4.3\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 16,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 16
+      },
+      "path": "fixtures/eslint-v10/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 402
+    },
+    {
+      "content": "{\n  \"private\": true,\n  \"name\": \"eslint-v6\",\n  \"dependencies\": {\n    \"eslint\": \"^6\",\n    \"eslint-plugin-react-hooks\": \"link:../../build/oss-stable/eslint-plugin-react-hooks\"\n  },\n  \"scripts\": {\n    \"build\": \"node build.mjs && yarn\",\n    \"lint\": \"eslint index.js --report-unused-disable-directives\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 12,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 12
+      },
+      "path": "fixtures/eslint-v6/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 303
+    },
+    {
+      "content": "{\n  \"private\": true,\n  \"name\": \"eslint-v7\",\n  \"dependencies\": {\n    \"eslint\": \"^7\",\n    \"eslint-plugin-react-hooks\": \"link:../../build/oss-stable/eslint-plugin-react-hooks\"\n  },\n  \"scripts\": {\n    \"build\": \"node build.mjs && yarn\",\n    \"lint\": \"eslint index.js --report-unused-disable-directives\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 12,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 12
+      },
+      "path": "fixtures/eslint-v7/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 303
+    },
+    {
+      "content": "{\n  \"private\": true,\n  \"name\": \"eslint-v8\",\n  \"dependencies\": {\n    \"eslint\": \"^8\",\n    \"eslint-plugin-react-hooks\": \"link:../../build/oss-stable/eslint-plugin-react-hooks\"\n  },\n  \"scripts\": {\n    \"build\": \"node build.mjs && yarn\",\n    \"lint\": \"eslint index.js --report-unused-disable-directives\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 12,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 12
+      },
+      "path": "fixtures/eslint-v8/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 303
+    },
+    {
+      "content": "{\n  \"private\": true,\n  \"name\": \"eslint-v9\",\n  \"dependencies\": {\n    \"eslint\": \"^9.33.0\",\n    \"eslint-plugin-react-hooks\": \"link:../../build/oss-stable/eslint-plugin-react-hooks\",\n    \"jiti\": \"^2.4.2\"\n  },\n  \"scripts\": {\n    \"build\": \"node build.mjs && yarn\",\n    \"lint\": \"tsc --noEmit && eslint index.js --report-unused-disable-directives\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"^5.4.3\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 16,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 16
+      },
+      "path": "fixtures/eslint-v9/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 401
+    },
+    {
+      "content": "{\n  \"name\": \"expiration-2\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"dependencies\": {\n    \"react\": \"^16.1.1\",\n    \"react-dom\": \"^16.1.1\",\n    \"react-scripts\": \"1.0.17\"\n  },\n  \"scripts\": {\n    \"predev\":\n      \"cp ../../build/oss-experimental/react/umd/react.development.js public/ && cp ../../build/oss-experimental/react-dom/umd/react-dom.development.js public/\",\n    \"dev\": \"react-scripts start\",\n    \"build\": \"react-scripts build\",\n    \"test\": \"react-scripts test --env=jsdom\",\n    \"eject\": \"react-scripts eject\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 18,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 18
+      },
+      "path": "fixtures/expiration/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 524
+    },
+    {
+      "content": "{\n  \"name\": \"react-fiber-debugger\",\n  \"version\": \"0.0.1\",\n  \"private\": true,\n  \"devDependencies\": {\n    \"react-scripts\": \"0.9.5\"\n  },\n  \"dependencies\": {\n    \"dagre\": \"^0.7.4\",\n    \"pretty-format\": \"^4.2.1\",\n    \"react-draggable\": \"^2.2.6\",\n    \"react-motion\": \"^0.5.0\"\n  },\n  \"scripts\": {\n    \"dev\": \"react-scripts start\",\n    \"build\": \"react-scripts build\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 1,
+      "debt_signals": [
+        {
+          "line_number": 2,
+          "line_snippet": "\"name\": \"react-fiber-debugger\",",
+          "pattern": "debugger"
+        }
+      ],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 18,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 18
+      },
+      "path": "fixtures/fiber-debugger/package.json",
+      "reasons_flagged": [
+        "has_debt_signals",
+        "dependency_file"
+      ],
+      "size_bytes": 365
+    },
+    {
+      "content": "{\n  \"name\": \"react-ssr\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"engines\": {\n    \"node\": \">=14.9.0\"\n  },\n  \"license\": \"MIT\",\n  \"dependencies\": {\n    \"@babel/core\": \"7.14.3\",\n    \"@babel/register\": \"7.13.16\",\n    \"babel-loader\": \"8.1.0\",\n    \"babel-preset-react-app\": \"10.0.0\",\n    \"compression\": \"^1.7.4\",\n    \"concurrently\": \"^5.3.0\",\n    \"express\": \"^4.17.1\",\n    \"nodemon\": \"^2.0.6\",\n    \"react\": \"^19.0.0\",\n    \"react-dom\": \"^19.0.0\",\n    \"react-error-boundary\": \"^3.1.3\",\n    \"resolve\": \"1.12.0\",\n    \"rimraf\": \"^3.0.2\",\n    \"webpack\": \"4.44.2\",\n    \"webpack-cli\": \"^4.2.0\"\n  },\n  \"devDependencies\": {\n    \"cross-env\": \"^7.0.3\",\n    \"prettier\": \"1.19.1\"\n  },\n  \"scripts\": {\n    \"predev\": \"cp -r ../../build/oss-experimental/* ./node_modules/ && rm -rf node_modules/.cache;\",\n    \"prestart\": \"cp -r ../../build/oss-experimental/* ./node_modules/ && rm -rf node_modules/.cache;\",\n    \"dev\": \"concurrently \\\"npm run dev:server\\\" \\\"npm run dev:bundler\\\"\",\n    \"start\": \"concurrently \\\"npm run start:server\\\" \\\"npm run start:bundler\\\"\",\n    \"dev:server\": \"cross-env NODE_ENV=development nodemon -- --inspect server/server.js\",\n    \"start:server\": \"cross-env NODE_ENV=production nodemon -- server/server.js\",\n    \"dev:bundler\": \"cross-env NODE_ENV=development nodemon -- scripts/build.js\",\n    \"start:bundler\": \"cross-env NODE_ENV=production nodemon -- scripts/build.js\"\n  },\n  \"babel\": {\n    \"presets\": [\n      [\n        \"react-app\",\n        {\n          \"runtime\": \"automatic\"\n        }\n      ]\n    ]\n  },\n  \"nodemonConfig\": {\n    \"ignore\": [\n      \"build/*\"\n    ]\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 55,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 2,
+        "total_lines": 55
+      },
+      "path": "fixtures/fizz/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 1575
+    },
+    {
+      "content": "{\n  \"type\": \"module\"\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 3,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 0,
+        "total_lines": 3
+      },
+      "path": "fixtures/flight-esm/loader/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 23
+    },
+    {
+      "content": "{\n  \"name\": \"flight-esm\",\n  \"type\": \"module\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"dependencies\": {\n    \"body-parser\": \"^1.20.1\",\n    \"browserslist\": \"^4.18.1\",\n    \"busboy\": \"^1.6.0\",\n    \"compression\": \"^1.7.4\",\n    \"concurrently\": \"^7.3.0\",\n    \"nodemon\": \"^2.0.19\",\n    \"prompts\": \"^2.4.2\",\n    \"react\": \"experimental\",\n    \"react-dom\": \"experimental\",\n    \"undici\": \"^5.20.0\",\n    \"webpack-sources\": \"^3.2.0\"\n  },\n  \"scripts\": {\n    \"predev\": \"cp -r ../../build/oss-experimental/* ./node_modules/ && rm -rf node_modules/.cache;\",\n    \"prestart\": \"cp -r ../../build/oss-experimental/* ./node_modules/ && rm -rf node_modules/.cache;\",\n    \"dev\": \"concurrently \\\"npm run dev:region\\\" \\\"npm run dev:global\\\"\",\n    \"dev:global\": \"NODE_ENV=development BUILD_PATH=dist node server/global\",\n    \"dev:region\": \"NODE_ENV=development BUILD_PATH=dist nodemon --watch src --watch dist -- --enable-source-maps --experimental-loader ./loader/region.js --conditions=react-server server/region\",\n    \"start\": \"concurrently \\\"npm run start:region\\\" \\\"npm run start:global\\\"\",\n    \"start:global\": \"NODE_ENV=production node server/global\",\n    \"start:region\": \"NODE_ENV=production node --experimental-loader ./loader/region.js --conditions=react-server server/region\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 29,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 29
+      },
+      "path": "fixtures/flight-esm/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 1266
+    },
+    {
+      "content": "{\n  \"type\": \"commonjs\"\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 3,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 0,
+        "total_lines": 3
+      },
+      "path": "fixtures/flight-esm/server/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 25
+    },
+    {
+      "content": "{\n  \"name\": \"flight-parcel\",\n  \"private\": true,\n  \"source\": \"src/server.tsx\",\n  \"server\": \"dist/server.js\",\n  \"targets\": {\n    \"server\": {\n      \"context\": \"react-server\",\n      \"includeNodeModules\": {\n        \"express\": false\n      }\n    }\n  },\n  \"scripts\": {\n    \"predev\": \"cp -r ../../build/oss-experimental/* ./node_modules/\",\n    \"prebuild\": \"cp -r ../../build/oss-experimental/* ./node_modules/\",\n    \"dev\": \"parcel\",\n    \"build\": \"parcel build\",\n    \"start\": \"node dist/server.js\"\n  },\n  \"dependencies\": {\n    \"@types/parcel-env\": \"^0.0.6\",\n    \"@types/express\": \"*\",\n    \"@types/node\": \"^22.10.1\",\n    \"@types/react\": \"^19\",\n    \"@types/react-dom\": \"^19\",\n    \"concurrently\": \"^7.3.0\",\n    \"express\": \"^4.18.2\",\n    \"parcel\": \"canary\",\n    \"process\": \"^0.11.10\",\n    \"react\": \"experimental\",\n    \"react-dom\": \"experimental\",\n    \"react-server-dom-parcel\": \"experimental\",\n    \"rsc-html-stream\": \"^0.0.4\"\n  }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 36,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 2,
+        "total_lines": 36
+      },
+      "path": "fixtures/flight-parcel/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 918
+    },
+    {
+      "content": "{\n  \"type\": \"commonjs\"\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 3,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 0,
+        "total_lines": 3
+      },
+      "path": "fixtures/flight/config/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 25
+    },
+    {
+      "content": "{\n  \"type\": \"module\"\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 3,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 0,
+        "total_lines": 3
+      },
+      "path": "fixtures/flight/loader/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 23
+    }
+  ],
+  "flagged_files_count": 30,
+  "message": "Extracted 30 flagged/dependency files",
+  "repo_url": "facebook/react",
+  "status": "success",
+  "total_files_scanned": 30
+}
