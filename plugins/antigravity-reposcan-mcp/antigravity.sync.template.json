@@ -1,0 +1,56 @@
+{
+  "workflow": {
+    "on_session_started": [
+      {
+        "type": "mcp_tool",
+        "server": "reposcan-continuous-intelligence",
+        "tool": "continuous_scan",
+        "arguments": {
+          "repo_url": "{{repo_url}}",
+          "branch_name": "{{branch_name}}",
+          "generate_fixes": true
+        }
+      },
+      {
+        "type": "mcp_resource",
+        "server": "reposcan-continuous-intelligence",
+        "uri": "repomemory://context/{{repo_id}}"
+      },
+      {
+        "type": "mcp_resource",
+        "server": "reposcan-continuous-intelligence",
+        "uri": "repomemory://delta/{{repo_id}}"
+      }
+    ],
+    "on_successful_write": [
+      {
+        "type": "mcp_tool",
+        "server": "reposcan-continuous-intelligence",
+        "tool": "sync_agent_change",
+        "arguments": {
+          "repo_url": "{{repo_url}}",
+          "branch_name": "{{branch_name}}",
+          "command_name": "{{command_name}}",
+          "notes": "{{command_summary}}",
+          "generate_fixes": true
+        }
+      },
+      {
+        "type": "mcp_resource",
+        "server": "reposcan-continuous-intelligence",
+        "uri": "repomemory://context/{{repo_id}}"
+      },
+      {
+        "type": "mcp_resource",
+        "server": "reposcan-continuous-intelligence",
+        "uri": "repomemory://delta/{{repo_id}}"
+      },
+      {
+        "type": "mcp_resource",
+        "server": "reposcan-continuous-intelligence",
+        "uri": "repomemory://commands/{{repo_id}}"
+      }
+    ]
+  }
+}
+

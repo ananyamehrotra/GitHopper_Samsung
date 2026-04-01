@@ -186,11 +186,14 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 try:
-    session = boto3.Session(profile_name="default")
+    try:
+        session = boto3.Session(profile_name="default")
+    except Exception:
+        session = boto3.Session()
     bedrock = session.client("bedrock-runtime", region_name=REGION)
     print(f"[BEDROCK] Client initialized. Model: {MODEL_ID} | Region: {REGION}")
 except Exception as init_err:
-    print(f"[BEDROCK] ❌ Failed to initialize boto3 client: {init_err}")
+    print(f"[BEDROCK] Failed to initialize boto3 client: {init_err}")
     bedrock = None
 
 # ---------------------------------------------------------------------------
@@ -206,6 +209,7 @@ cost_tracker = {
 
 # Global flag: set True when AWS payment/access is denied — skips all further Bedrock calls
 _bedrock_access_denied = False
+_bedrock_fallback_notice_shown = False
 
 # ---------------------------------------------------------------------------
 # Static Fallback — converts chunker debt_signals → vulnerability objects
@@ -294,28 +298,31 @@ BILLING_THRESHOLD_CALLS = 100
 BILLING_THRESHOLD_COST = 5.0
 
 def reset_cost_tracker():
-    global cost_tracker
+    global cost_tracker, _bedrock_fallback_notice_shown
     cost_tracker = {
         "api_calls": 0,
         "input_tokens": 0,
         "output_tokens": 0,
         "estimated_cost": 0.0
     }
+    _bedrock_fallback_notice_shown = False
 
 # ---------------------------------------------------------------------------
 # Bedrock invocation
 # ---------------------------------------------------------------------------
 
 def invoke_bedrock(prompt: str, filename: str = "") -> dict:
-    global cost_tracker
+    global cost_tracker, _bedrock_access_denied, _bedrock_fallback_notice_shown
     cost_tracker["api_calls"] += 1
 
-    print(f"\n🔍 BEDROCK ANALYSIS: {filename}")
+    print(f"\n[BEDROCK] Analysis: {filename}")
     print(f"   Model: {MODEL_ID}")
     print(f"   Prompt length: {len(prompt)} chars")
 
     if bedrock is None:
-        print(f"   ❌ Bedrock client not initialized. Skipping.")
+        if not _bedrock_fallback_notice_shown:
+            print("   Bedrock client not initialized. Using fallback behavior.")
+            _bedrock_fallback_notice_shown = True
         return {"vulnerabilities": []}
 
     text = None
@@ -338,7 +345,7 @@ def invoke_bedrock(prompt: str, filename: str = "") -> dict:
 
         content = raw.get('content', [])
         if not content:
-            print(f"   ❌ Empty content in response: {raw}")
+            print(f"   Empty content in response: {raw}")
             return {"vulnerabilities": []}
 
         text = content[0].get('text', '').strip()
@@ -352,7 +359,7 @@ def invoke_bedrock(prompt: str, filename: str = "") -> dict:
         else:
             cost_tracker["input_tokens"] += len(prompt) // 4
             cost_tracker["output_tokens"] += len(text) // 4
-            print(f"   ⚠️  No 'usage' key in response — estimating tokens")
+            print("   No 'usage' key in response. Estimating tokens.")
 
         cost_tracker["estimated_cost"] = (
             (cost_tracker["input_tokens"] * CLAUDE_HAIKU_INPUT_COST) +
@@ -368,30 +375,37 @@ def invoke_bedrock(prompt: str, filename: str = "") -> dict:
                     part = part[4:].strip()
                 try:
                     result = json.loads(part)
-                    print(f"   ✅ Parsed JSON from code fence. Found {len(result.get('vulnerabilities', []))} vulnerabilities")
+                    print(f"   Parsed JSON from code fence. Found {len(result.get('vulnerabilities', []))} vulnerabilities")
                     return result
                 except json.JSONDecodeError:
                     continue
 
         # Try parsing the raw text directly
         result = json.loads(text)
-        print(f"   ✅ Parsed JSON directly. Found {len(result.get('vulnerabilities', []))} vulnerabilities")
+        print(f"   Parsed JSON directly. Found {len(result.get('vulnerabilities', []))} vulnerabilities")
         return result
 
     except json.JSONDecodeError as e:
-        print(f"   ❌ JSON parse error: {e}")
+        print(f"   JSON parse error: {e}")
         print(f"   Full raw text:\n{text}")
         return {"vulnerabilities": []}
     except Exception as e:
-        global _bedrock_access_denied
         error_str = str(e)
-        print(f"   ❌ Bedrock invocation error: {type(e).__name__}: {error_str}")
-        import traceback
-        traceback.print_exc()
-        # If payment/access is denied, flag it so we skip all remaining calls
-        if "AccessDeniedException" in type(e).__name__ or "INVALID_PAYMENT_INSTRUMENT" in error_str or "AccessDenied" in error_str:
+        error_type = type(e).__name__
+        known_fallback_error = (
+            "AccessDeniedException" in error_type
+            or "INVALID_PAYMENT_INSTRUMENT" in error_str
+            or "AccessDenied" in error_str
+            or error_type == "NoCredentialsError"
+            or "Unable to locate credentials" in error_str
+        )
+        if known_fallback_error:
             _bedrock_access_denied = True
-            print(f"   ⚠️  AWS payment/access issue detected — switching to static analysis fallback for all remaining files")
+            if not _bedrock_fallback_notice_shown:
+                print(f"   Bedrock unavailable ({error_type}). Switching to static fallback for this run.")
+                _bedrock_fallback_notice_shown = True
+        else:
+            print(f"   Bedrock invocation error: {error_type}: {error_str}")
         return {"vulnerabilities": []}
 
 # ---------------------------------------------------------------------------
@@ -405,11 +419,11 @@ def scan_chunk(chunk: dict, branch_name: str = "main") -> dict:
     file_type = classify_file(filename)
     debt_signals = chunk.get("debt_signals", [])
 
-    print(f"\n📄 Scanning: {filename} (type: {file_type}, size: {len(content)} chars)")
+    print(f"\n[SCAN] {filename} (type: {file_type}, size: {len(content)} chars)")
 
     # If Bedrock access is blocked, use static fallback immediately
     if _bedrock_access_denied:
-        print(f"   ⚡ Using static analysis fallback (Bedrock access denied)")
+        print("   Using static analysis fallback")
         vulnerabilities = [_debt_signal_to_vulnerability(s, filename) for s in debt_signals]
         if vulnerabilities:
             print(f"   Found {len(vulnerabilities)} vulnerabilities (static)")
@@ -435,7 +449,7 @@ def scan_chunk(chunk: dict, branch_name: str = "main") -> dict:
     # If Bedrock returned nothing AND we have debt signals, also inject static findings
     if not vulnerabilities and debt_signals and _bedrock_access_denied:
         vulnerabilities = [_debt_signal_to_vulnerability(s, filename) for s in debt_signals]
-        print(f"   ⚡ Bedrock returned empty — using static fallback: {len(vulnerabilities)} findings")
+        print(f"   Bedrock returned empty. Using static fallback: {len(vulnerabilities)} findings")
 
     print(f"   Found {len(vulnerabilities)} vulnerabilities")
 
@@ -453,7 +467,7 @@ def scan_all_chunks(chunks: list, branch_name: str = "main") -> dict:
     reset_cost_tracker()
 
     print(f"\n{'='*60}")
-    print(f"🔬 BEDROCK ANALYSIS STARTING")
+    print("BEDROCK ANALYSIS STARTING")
     print(f"{'='*60}")
     print(f"Total chunks to analyze: {len(chunks)}")
     print(f"Branch: {branch_name}")
@@ -478,7 +492,7 @@ def scan_all_chunks(chunks: list, branch_name: str = "main") -> dict:
             all_vulnerabilities.extend(result["vulnerabilities"])
 
     print(f"\n{'='*60}")
-    print(f"📊 ANALYSIS COMPLETE")
+    print("ANALYSIS COMPLETE")
     print(f"{'='*60}")
     print(f"Total vulnerabilities found: {len(all_vulnerabilities)}")
     print(f"Files with issues: {len(vulnerable_files)}")

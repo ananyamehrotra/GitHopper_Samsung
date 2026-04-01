@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "reposcan-continuous-intelligence": {
+      "command": "python",
+      "args": [
+        "c:/Users/Mukul Prasad/Desktop/PROJECTS/New folder/an/githoppermain/backend/mcp_runtime_server.py"
+      ],
+      "cwd": "c:/Users/Mukul Prasad/Desktop/PROJECTS/New folder/an/githoppermain/backend",
+      "env": {
+        "MCP_TRANSPORT": "stdio",
+        "GITHUB_TOKEN": "REPLACE_WITH_YOUR_TOKEN"
+      }
+    }
+  }
+}
+
