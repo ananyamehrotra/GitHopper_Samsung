@@ -421,7 +421,7 @@ export function AnalyseBranchesPage() {
                                     marginBottom: "30px",
                                     textAlign: "center"
                                 }}>
-                                    <h2 style={{ color: "#72ea1e", marginTop: 0 }}>🏆 HEALTH SCORE</h2>
+                                    <h2 style={{ color: "#72ea1e", marginTop: 0 }}>HEALTH SCORE</h2>
                                     <div style={{
                                         fontSize: "72px",
                                         fontWeight: "bold",
@@ -431,9 +431,54 @@ export function AnalyseBranchesPage() {
                                         {scanResult.stages.score.health_score}/100
                                     </div>
                                     <p style={{ color: "#d2ddb8", fontSize: "16px", margin: "15px 0" }}>
-                                        {scanResult.stages.score.health_score >= 70 ? "✅ Good overall health" : scanResult.stages.score.health_score >= 40 ? "⚠️  Needs attention" : "🚨 Critical issues detected"}
+                                        {scanResult.stages.score.health_score >= 70 ? "[GOOD] Good overall health" : scanResult.stages.score.health_score >= 40 ? "[WARN] Needs attention" : "[CRITICAL] Critical issues detected"}
                                     </p>
                                 </div>
+
+                                {/* Cost Tracking & Service Alternatives */}
+                                {scanResult.stages.analyze.cost_tracker && (
+                                    <div style={{
+                                        background: "rgba(76, 175, 80, 0.05)",
+                                        border: "1px solid #4caf50",
+                                        borderRadius: "8px",
+                                        padding: "20px",
+                                        marginBottom: "30px"
+                                    }}>
+                                        <h3 style={{ color: "#4caf50", marginTop: 0 }}>Analysis Metrics</h3>
+                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px", marginBottom: "20px" }}>
+                                            <div>
+                                                <p style={{ margin: "0 0 5px 0", color: "#a1d96a", fontSize: "14px" }}>API Calls</p>
+                                                <p style={{ margin: "0", color: "#d2ddb8", fontSize: "18px", fontWeight: "bold" }}>{scanResult.stages.analyze.cost_tracker.api_calls}</p>
+                                            </div>
+                                            <div>
+                                                <p style={{ margin: "0 0 5px 0", color: "#a1d96a", fontSize: "14px" }}>Tokens Used</p>
+                                                <p style={{ margin: "0", color: "#d2ddb8", fontSize: "18px", fontWeight: "bold" }}>{(scanResult.stages.analyze.cost_tracker.input_tokens + scanResult.stages.analyze.cost_tracker.output_tokens).toLocaleString()}</p>
+                                            </div>
+                                            <div>
+                                                <p style={{ margin: "0 0 5px 0", color: "#a1d96a", fontSize: "14px" }}>Estimated Cost</p>
+                                                <p style={{ margin: "0", color: "#d2ddb8", fontSize: "18px", fontWeight: "bold" }}>${scanResult.stages.analyze.cost_tracker.estimated_cost.toFixed(4)}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style={{ borderTop: "1px solid #4caf50", paddingTop: "15px" }}>
+                                            <p style={{ margin: "0 0 15px 0", color: "#a1d96a", fontSize: "12px", fontWeight: "bold" }}>Alternative Services Comparison</p>
+                                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "15px" }}>
+                                                <div style={{ border: "1px solid #4caf50", borderRadius: "4px", padding: "12px", background: "rgba(76, 175, 80, 0.02)" }}>
+                                                    <p style={{ margin: "0 0 8px 0", color: "#d2ddb8", fontWeight: "bold", fontSize: "13px" }}>Bedrock (Current)</p>
+                                                    <p style={{ margin: "0", color: "#9ccc65", fontSize: "12px" }}>${scanResult.stages.analyze.cost_tracker.estimated_cost.toFixed(4)} per analysis</p>
+                                                </div>
+                                                <div style={{ border: "1px solid #ffc107", borderRadius: "4px", padding: "12px", background: "rgba(255, 193, 7, 0.02)" }}>
+                                                    <p style={{ margin: "0 0 8px 0", color: "#d2ddb8", fontWeight: "bold", fontSize: "13px" }}>SonarQube</p>
+                                                    <p style={{ margin: "0", color: "#ffc107", fontSize: "12px" }}>Free (community)</p>
+                                                </div>
+                                                <div style={{ border: "1px solid #2196f3", borderRadius: "4px", padding: "12px", background: "rgba(33, 150, 243, 0.02)" }}>
+                                                    <p style={{ margin: "0 0 8px 0", color: "#d2ddb8", fontWeight: "bold", fontSize: "13px" }}>GitHub CodeQL</p>
+                                                    <p style={{ margin: "0", color: "#64b5f6", fontSize: "12px" }}>Free (open source)</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Architecture Archetype & Risk Radar */}
                                 {scanResult.stages.score.archetype && (
@@ -444,7 +489,7 @@ export function AnalyseBranchesPage() {
                                         padding: "20px",
                                         marginBottom: "30px"
                                     }}>
-                                        <h3 style={{ color: "#72ea1e", marginTop: 0 }}>📊 Repository Archetype</h3>
+                                        <h3 style={{ color: "#72ea1e", marginTop: 0 }}>Repository Archetype</h3>
                                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
                                             <div>
                                                 <p style={{ margin: "0 0 10px 0", color: "#a1d96a", fontWeight: "bold" }}>Type: {scanResult.stages.score.archetype}</p>
@@ -493,7 +538,7 @@ export function AnalyseBranchesPage() {
                                         padding: "20px",
                                         marginBottom: "30px"
                                     }}>
-                                        <h3 style={{ color: "#72ea1e", marginTop: 0 }}>🎯 Top 5 Priority Actions</h3>
+                                        <h3 style={{ color: "#72ea1e", marginTop: 0 }}>Top 5 Priority Actions</h3>
                                         {scanResult.stages.score.top_5_actions.map((action, idx) => {
                                             const severityColor = {
                                                 'CRITICAL': '#ff6b6b',
@@ -566,7 +611,7 @@ export function AnalyseBranchesPage() {
                                         padding: "20px",
                                         marginBottom: "30px"
                                     }}>
-                                        <h3 style={{ color: "#ff6b6b", marginTop: 0 }}>🔓 Security Findings ({scanResult.stages.analyze.security_findings.length})</h3>
+                                        <h3 style={{ color: "#ff6b6b", marginTop: 0 }}>Security Findings ({scanResult.stages.analyze.security_findings.length})</h3>
                                         {scanResult.stages.analyze.security_findings.map((finding, idx) => {
                                             const severityColor = {
                                                 'CRITICAL': '#ff6b6b',
@@ -614,7 +659,7 @@ export function AnalyseBranchesPage() {
                                         padding: "20px",
                                         marginBottom: "30px"
                                     }}>
-                                        <h3 style={{ color: "#ffb74d", marginTop: 0 }}>💸 Technical Debt ({scanResult.stages.analyze.debt_findings.length})</h3>
+                                        <h3 style={{ color: "#ffb74d", marginTop: 0 }}>Technical Debt ({scanResult.stages.analyze.debt_findings.length})</h3>
                                         {scanResult.stages.analyze.debt_findings.map((finding, idx) => {
                                             const severityColor = {
                                                 'CRITICAL': '#ff6b6b',
@@ -655,28 +700,6 @@ export function AnalyseBranchesPage() {
                             </>
                         )}
 
-                        {/* Full JSON Response */}
-                        <div style={{
-                            background: "rgba(114, 234, 30, 0.05)",
-                            border: "1px solid #72ea1e",
-                            borderRadius: "8px",
-                            padding: "20px",
-                            marginBottom: "30px"
-                        }}>
-                            <h3 style={{ color: "#72ea1e", marginTop: 0 }}>📋 Full JSON Response</h3>
-                            <pre style={{
-                                background: "#000",
-                                padding: "15px",
-                                borderRadius: "4px",
-                                overflow: "auto",
-                                fontSize: "12px",
-                                color: "#d9ffb8",
-                                maxHeight: "400px"
-                            }}>
-                                {JSON.stringify(scanResult, null, 2)}
-                            </pre>
-                        </div>
-
                         {/* Back Button */}
                         <button
                             onClick={() => navigate("/dashboard")}
@@ -692,7 +715,7 @@ export function AnalyseBranchesPage() {
                                 marginTop: "20px"
                             }}
                         >
-                            [BACK] Back to Dashboard
+                            Back to Dashboard
                         </button>
                     </div>
                 </section>
