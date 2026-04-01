@@ -329,6 +329,83 @@ export function AnalyseBranchesPage() {
                             </div>
                         </div>
 
+                        {/* Real-Time Analysis Progress Visualization */}
+                        {scanResult.stages && scanResult.stages.analyze && (
+                            <div style={{
+                                background: "rgba(76, 175, 80, 0.05)",
+                                border: "1px solid #4caf50",
+                                borderRadius: "8px",
+                                padding: "20px",
+                                marginBottom: "30px"
+                            }}>
+                                <h3 style={{ color: "#4caf50", marginTop: 0 }}>Analysis Progress Summary</h3>
+                                
+                                {/* Progress Bar */}
+                                <div style={{ marginBottom: "20px" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                                        <span style={{ color: "#a1d96a", fontSize: "13px" }}>Files Analyzed</span>
+                                        <span style={{ color: "#d2ddb8", fontSize: "13px" }}>{scanResult.stages.analyze.chunks_scanned} of {scanResult.stages.analyze.total_files}</span>
+                                    </div>
+                                    <div style={{
+                                        width: "100%",
+                                        height: "8px",
+                                        background: "rgba(114, 234, 30, 0.2)",
+                                        borderRadius: "4px",
+                                        overflow: "hidden"
+                                    }}>
+                                        <div style={{
+                                            height: "100%",
+                                            width: `${Math.round((scanResult.stages.analyze.chunks_scanned / scanResult.stages.analyze.total_files) * 100)}%`,
+                                            background: "linear-gradient(90deg, #4caf50, #9ccc65)",
+                                            transition: "width 0.5s ease"
+                                        }} />
+                                    </div>
+                                </div>
+
+                                {/* File Tree Animation */}
+                                <div style={{ background: "#000", borderRadius: "4px", padding: "15px", fontFamily: "monospace", fontSize: "12px" }}>
+                                    <p style={{ color: "#4caf50", margin: "0 0 12px 0" }}>Scanning folder structure...</p>
+                                    <div style={{ color: "#9ccc65", lineHeight: "1.8" }}>
+                                        <div>. (root)</div>
+                                        {data.files_by_category?.config?.length > 0 && (
+                                            <div style={{ marginLeft: "20px", color: "#81c784" }}>
+                                                ├─ config/
+                                                {data.files_by_category.config.map((f, i) => (
+                                                    <div key={i} style={{ marginLeft: "20px", color: "#c8e6c9" }}>
+                                                        {i === data.files_by_category.config.length - 1 ? "└─" : "├─"} {f.path.split('/').pop()} [SCANNED]
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {data.files_by_category?.dependencies?.length > 0 && (
+                                            <div style={{ marginLeft: "20px", color: "#81c784" }}>
+                                                ├─ dependencies/
+                                                {data.files_by_category.dependencies.map((f, i) => (
+                                                    <div key={i} style={{ marginLeft: "20px", color: "#c8e6c9" }}>
+                                                        {i === data.files_by_category.dependencies.length - 1 ? "└─" : "├─"} {f.path.split('/').pop()} [SCANNED]
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {data.files_by_category?.source_code?.length > 0 && (
+                                            <div style={{ marginLeft: "20px", color: "#81c784" }}>
+                                                └─ src/
+                                                {data.files_by_category.source_code.map((f, i) => (
+                                                    <div key={i} style={{ marginLeft: "20px", color: "#c8e6c9" }}>
+                                                        {i === data.files_by_category.source_code.length - 1 ? "└─" : "├─"} {f.path.split('/').pop()} [SCANNED]
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <p style={{ color: "#9ccc65", fontSize: "12px", margin: "12px 0 0 0", fontStyle: "italic" }}>
+                                    Analysis completed with {scanResult.stages.analyze.cost_tracker?.api_calls || 0} API calls
+                                </p>
+                            </div>
+                        )}
+
                         {/* Detailed Files Analysis */}
                         {data.detailed_files && data.detailed_files.length > 0 && (
                             <div style={{
