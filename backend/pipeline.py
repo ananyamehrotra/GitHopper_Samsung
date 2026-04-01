@@ -285,7 +285,7 @@ def long_function():
         }
 
     def _stage_analyze(self, fetch_result, branch_name="main"):
-        """Stage 2: Analyze with Bedrock"""
+        """Stage 2: Analyze with Bedrock - Dynamic prompts per repo"""
         try:
             chunks = fetch_result.get('chunks', [])
             files = fetch_result.get('files', [])
@@ -307,22 +307,26 @@ def long_function():
                 )
 
                 result = json.loads(response['Payload'].read())
-                analysis_data = json.loads(result['body'])
+                analysis_result = json.loads(result['body'])
 
             else:
-                # Local execution - use existing scan_all_chunks with branch_name
-                all_findings = scan_all_chunks(chunks, branch_name)
+                # Local execution with dynamic Bedrock analysis
+                analysis_result = scan_all_chunks(chunks, branch_name)
 
-                analysis_data = {
-                    'repo_id': fetch_result['repo_id'],
-                    'repo_url': fetch_result['repo_url'],
-                    'branch_name': branch_name,
-                    'security_findings': all_findings.get('security_findings', []),
-                    'debt_findings': all_findings.get('debt_findings', []),
-                    'cost_tracker': all_findings.get('cost_tracker', {}),
-                    'chunks_scanned': len(chunks),
-                    'total_files': len(files)
-                }
+            analysis_data = {
+                'repo_id': fetch_result['repo_id'],
+                'repo_url': fetch_result['repo_url'],
+                'branch_name': branch_name,
+                'vulnerabilities': analysis_result.get('vulnerabilities', []),
+                'vulnerable_files': analysis_result.get('vulnerable_files', []),
+                'total_files_analyzed': analysis_result.get('total_files_analyzed', len(chunks)),
+                'files_with_issues': analysis_result.get('files_with_issues', 0),
+                'total_vulnerabilities': analysis_result.get('total_vulnerabilities', 0),
+                'cost_tracker': analysis_result.get('cost_tracker', {}),
+                'billing': analysis_result.get('billing', {}),
+                'chunks_scanned': len(chunks),
+                'total_files': len(files)
+            }
 
             return analysis_data
 
