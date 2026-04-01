@@ -1,16 +1,16 @@
 {
   "status": "success",
   "pipeline": "complete",
-  "execution_time_seconds": 2.142458,
+  "execution_time_seconds": 23.19523,
   "stages": {
     "fetch": {
       "repo_id": "2ca99584",
       "repo_url": "aniketaggarwal/vulnerable-demo-app",
-      "total_files": 6,
+      "total_files": 9,
       "categories": {
         "config": 1,
         "dependencies": 0,
-        "source_code": 5
+        "source_code": 8
       },
       "chunks": [
         {
@@ -20,40 +20,66 @@
           "chunk_index": 0,
           "total_chunks": 1,
           "start_line": 1,
-          "end_line": 43,
-          "code": "# Demo App\n\nA simple Flask application.\n\n## Setup\n1. Clone the repo\n2. Run pip install -r requirements.txt\n3. Run python app.py\n```\n\n---\n\n## What your scanner should find\n\n| Finding | Type | Severity |\n|---------|------|----------|\n| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |\n| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |\n| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |\n| SQL injection in get_user | SQL_INJECTION | CRITICAL |\n| SQL injection in get_orders | SQL_INJECTION | CRITICAL |\n| Open S3 bucket | OPEN_S3 | HIGH |\n| Wildcard IAM permissions | OPEN_S3 | HIGH |\n| JWT no expiry | JWT_NO_EXPIRY | HIGH |\n| CORS allows all origins | CORS_MISCONFIGURATION | HIGH |\n| process_order() complexity 20+ | HIGH_COMPLEXITY | HIGH |\n| Duplicate tax logic | DUPLICATE_LOGIC | MEDIUM |\n| No input validation | MISSING_VALIDATION | MEDIUM |\n| No unit tests in payments | MISSING_TESTS | MEDIUM |\n| Unused imports | UNUSED_IMPORT | LOW |\n| No docstrings | MISSING_DOCSTRINGS | LOW |\n\n---\n\n## Expected score\n```\nCRITICAL findings: 5 \u00d7 20 = 100 penalty\nHIGH findings:     5 \u00d7 10 = 50  penalty\nMEDIUM findings:   3 \u00d7 5  = 15  penalty\nLOW findings:      2 \u00d7 1  = 2   penalty\n                           \u2500\u2500\u2500\u2500\u2500\nTotal penalty:             167\nhealth_score = max(0, 100 - 167) = 0",
-          "char_count": 1288,
+          "end_line": 45,
+          "code": "# Demo App\n\nA simple Flask application.\n\n## Setup\n1. Clone the repo\n2. Run pip install -r requirements.txt\n3. Run python app.py\n4. END\n```\n--\n\n---\n\n## What your scanner should find\n\n| Finding | Type | Severity |\n|---------|------|----------|\n| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |\n| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |\n| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |\n| SQL injection in get_user | SQL_INJECTION | CRITICAL |\n| SQL injection in get_orders | SQL_INJECTION | CRITICAL |\n| Open S3 bucket | OPEN_S3 | HIGH |\n| Wildcard IAM permissions | OPEN_S3 | HIGH |\n| JWT no expiry | JWT_NO_EXPIRY | HIGH |\n| CORS allows all origins | CORS_MISCONFIGURATION | HIGH |\n| process_order() complexity 20+ | HIGH_COMPLEXITY | HIGH |\n| Duplicate tax logic | DUPLICATE_LOGIC | MEDIUM |\n| No input validation | MISSING_VALIDATION | MEDIUM |\n| No unit tests in payments | MISSING_TESTS | MEDIUM |\n| Unused imports | UNUSED_IMPORT | LOW |\n| No docstrings | MISSING_DOCSTRINGS | LOW |\n\n---\n\n## Expected score\n```\nCRITICAL findings: 5 \u00d7 20 = 100 penalty\nHIGH findings:     5 \u00d7 10 = 50  penalty\nMEDIUM findings:   3 \u00d7 5  = 15  penalty\nLOW findings:      2 \u00d7 1  = 2   penalty\n                           \u2500\u2500\u2500\u2500\u2500\nTotal penalty:             167\nhealth_score = max(0, 100 - 167) = 0\n",
+          "char_count": 1299,
           "debt_category_hint": "code_quality",
           "debt_signals": [
             {
               "pattern": "hardcoded",
-              "line_number": 17,
+              "line_number": 19,
               "line_snippet": "| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |"
             },
             {
               "pattern": "hardcoded",
-              "line_number": 18,
+              "line_number": 20,
               "line_snippet": "| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |"
             },
             {
               "pattern": "hardcoded",
-              "line_number": 19,
+              "line_number": 21,
               "line_snippet": "| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |"
             }
           ],
           "file_metrics": {
-            "total_lines": 43,
-            "code_lines": 32,
+            "total_lines": 45,
+            "code_lines": 34,
             "blank_lines": 7,
             "comment_lines": 4,
-            "comment_ratio": 0.093,
+            "comment_ratio": 0.089,
             "max_indentation_depth": 6,
             "long_functions_detected": [],
             "long_function_count": 0
           },
           "is_entry_point": true,
           "contains_tests": false,
-          "context_note": "File: README.md (markdown) | Lines 1\u201343 (chunk 1 of 1). | Debt signals in this chunk: line 17: | DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |; line 18: | STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |; line 19: | AWS keys hardcoded | HARDCODED_SECRET | CRITICAL | | Max nesting depth: 6 levels (complexity risk)."
+          "context_note": "File: README.md (markdown) | Lines 1\u201345 (chunk 1 of 1). | Debt signals in this chunk: line 19: | DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |; line 20: | STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |; line 21: | AWS keys hardcoded | HARDCODED_SECRET | CRITICAL | | Max nesting depth: 6 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "and.cpp::chunk_0",
+          "file": "and.cpp",
+          "language": "cpp",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 1,
+          "code": "ofds;kfop\n",
+          "char_count": 10,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 1,
+            "code_lines": 1,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: and.cpp (cpp) | Lines 1\u20131 (chunk 1 of 1)."
         },
         {
           "chunk_id": "app.py::chunk_0",
@@ -208,6 +234,58 @@
           "context_note": "File: database.py (python) | Lines 1\u201323 (chunk 1 of 1)."
         },
         {
+          "chunk_id": "main.cpp::chunk_0",
+          "file": "main.cpp",
+          "language": "cpp",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 1,
+          "code": "Amefjs\n",
+          "char_count": 7,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 1,
+            "code_lines": 1,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: main.cpp (cpp) | Lines 1\u20131 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "nmt.html::chunk_0",
+          "file": "nmt.html",
+          "language": "html",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 1,
+          "code": "knksgfjkdndf\n",
+          "char_count": 13,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 1,
+            "code_lines": 1,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: nmt.html (html) | Lines 1\u20131 (chunk 1 of 1)."
+        },
+        {
           "chunk_id": "utils.py::chunk_0",
           "file": "utils.py",
           "language": "python",
@@ -238,34 +316,53 @@
         {
           "path": "README.md",
           "language": "markdown",
-          "content": "# Demo App\n\nA simple Flask application.\n\n## Setup\n1. Clone the repo\n2. Run pip install -r requirements.txt\n3. Run python app.py\n```\n\n---\n\n## What your scanner should find\n\n| Finding | Type | Severity |\n|---------|------|----------|\n| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |\n| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |\n| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |\n| SQL injection in get_user | SQL_INJECTION | CRITICAL |\n| SQL injection in get_orders | SQL_INJECTION | CRITICAL |\n| Open S3 bucket | OPEN_S3 | HIGH |\n| Wildcard IAM permissions | OPEN_S3 | HIGH |\n| JWT no expiry | JWT_NO_EXPIRY | HIGH |\n| CORS allows all origins | CORS_MISCONFIGURATION | HIGH |\n| process_order() complexity 20+ | HIGH_COMPLEXITY | HIGH |\n| Duplicate tax logic | DUPLICATE_LOGIC | MEDIUM |\n| No input validation | MISSING_VALIDATION | MEDIUM |\n| No unit tests in payments | MISSING_TESTS | MEDIUM |\n| Unused imports | UNUSED_IMPORT | LOW |\n| No docstrings | MISSING_DOCSTRINGS | LOW |\n\n---\n\n## Expected score\n```\nCRITICAL findings: 5 \u00d7 20 = 100 penalty\nHIGH findings:     5 \u00d7 10 = 50  penalty\nMEDIUM findings:   3 \u00d7 5  = 15  penalty\nLOW findings:      2 \u00d7 1  = 2   penalty\n                           \u2500\u2500\u2500\u2500\u2500\nTotal penalty:             167\nhealth_score = max(0, 100 - 167) = 0",
-          "size_bytes": 1302,
+          "content": "# Demo App\n\nA simple Flask application.\n\n## Setup\n1. Clone the repo\n2. Run pip install -r requirements.txt\n3. Run python app.py\n4. END\n```\n--\n\n---\n\n## What your scanner should find\n\n| Finding | Type | Severity |\n|---------|------|----------|\n| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |\n| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |\n| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |\n| SQL injection in get_user | SQL_INJECTION | CRITICAL |\n| SQL injection in get_orders | SQL_INJECTION | CRITICAL |\n| Open S3 bucket | OPEN_S3 | HIGH |\n| Wildcard IAM permissions | OPEN_S3 | HIGH |\n| JWT no expiry | JWT_NO_EXPIRY | HIGH |\n| CORS allows all origins | CORS_MISCONFIGURATION | HIGH |\n| process_order() complexity 20+ | HIGH_COMPLEXITY | HIGH |\n| Duplicate tax logic | DUPLICATE_LOGIC | MEDIUM |\n| No input validation | MISSING_VALIDATION | MEDIUM |\n| No unit tests in payments | MISSING_TESTS | MEDIUM |\n| Unused imports | UNUSED_IMPORT | LOW |\n| No docstrings | MISSING_DOCSTRINGS | LOW |\n\n---\n\n## Expected score\n```\nCRITICAL findings: 5 \u00d7 20 = 100 penalty\nHIGH findings:     5 \u00d7 10 = 50  penalty\nMEDIUM findings:   3 \u00d7 5  = 15  penalty\nLOW findings:      2 \u00d7 1  = 2   penalty\n                           \u2500\u2500\u2500\u2500\u2500\nTotal penalty:             167\nhealth_score = max(0, 100 - 167) = 0\n",
+          "size_bytes": 1313,
           "debt_category_hint": "code_quality",
           "debt_signals": [
             {
               "pattern": "hardcoded",
-              "line_number": 17,
+              "line_number": 19,
               "line_snippet": "| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |"
             },
             {
               "pattern": "hardcoded",
-              "line_number": 18,
+              "line_number": 20,
               "line_snippet": "| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |"
             },
             {
               "pattern": "hardcoded",
-              "line_number": 19,
+              "line_number": 21,
               "line_snippet": "| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |"
             }
           ],
           "debt_signal_count": 3,
           "metrics": {
-            "total_lines": 43,
-            "code_lines": 32,
+            "total_lines": 45,
+            "code_lines": 34,
             "blank_lines": 7,
             "comment_lines": 4,
-            "comment_ratio": 0.093,
+            "comment_ratio": 0.089,
             "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "and.cpp",
+          "language": "cpp",
+          "content": "ofds;kfop\n",
+          "size_bytes": 10,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 1,
+            "code_lines": 1,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
             "long_functions_detected": [],
             "long_function_count": 0
           }
@@ -395,6 +492,44 @@
           }
         },
         {
+          "path": "main.cpp",
+          "language": "cpp",
+          "content": "Amefjs\n",
+          "size_bytes": 7,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 1,
+            "code_lines": 1,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "nmt.html",
+          "language": "html",
+          "content": "knksgfjkdndf\n",
+          "size_bytes": 13,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 1,
+            "code_lines": 1,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
           "path": "utils.py",
           "language": "python",
           "content": "# Utility functions\n\ndef process_order(order, user, items, discount, tax, shipping, coupon, gift_card, store_credit, loyalty_points):\n    # cyclomatic complexity of 20+\n    if order:\n        if user:\n            if items:\n                if discount > 0:\n                    if tax > 0:\n                        if shipping > 0:\n                            if coupon:\n                                if gift_card:\n                                    if store_credit > 0:\n                                        if loyalty_points > 0:\n                                            total = sum([i['price'] for i in items])\n                                            total = total - discount\n                                            total = total + tax\n                                            total = total + shipping\n                                            if coupon == \"SAVE10\":\n                                                total = total * 0.9\n                                            if gift_card:\n                                                total = total - gift_card\n                                            if store_credit:\n                                                total = total - store_credit\n                                            if loyalty_points:\n                                                total = total - (loyalty_points * 0.01)\n                                            return total\n    return 0\n\ndef calculate_tax(amount):\n    # duplicate logic \u2014 same as in payments.py\n    tax_rate = 0.18\n    return amount * tax_rate\n\ndef calculate_discount(amount):\n    # duplicate logic \u2014 same as in orders.py\n    discount_rate = 0.10\n    return amount * discount_rate\n\ndef validate_email(email):\n    # no actual validation\n    return True\n\ndef validate_phone(phone):\n    # no actual validation\n    return True\n\ndef validate_address(address):\n    # no actual validation\n    return True",
@@ -424,7 +559,7 @@
           "type": "HARDCODED_SECRET",
           "severity": "HIGH",
           "file": "README.md",
-          "line_range": "17",
+          "line_range": "19",
           "code_snippet": "| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |",
           "explanation": "Hardcoded value flagged as potential secret.",
           "business_impact": "Potential credential exposure in version control history.",
@@ -436,7 +571,7 @@
           "type": "HARDCODED_SECRET",
           "severity": "HIGH",
           "file": "README.md",
-          "line_range": "18",
+          "line_range": "20",
           "code_snippet": "| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |",
           "explanation": "Hardcoded value flagged as potential secret.",
           "business_impact": "Potential credential exposure in version control history.",
@@ -448,7 +583,7 @@
           "type": "HARDCODED_SECRET",
           "severity": "HIGH",
           "file": "README.md",
-          "line_range": "19",
+          "line_range": "21",
           "code_snippet": "| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |",
           "explanation": "Hardcoded value flagged as potential secret.",
           "business_impact": "Potential credential exposure in version control history.",
@@ -587,18 +722,18 @@
           "count": 6
         }
       ],
-      "total_files_analyzed": 6,
+      "total_files_analyzed": 9,
       "files_with_issues": 4,
       "total_vulnerabilities": 12,
       "cost_tracker": {
-        "api_calls": 0,
+        "api_calls": 1,
         "input_tokens": 0,
         "output_tokens": 0,
         "estimated_cost": 0.0
       },
       "billing": {
-        "calls_made": 0,
-        "free_calls_remaining": 100,
+        "calls_made": 1,
+        "free_calls_remaining": 99,
         "estimated_cost": 0.0,
         "will_be_charged": false,
         "alternatives": [
@@ -624,15 +759,15 @@
           }
         ]
       },
-      "chunks_scanned": 6,
-      "total_files": 6
+      "chunks_scanned": 9,
+      "total_files": 9
     },
     "score": {
       "repo_id": "2ca99584",
       "repo_url": "aniketaggarwal/vulnerable-demo-app",
       "health_score": 100,
-      "chunks_scanned": 6,
-      "total_files": 6,
+      "chunks_scanned": 9,
+      "total_files": 9,
       "analysis": {
         "total_security_issues": 0,
         "total_debt_issues": 0,
@@ -667,11 +802,11 @@
     }
   },
   "data": {
-    "total_files_fetched": 6,
+    "total_files_fetched": 9,
     "config_files": 1,
     "dependency_files": 0,
-    "source_files": 5,
-    "total_chunks": 6,
+    "source_files": 8,
+    "total_chunks": 9,
     "files_by_category": {
       "config": [
         {
@@ -730,34 +865,53 @@
         {
           "path": "README.md",
           "language": "markdown",
-          "content": "# Demo App\n\nA simple Flask application.\n\n## Setup\n1. Clone the repo\n2. Run pip install -r requirements.txt\n3. Run python app.py\n```\n\n---\n\n## What your scanner should find\n\n| Finding | Type | Severity |\n|---------|------|----------|\n| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |\n| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |\n| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |\n| SQL injection in get_user | SQL_INJECTION | CRITICAL |\n| SQL injection in get_orders | SQL_INJECTION | CRITICAL |\n| Open S3 bucket | OPEN_S3 | HIGH |\n| Wildcard IAM permissions | OPEN_S3 | HIGH |\n| JWT no expiry | JWT_NO_EXPIRY | HIGH |\n| CORS allows all origins | CORS_MISCONFIGURATION | HIGH |\n| process_order() complexity 20+ | HIGH_COMPLEXITY | HIGH |\n| Duplicate tax logic | DUPLICATE_LOGIC | MEDIUM |\n| No input validation | MISSING_VALIDATION | MEDIUM |\n| No unit tests in payments | MISSING_TESTS | MEDIUM |\n| Unused imports | UNUSED_IMPORT | LOW |\n| No docstrings | MISSING_DOCSTRINGS | LOW |\n\n---\n\n## Expected score\n```\nCRITICAL findings: 5 \u00d7 20 = 100 penalty\nHIGH findings:     5 \u00d7 10 = 50  penalty\nMEDIUM findings:   3 \u00d7 5  = 15  penalty\nLOW findings:      2 \u00d7 1  = 2   penalty\n                           \u2500\u2500\u2500\u2500\u2500\nTotal penalty:             167\nhealth_score = max(0, 100 - 167) = 0",
-          "size_bytes": 1302,
+          "content": "# Demo App\n\nA simple Flask application.\n\n## Setup\n1. Clone the repo\n2. Run pip install -r requirements.txt\n3. Run python app.py\n4. END\n```\n--\n\n---\n\n## What your scanner should find\n\n| Finding | Type | Severity |\n|---------|------|----------|\n| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |\n| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |\n| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |\n| SQL injection in get_user | SQL_INJECTION | CRITICAL |\n| SQL injection in get_orders | SQL_INJECTION | CRITICAL |\n| Open S3 bucket | OPEN_S3 | HIGH |\n| Wildcard IAM permissions | OPEN_S3 | HIGH |\n| JWT no expiry | JWT_NO_EXPIRY | HIGH |\n| CORS allows all origins | CORS_MISCONFIGURATION | HIGH |\n| process_order() complexity 20+ | HIGH_COMPLEXITY | HIGH |\n| Duplicate tax logic | DUPLICATE_LOGIC | MEDIUM |\n| No input validation | MISSING_VALIDATION | MEDIUM |\n| No unit tests in payments | MISSING_TESTS | MEDIUM |\n| Unused imports | UNUSED_IMPORT | LOW |\n| No docstrings | MISSING_DOCSTRINGS | LOW |\n\n---\n\n## Expected score\n```\nCRITICAL findings: 5 \u00d7 20 = 100 penalty\nHIGH findings:     5 \u00d7 10 = 50  penalty\nMEDIUM findings:   3 \u00d7 5  = 15  penalty\nLOW findings:      2 \u00d7 1  = 2   penalty\n                           \u2500\u2500\u2500\u2500\u2500\nTotal penalty:             167\nhealth_score = max(0, 100 - 167) = 0\n",
+          "size_bytes": 1313,
           "debt_category_hint": "code_quality",
           "debt_signals": [
             {
               "pattern": "hardcoded",
-              "line_number": 17,
+              "line_number": 19,
               "line_snippet": "| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |"
             },
             {
               "pattern": "hardcoded",
-              "line_number": 18,
+              "line_number": 20,
               "line_snippet": "| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |"
             },
             {
               "pattern": "hardcoded",
-              "line_number": 19,
+              "line_number": 21,
               "line_snippet": "| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |"
             }
           ],
           "debt_signal_count": 3,
           "metrics": {
-            "total_lines": 43,
-            "code_lines": 32,
+            "total_lines": 45,
+            "code_lines": 34,
             "blank_lines": 7,
             "comment_lines": 4,
-            "comment_ratio": 0.093,
+            "comment_ratio": 0.089,
             "max_indentation_depth": 6,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "and.cpp",
+          "language": "cpp",
+          "content": "ofds;kfop\n",
+          "size_bytes": 10,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 1,
+            "code_lines": 1,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
             "long_functions_detected": [],
             "long_function_count": 0
           }
@@ -837,6 +991,44 @@
           }
         },
         {
+          "path": "main.cpp",
+          "language": "cpp",
+          "content": "Amefjs\n",
+          "size_bytes": 7,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 1,
+            "code_lines": 1,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "nmt.html",
+          "language": "html",
+          "content": "knksgfjkdndf\n",
+          "size_bytes": 13,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 1,
+            "code_lines": 1,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
           "path": "utils.py",
           "language": "python",
           "content": "# Utility functions\n\ndef process_order(order, user, items, discount, tax, shipping, coupon, gift_card, store_credit, loyalty_points):\n    # cyclomatic complexity of 20+\n    if order:\n        if user:\n            if items:\n                if discount > 0:\n                    if tax > 0:\n                        if shipping > 0:\n                            if coupon:\n                                if gift_card:\n                                    if store_credit > 0:\n                                        if loyalty_points > 0:\n                                            total = sum([i['price'] for i in items])\n                                            total = total - discount\n                                            total = total + tax\n                                            total = total + shipping\n                                            if coupon == \"SAVE10\":\n                                                total = total * 0.9\n                                            if gift_card:\n                                                total = total - gift_card\n                                            if store_credit:\n                                                total = total - store_credit\n                                            if loyalty_points:\n                                                total = total - (loyalty_points * 0.01)\n                                            return total\n    return 0\n\ndef calculate_tax(amount):\n    # duplicate logic \u2014 same as in payments.py\n    tax_rate = 0.18\n    return amount * tax_rate\n\ndef calculate_discount(amount):\n    # duplicate logic \u2014 same as in orders.py\n    discount_rate = 0.10\n    return amount * discount_rate\n\ndef validate_email(email):\n    # no actual validation\n    return True\n\ndef validate_phone(phone):\n    # no actual validation\n    return True\n\ndef validate_address(address):\n    # no actual validation\n    return True",
@@ -861,34 +1053,53 @@
       {
         "path": "README.md",
         "language": "markdown",
-        "content": "# Demo App\n\nA simple Flask application.\n\n## Setup\n1. Clone the repo\n2. Run pip install -r requirements.txt\n3. Run python app.py\n```\n\n---\n\n## What your scanner should find\n\n| Finding | Type | Severity |\n|---------|------|----------|\n| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |\n| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |\n| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |\n| SQL injection in get_user | SQL_INJECTION | CRITICAL |\n| SQL injection in get_orders | SQL_INJECTION | CRITICAL |\n| Open S3 bucket | OPEN_S3 | HIGH |\n| Wildcard IAM permissions | OPEN_S3 | HIGH |\n| JWT no expiry | JWT_NO_EXPIRY | HIGH |\n| CORS allows all origins | CORS_MISCONFIGURATION | HIGH |\n| process_order() complexity 20+ | HIGH_COMPLEXITY | HIGH |\n| Duplicate tax logic | DUPLICATE_LOGIC | MEDIUM |\n| No input validation | MISSING_VALIDATION | MEDIUM |\n| No unit tests in payments | MISSING_TESTS | MEDIUM |\n| Unused imports | UNUSED_IMPORT | LOW |\n| No docstrings | MISSING_DOCSTRINGS | LOW |\n\n---\n\n## Expected score\n```\nCRITICAL findings: 5 \u00d7 20 = 100 penalty\nHIGH findings:     5 \u00d7 10 = 50  penalty\nMEDIUM findings:   3 \u00d7 5  = 15  penalty\nLOW findings:      2 \u00d7 1  = 2   penalty\n                           \u2500\u2500\u2500\u2500\u2500\nTotal penalty:             167\nhealth_score = max(0, 100 - 167) = 0",
-        "size_bytes": 1302,
+        "content": "# Demo App\n\nA simple Flask application.\n\n## Setup\n1. Clone the repo\n2. Run pip install -r requirements.txt\n3. Run python app.py\n4. END\n```\n--\n\n---\n\n## What your scanner should find\n\n| Finding | Type | Severity |\n|---------|------|----------|\n| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |\n| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |\n| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |\n| SQL injection in get_user | SQL_INJECTION | CRITICAL |\n| SQL injection in get_orders | SQL_INJECTION | CRITICAL |\n| Open S3 bucket | OPEN_S3 | HIGH |\n| Wildcard IAM permissions | OPEN_S3 | HIGH |\n| JWT no expiry | JWT_NO_EXPIRY | HIGH |\n| CORS allows all origins | CORS_MISCONFIGURATION | HIGH |\n| process_order() complexity 20+ | HIGH_COMPLEXITY | HIGH |\n| Duplicate tax logic | DUPLICATE_LOGIC | MEDIUM |\n| No input validation | MISSING_VALIDATION | MEDIUM |\n| No unit tests in payments | MISSING_TESTS | MEDIUM |\n| Unused imports | UNUSED_IMPORT | LOW |\n| No docstrings | MISSING_DOCSTRINGS | LOW |\n\n---\n\n## Expected score\n```\nCRITICAL findings: 5 \u00d7 20 = 100 penalty\nHIGH findings:     5 \u00d7 10 = 50  penalty\nMEDIUM findings:   3 \u00d7 5  = 15  penalty\nLOW findings:      2 \u00d7 1  = 2   penalty\n                           \u2500\u2500\u2500\u2500\u2500\nTotal penalty:             167\nhealth_score = max(0, 100 - 167) = 0\n",
+        "size_bytes": 1313,
         "debt_category_hint": "code_quality",
         "debt_signals": [
           {
             "pattern": "hardcoded",
-            "line_number": 17,
+            "line_number": 19,
             "line_snippet": "| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |"
           },
           {
             "pattern": "hardcoded",
-            "line_number": 18,
+            "line_number": 20,
             "line_snippet": "| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |"
           },
           {
             "pattern": "hardcoded",
-            "line_number": 19,
+            "line_number": 21,
             "line_snippet": "| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |"
           }
         ],
         "debt_signal_count": 3,
         "metrics": {
-          "total_lines": 43,
-          "code_lines": 32,
+          "total_lines": 45,
+          "code_lines": 34,
           "blank_lines": 7,
           "comment_lines": 4,
-          "comment_ratio": 0.093,
+          "comment_ratio": 0.089,
           "max_indentation_depth": 6,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "and.cpp",
+        "language": "cpp",
+        "content": "ofds;kfop\n",
+        "size_bytes": 10,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 1,
+          "code_lines": 1,
+          "blank_lines": 0,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 0,
           "long_functions_detected": [],
           "long_function_count": 0
         }
@@ -1018,6 +1229,44 @@
         }
       },
       {
+        "path": "main.cpp",
+        "language": "cpp",
+        "content": "Amefjs\n",
+        "size_bytes": 7,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 1,
+          "code_lines": 1,
+          "blank_lines": 0,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 0,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "nmt.html",
+        "language": "html",
+        "content": "knksgfjkdndf\n",
+        "size_bytes": 13,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 1,
+          "code_lines": 1,
+          "blank_lines": 0,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 0,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
         "path": "utils.py",
         "language": "python",
         "content": "# Utility functions\n\ndef process_order(order, user, items, discount, tax, shipping, coupon, gift_card, store_credit, loyalty_points):\n    # cyclomatic complexity of 20+\n    if order:\n        if user:\n            if items:\n                if discount > 0:\n                    if tax > 0:\n                        if shipping > 0:\n                            if coupon:\n                                if gift_card:\n                                    if store_credit > 0:\n                                        if loyalty_points > 0:\n                                            total = sum([i['price'] for i in items])\n                                            total = total - discount\n                                            total = total + tax\n                                            total = total + shipping\n                                            if coupon == \"SAVE10\":\n                                                total = total * 0.9\n                                            if gift_card:\n                                                total = total - gift_card\n                                            if store_credit:\n                                                total = total - store_credit\n                                            if loyalty_points:\n                                                total = total - (loyalty_points * 0.01)\n                                            return total\n    return 0\n\ndef calculate_tax(amount):\n    # duplicate logic \u2014 same as in payments.py\n    tax_rate = 0.18\n    return amount * tax_rate\n\ndef calculate_discount(amount):\n    # duplicate logic \u2014 same as in orders.py\n    discount_rate = 0.10\n    return amount * discount_rate\n\ndef validate_email(email):\n    # no actual validation\n    return True\n\ndef validate_phone(phone):\n    # no actual validation\n    return True\n\ndef validate_address(address):\n    # no actual validation\n    return True",
@@ -1041,9 +1290,9 @@
       "total_debt_signals": 12,
       "files_with_debt_signals": 4,
       "cost_estimate": {
-        "chunks_to_analyze": 6,
-        "total_code_chars": 6229,
-        "approx_tokens": 1557
+        "chunks_to_analyze": 9,
+        "total_code_chars": 6270,
+        "approx_tokens": 1567
       }
     }
   },

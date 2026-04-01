@@ -1,0 +1,1150 @@
+{
+  "status": "success",
+  "pipeline": "complete",
+  "execution_time_seconds": 12.695454,
+  "stages": {
+    "fetch": {
+      "repo_id": "4fc59dca",
+      "repo_url": "ananyamehrotra/vulnerable",
+      "total_files": 5,
+      "categories": {
+        "config": 1,
+        "dependencies": 1,
+        "source_code": 3
+      },
+      "chunks": [
+        {
+          "chunk_id": "requirements.txt::chunk_0",
+          "file": "requirements.txt",
+          "language": "txt",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 44,
+          "code": "# requirements.txt\n# Last updated: a long time ago\n# \"if it ain't broke don't fix it\" - previous dev\n\n# Web framework - critically outdated, multiple CVEs\nFlask==0.12.2          # current: 3.0.x \u2014 CVE-2018-1000656 (DoS), CVE-2023-30861 (cookie leak)\nDjango==2.0.0          # current: 5.0.x \u2014 CVE-2019-14234 (SQLi), CVE-2021-33203, CVE-2022-28347\n\n# Crypto - dangerously outdated\ncryptography==2.1.4    # current: 42.x \u2014 multiple critical CVEs including RSA padding oracle\npyOpenSSL==17.5.0      # current: 24.x \u2014 CVE-2018-1000522, several TLS vulnerabilities\nparamiko==2.0.0        # current: 3.x  \u2014 CVE-2018-7750 (auth bypass)\n\n# HTTP client\nrequests==2.6.0        # current: 2.31 \u2014 CVE-2023-32681 (credential leak in redirects)\nurllib3==1.10.0        # current: 2.x  \u2014 CVE-2021-33503, CVE-2023-43804\n\n# Parsing - deserialization vulnerabilities\nPyYAML==3.11           # current: 6.x  \u2014 CVE-2017-18342 (arbitrary code via yaml.load)\nPillow==4.0.0          # current: 10.x \u2014 CVE-2021-25287, CVE-2021-34552 (RCE)\nlxml==3.6.0            # current: 5.x  \u2014 CVE-2021-43818 (XSS)\n\n# Auth\nPyJWT==1.4.0           # current: 2.x  \u2014 CVE-2022-29217 (alg confusion attack)\nbcrypt==2.0.0          # current: 4.x  \u2014 outdated, performance issues\n\n# Database\nSQLAlchemy==1.0.0      # current: 2.x  \u2014 multiple security fixes, major API changes\npsycopg2==2.6.0        # current: 2.9.x\n\n# Serialization  \npickle                 # not a package but used directly - arbitrary code execution risk\nmarshmallow==2.0.0     # current: 3.x\n\n# Unused dependencies (nobody knows what these do anymore)\ncelery==3.1.0          # CVE-2021-23727 - not even sure if we use celery\nredis==2.10.0          # outdated client\nboto3==1.4.0           # AWS SDK from 2017, missing many security patches\nJinja2==2.8            # current: 3.x \u2014 CVE-2019-10906 (sandbox escape)\n\n# Dev dependencies accidentally in prod\npytest==3.0.0\nipython==5.0.0         # CVE-2022-21699 (arbitrary code execution)\njupyter==1.0.0         # multiple CVEs, should never be in prod\n",
+          "char_count": 2019,
+          "debt_category_hint": "dependencies",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 44,
+            "code_lines": 23,
+            "blank_lines": 9,
+            "comment_lines": 12,
+            "comment_ratio": 0.273,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: requirements.txt (txt) | Lines 1\u201344 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "README.md::chunk_0",
+          "file": "README.md",
+          "language": "markdown",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 1,
+          "code": "# vulnerable",
+          "char_count": 12,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 1,
+            "code_lines": 0,
+            "blank_lines": 0,
+            "comment_lines": 1,
+            "comment_ratio": 1.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: README.md (markdown) | Lines 1\u20131 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "auth_service.py::chunk_0",
+          "file": "auth_service.py",
+          "language": "python",
+          "chunk_index": 0,
+          "total_chunks": 2,
+          "start_line": 1,
+          "end_line": 85,
+          "code": "import os\nimport sqlite3\nimport hashlib\nimport requests\nimport logging\n\n# TODO: move these to env vars (never got around to it)\nDB_PASSWORD = \"admin123\"\nAPI_SECRET_KEY = \"sk-prod-xK92mNqL8vRt3wPz\"\nJWT_SECRET = \"supersecret_jwt_key_2024\"\nAWS_ACCESS_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\n\nlogging.basicConfig(level=logging.DEBUG)\nlogger = logging.getLogger(__name__)\n\ndef get_user(username, password):\n    # FIXME: SQL injection vulnerability - been here since sprint 3\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    query = \"SELECT * FROM users WHERE username = '\" + username + \"' AND password = '\" + password + \"'\"\n    logger.debug(f\"Executing query: {query}\")  # logs sensitive data\n    cursor.execute(query)\n    result = cursor.fetchone()\n    conn.close()\n    return result\n\ndef get_user_by_id(user_id):\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    # another SQL injection - copy pasted from above\n    query = \"SELECT * FROM users WHERE id = \" + str(user_id)\n    cursor.execute(query)\n    result = cursor.fetchone()\n    conn.close()\n    return result\n\ndef hash_password(password):\n    # MD5 - weak hashing, left over from legacy system\n    return hashlib.md5(password.encode()).hexdigest()\n\ndef validate_user_input(data):\n    # enormous function - classic complexity debt\n    if data is None:\n        return False\n    if \"username\" not in data:\n        return False\n    if len(data[\"username\"]) < 3:\n        return False\n    if len(data[\"username\"]) > 50:\n        return False\n    if \"email\" not in data:\n        return False\n    if \"@\" not in data[\"email\"]:\n        return False\n    if \".\" not in data[\"email\"]:\n        return False\n    if \"password\" not in data:\n        return False\n    if len(data[\"password\"]) < 6:\n        return False\n    if \"age\" not in data:\n        return False\n    if data[\"age\"] < 0:\n        return False\n    if data[\"age\"] > 150:\n        return False\n    if \"country\" not in data:\n        return False\n    if len(data[\"country\"]) != 2:\n        return False\n    if \"phone\" in data:\n        if len(data[\"phone\"]) < 7:\n            return False\n        if len(data[\"phone\"]) > 15:\n            return False\n    if \"role\" in data:\n        if data[\"role\"] not in [\"admin\", \"user\", \"moderator\", \"guest\"]:\n            return False\n    if \"referral_code\" in data:\n        if len(data[\"referral_code\"]) != 8:\n            return False\n    # still more checks needed but ran out of time\n    return True\n\n",
+          "char_count": 2517,
+          "debt_category_hint": "architecture",
+          "debt_signals": [
+            {
+              "pattern": "TODO",
+              "line_number": 7,
+              "line_snippet": "# TODO: move these to env vars (never got around to it)"
+            },
+            {
+              "pattern": "password\\s*=",
+              "line_number": 8,
+              "line_snippet": "DB_PASSWORD = \"admin123\""
+            },
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 10,
+              "line_snippet": "JWT_SECRET = \"supersecret_jwt_key_2024\""
+            },
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 12,
+              "line_snippet": "AWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\""
+            },
+            {
+              "pattern": "FIXME",
+              "line_number": 18,
+              "line_snippet": "# FIXME: SQL injection vulnerability - been here since sprint 3"
+            },
+            {
+              "pattern": "password\\s*=",
+              "line_number": 21,
+              "line_snippet": "query = \"SELECT * FROM users WHERE username = '\" + username + \"' AND password = '\" + password + \"'\""
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 154,
+            "code_lines": 129,
+            "blank_lines": 12,
+            "comment_lines": 13,
+            "comment_ratio": 0.084,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: auth_service.py (python) | Lines 1\u201385 (chunk 1 of 2). | Debt signals in this chunk: line 7: # TODO: move these to env vars (never got around to it); line 8: DB_PASSWORD = \"admin123\"; line 10: JWT_SECRET = \"supersecret_jwt_key_2024\"; line 12: AWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"; line 18: # FIXME: SQL injection vulnerability - been here since sprin"
+        },
+        {
+          "chunk_id": "auth_service.py::chunk_1",
+          "file": "auth_service.py",
+          "language": "python",
+          "chunk_index": 1,
+          "total_chunks": 2,
+          "start_line": 86,
+          "end_line": 154,
+          "code": "def send_notification(user_id, message, channel):\n    # duplicated logic from notifications_legacy.py - TODO: consolidate\n    if channel == \"email\":\n        api_key = \"sg.prod_sendgrid_key_hardcoded_yikes\"\n        response = requests.post(\n            \"https://api.sendgrid.com/v3/mail/send\",\n            headers={\"Authorization\": f\"Bearer {api_key}\"},\n            json={\"to\": user_id, \"message\": message}\n        )\n        logger.info(f\"Email sent to {user_id}: {message}\")  # logs PII\n        return response.status_code\n    elif channel == \"sms\":\n        twilio_sid = \"AC_hardcoded_twilio_sid\"\n        twilio_token = \"hardcoded_twilio_auth_token\"\n        response = requests.post(\n            f\"https://api.twilio.com/2010-04-01/Accounts/{twilio_sid}/Messages\",\n            auth=(twilio_sid, twilio_token),\n            data={\"To\": user_id, \"Body\": message}\n        )\n        return response.status_code\n    elif channel == \"push\":\n        fcm_key = \"AAAA_hardcoded_fcm_server_key\"\n        response = requests.post(\n            \"https://fcm.googleapis.com/fcm/send\",\n            headers={\"Authorization\": f\"key={fcm_key}\"},\n            json={\"to\": user_id, \"notification\": {\"body\": message}}\n        )\n        return response.status_code\n    else:\n        logger.warning(f\"Unknown channel: {channel}\")\n        return None\n\ndef process_payment(user_id, amount, card_number, cvv, expiry):\n    # PCI violation: logging card data\n    logger.debug(f\"Processing payment for user {user_id}: card={card_number}, cvv={cvv}, expiry={expiry}\")\n    \n    stripe_key = \"sk_live_hardcoded_stripe_key_abc123\"\n    \n    # no input validation on card number\n    # no rate limiting\n    # no idempotency key\n    response = requests.post(\n        \"https://api.stripe.com/v1/charges\",\n        auth=(stripe_key, \"\"),\n        data={\n            \"amount\": amount,\n            \"currency\": \"usd\",\n            \"source\": card_number,\n        }\n    )\n    return response.json()\n\ndef get_admin_users():\n    # no auth check - anyone can call this\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    cursor.execute(\"SELECT * FROM users WHERE role = 'admin'\")\n    results = cursor.fetchall()\n    conn.close()\n    return results\n\ndef delete_user(user_id):\n    # no auth, no soft delete, no audit log\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    cursor.execute(f\"DELETE FROM users WHERE id = {user_id}\")  # SQL injection\n    conn.commit()\n    conn.close()\n    print(f\"Deleted user {user_id}\")  # print instead of logger\n",
+          "char_count": 2528,
+          "debt_category_hint": "architecture",
+          "debt_signals": [
+            {
+              "pattern": "TODO",
+              "line_number": 87,
+              "line_snippet": "# duplicated logic from notifications_legacy.py - TODO: consolidate"
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 89,
+              "line_snippet": "api_key = \"sg.prod_sendgrid_key_hardcoded_yikes\""
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 98,
+              "line_snippet": "twilio_sid = \"AC_hardcoded_twilio_sid\""
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 99,
+              "line_snippet": "twilio_token = \"hardcoded_twilio_auth_token\""
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 107,
+              "line_snippet": "fcm_key = \"AAAA_hardcoded_fcm_server_key\""
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 122,
+              "line_snippet": "stripe_key = \"sk_live_hardcoded_stripe_key_abc123\""
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 154,
+              "line_snippet": "print(f\"Deleted user {user_id}\")  # print instead of logger"
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 154,
+            "code_lines": 129,
+            "blank_lines": 12,
+            "comment_lines": 13,
+            "comment_ratio": 0.084,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": false,
+          "contains_tests": false,
+          "context_note": "File: auth_service.py (python) | Lines 86\u2013154 (chunk 2 of 2). | Debt signals in this chunk: line 87: # duplicated logic from notifications_legacy.py - TODO: cons; line 89: api_key = \"sg.prod_sendgrid_key_hardcoded_yikes\"; line 98: twilio_sid = \"AC_hardcoded_twilio_sid\"; line 99: twilio_token = \"hardcoded_twilio_auth_token\"; line 107: fcm_key = \"AAAA_hardcoded_fcm_server_key\""
+        },
+        {
+          "chunk_id": "iam_policies.json::chunk_0",
+          "file": "iam_policies.json",
+          "language": "json",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 109,
+          "code": "{\n  \"IAMPolicies\": [\n    {\n      \"PolicyName\": \"DevTeamPolicy\",\n      \"Description\": \"Policy for dev team - started broad, never narrowed down\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Sid\": \"FullAccess\",\n            \"Effect\": \"Allow\",\n            \"Action\": \"*\",\n            \"Resource\": \"*\",\n            \"Condition\": {}\n          }\n        ]\n      }\n    },\n    {\n      \"PolicyName\": \"S3ReadPolicy\",\n      \"Description\": \"Supposed to be read-only S3, but...\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Sid\": \"S3Everything\",\n            \"Effect\": \"Allow\",\n            \"Action\": [\n              \"s3:*\"\n            ],\n            \"Resource\": \"*\"\n          },\n          {\n            \"Sid\": \"AlsoEC2ForSomeReason\",\n            \"Effect\": \"Allow\",\n            \"Action\": [\n              \"ec2:*\",\n              \"iam:*\",\n              \"lambda:*\"\n            ],\n            \"Resource\": \"*\"\n          }\n        ]\n      }\n    },\n    {\n      \"PolicyName\": \"LambdaExecutionRole\",\n      \"Description\": \"Lambda needs some permissions\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Effect\": \"Allow\",\n            \"Action\": [\n              \"logs:*\",\n              \"s3:*\",\n              \"dynamodb:*\",\n              \"secretsmanager:*\",\n              \"ssm:*\",\n              \"kms:*\",\n              \"iam:PassRole\",\n              \"iam:CreateRole\",\n              \"iam:AttachRolePolicy\"\n            ],\n            \"Resource\": \"*\"\n          }\n        ]\n      }\n    },\n    {\n      \"PolicyName\": \"CrossAccountAccess\",\n      \"Description\": \"Allow cross-account - who set this up??\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Effect\": \"Allow\",\n            \"Action\": \"sts:AssumeRole\",\n            \"Principal\": {\n              \"AWS\": \"*\"\n            },\n            \"Resource\": \"*\"\n          }\n        ]\n      }\n    }\n  ],\n  \"InlineRolePolicies\": [\n    {\n      \"RoleName\": \"prod-app-role\",\n      \"PolicyName\": \"inline-everything\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Effect\": \"Allow\",\n            \"Action\": \"*\",\n            \"Resource\": \"*\",\n            \"Condition\": {\n              \"StringEquals\": {\n                \"aws:RequestedRegion\": \"us-east-1\"\n              }\n            }\n          }\n        ]\n      }\n    }\n  ]\n}\n",
+          "char_count": 2517,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 109,
+            "code_lines": 109,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 4,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: iam_policies.json (json) | Lines 1\u2013109 (chunk 1 of 1). | Max nesting depth: 4 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "user_db.js::chunk_0",
+          "file": "user_db.js",
+          "language": "javascript",
+          "chunk_index": 0,
+          "total_chunks": 2,
+          "start_line": 1,
+          "end_line": 87,
+          "code": "// user-dashboard.js\n// Written by: Jake (left the company)\n// Last touched: ages ago, don't break it\n\nconst API_BASE = \"http://api.internal.company.com\";  // HTTP not HTTPS\nconst ADMIN_TOKEN = \"Bearer eyJhbGciOiJub25lIn0.eyJyb2xlIjoiYWRtaW4ifQ.\";  // hardcoded JWT, alg:none\n\n// Storing sensitive data in localStorage - insecure\nfunction loginUser(username, password) {\n    fetch(`${API_BASE}/login`, {\n        method: \"POST\",\n        body: JSON.stringify({ username, password })\n        // missing: Content-Type header, CSRF token\n    })\n    .then(res => res.json())\n    .then(data => {\n        localStorage.setItem(\"user_token\", data.token);\n        localStorage.setItem(\"user_role\", data.role);\n        localStorage.setItem(\"credit_card_last4\", data.payment?.last4);  // why is this here\n        localStorage.setItem(\"ssn_partial\", data.ssn);  // definitely should not be here\n        renderDashboard(data);\n    });\n    // no .catch() - silent failures\n}\n\n// XSS vulnerability - innerHTML with user-controlled data\nfunction renderUserProfile(user) {\n    const container = document.getElementById(\"profile\");\n    container.innerHTML = `\n        <h2>Welcome, ${user.name}!</h2>\n        <p>Email: ${user.email}</p>\n        <p>Bio: ${user.bio}</p>\n        <div class=\"notes\">${user.notes}</div>\n    `;\n    // user.bio and user.notes are not sanitized\n}\n\n// another XSS - eval with user input\nfunction runUserScript(scriptInput) {\n    // \"feature\" requested by enterprise client, big mistake\n    eval(scriptInput);\n}\n\n// insecure direct object reference - no auth check\nfunction getUserData(userId) {\n    return fetch(`${API_BASE}/users/${userId}`, {\n        headers: { \"Authorization\": ADMIN_TOKEN }\n    }).then(r => r.json());\n    // any userId can be requested, no ownership check\n}\n\n// massive duplicated function (copy of above with tiny change)\nfunction getUserDataV2(userId) {\n    return fetch(`${API_BASE}/v2/users/${userId}`, {\n        headers: { \"Authorization\": ADMIN_TOKEN }\n    }).then(r => r.json());\n}\n\n// massive duplicated function (copy of above with tiny change)\nfunction getUserDataV3(userId) {\n    return fetch(`${API_BASE}/v3/users/${userId}`, {\n        headers: { \"Authorization\": ADMIN_TOKEN }\n    }).then(r => r.json());\n}\n\n// open redirect vulnerability\nfunction redirectAfterLogin(returnUrl) {\n    // no validation of returnUrl - attacker can redirect to malicious site\n    window.location.href = returnUrl;\n}\n\n// prototype pollution\nfunction mergeConfig(userConfig) {\n    const defaults = { theme: \"light\", lang: \"en\" };\n    // vulnerable merge\n    for (let key in userConfig) {\n        defaults[key] = userConfig[key];\n    }\n    return defaults;\n}\n\n// sensitive data in URL (shows up in server logs, browser history)\nfunction searchUsers(query, adminPassword) {\n    return fetch(`${API_BASE}/admin/search?q=${query}&admin_pass=${adminPassword}`);\n}\n\n// no rate limiting, no lockout\n",
+          "char_count": 2910,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "token\\s*=",
+              "line_number": 6,
+              "line_snippet": "const ADMIN_TOKEN = \"Bearer eyJhbGciOiJub25lIn0.eyJyb2xlIjoiYWRtaW4ifQ.\";  // hardcoded JWT, alg:none"
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 126,
+            "code_lines": 91,
+            "blank_lines": 13,
+            "comment_lines": 22,
+            "comment_ratio": 0.175,
+            "max_indentation_depth": 11,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: user_db.js (javascript) | Lines 1\u201387 (chunk 1 of 2). | Debt signals in this chunk: line 6: const ADMIN_TOKEN = \"Bearer eyJhbGciOiJub25lIn0.eyJyb2xlIjoi | Max nesting depth: 11 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "user_db.js::chunk_1",
+          "file": "user_db.js",
+          "language": "javascript",
+          "chunk_index": 1,
+          "total_chunks": 2,
+          "start_line": 88,
+          "end_line": 126,
+          "code": "function bruteForceableLogin(username, password) {\n    return fetch(`${API_BASE}/login`, {\n        method: \"POST\",\n        body: JSON.stringify({ username, password })\n    });\n}\n\n// TODO: remove before prod - debug backdoor\nfunction devBypassAuth() {\n    localStorage.setItem(\"user_role\", \"admin\");\n    localStorage.setItem(\"user_token\", ADMIN_TOKEN);\n    console.log(\"Auth bypassed for dev purposes\");\n    window.location.reload();\n}\n\n// deeply nested callback hell - complexity debt\nfunction loadDashboardData(userId) {\n    fetch(`${API_BASE}/users/${userId}`)\n        .then(r => r.json())\n        .then(user => {\n            fetch(`${API_BASE}/orders/${user.id}`)\n                .then(r => r.json())\n                .then(orders => {\n                    fetch(`${API_BASE}/payments/${orders[0].id}`)\n                        .then(r => r.json())\n                        .then(payment => {\n                            fetch(`${API_BASE}/products/${payment.productId}`)\n                                .then(r => r.json())\n                                .then(product => {\n                                    fetch(`${API_BASE}/reviews/${product.id}`)\n                                        .then(r => r.json())\n                                        .then(reviews => {\n                                            renderDashboard({ user, orders, payment, product, reviews });\n                                        });\n                                });\n                        });\n                });\n        });\n}\n",
+          "char_count": 1522,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "TODO",
+              "line_number": 95,
+              "line_snippet": "// TODO: remove before prod - debug backdoor"
+            },
+            {
+              "pattern": "console\\.log",
+              "line_number": 99,
+              "line_snippet": "console.log(\"Auth bypassed for dev purposes\");"
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 126,
+            "code_lines": 91,
+            "blank_lines": 13,
+            "comment_lines": 22,
+            "comment_ratio": 0.175,
+            "max_indentation_depth": 11,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": false,
+          "contains_tests": false,
+          "context_note": "File: user_db.js (javascript) | Lines 88\u2013126 (chunk 2 of 2). | Debt signals in this chunk: line 95: // TODO: remove before prod - debug backdoor; line 99: console.log(\"Auth bypassed for dev purposes\"); | Max nesting depth: 11 levels (complexity risk)."
+        }
+      ],
+      "files": [
+        {
+          "path": "requirements.txt",
+          "language": "txt",
+          "content": "# requirements.txt\n# Last updated: a long time ago\n# \"if it ain't broke don't fix it\" - previous dev\n\n# Web framework - critically outdated, multiple CVEs\nFlask==0.12.2          # current: 3.0.x \u2014 CVE-2018-1000656 (DoS), CVE-2023-30861 (cookie leak)\nDjango==2.0.0          # current: 5.0.x \u2014 CVE-2019-14234 (SQLi), CVE-2021-33203, CVE-2022-28347\n\n# Crypto - dangerously outdated\ncryptography==2.1.4    # current: 42.x \u2014 multiple critical CVEs including RSA padding oracle\npyOpenSSL==17.5.0      # current: 24.x \u2014 CVE-2018-1000522, several TLS vulnerabilities\nparamiko==2.0.0        # current: 3.x  \u2014 CVE-2018-7750 (auth bypass)\n\n# HTTP client\nrequests==2.6.0        # current: 2.31 \u2014 CVE-2023-32681 (credential leak in redirects)\nurllib3==1.10.0        # current: 2.x  \u2014 CVE-2021-33503, CVE-2023-43804\n\n# Parsing - deserialization vulnerabilities\nPyYAML==3.11           # current: 6.x  \u2014 CVE-2017-18342 (arbitrary code via yaml.load)\nPillow==4.0.0          # current: 10.x \u2014 CVE-2021-25287, CVE-2021-34552 (RCE)\nlxml==3.6.0            # current: 5.x  \u2014 CVE-2021-43818 (XSS)\n\n# Auth\nPyJWT==1.4.0           # current: 2.x  \u2014 CVE-2022-29217 (alg confusion attack)\nbcrypt==2.0.0          # current: 4.x  \u2014 outdated, performance issues\n\n# Database\nSQLAlchemy==1.0.0      # current: 2.x  \u2014 multiple security fixes, major API changes\npsycopg2==2.6.0        # current: 2.9.x\n\n# Serialization  \npickle                 # not a package but used directly - arbitrary code execution risk\nmarshmallow==2.0.0     # current: 3.x\n\n# Unused dependencies (nobody knows what these do anymore)\ncelery==3.1.0          # CVE-2021-23727 - not even sure if we use celery\nredis==2.10.0          # outdated client\nboto3==1.4.0           # AWS SDK from 2017, missing many security patches\nJinja2==2.8            # current: 3.x \u2014 CVE-2019-10906 (sandbox escape)\n\n# Dev dependencies accidentally in prod\npytest==3.0.0\nipython==5.0.0         # CVE-2022-21699 (arbitrary code execution)\njupyter==1.0.0         # multiple CVEs, should never be in prod\n",
+          "size_bytes": 2047,
+          "debt_category_hint": "dependencies",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 44,
+            "code_lines": 23,
+            "blank_lines": 9,
+            "comment_lines": 12,
+            "comment_ratio": 0.273,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "README.md",
+          "language": "markdown",
+          "content": "# vulnerable",
+          "size_bytes": 12,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 1,
+            "code_lines": 0,
+            "blank_lines": 0,
+            "comment_lines": 1,
+            "comment_ratio": 1.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "auth_service.py",
+          "language": "python",
+          "content": "import os\nimport sqlite3\nimport hashlib\nimport requests\nimport logging\n\n# TODO: move these to env vars (never got around to it)\nDB_PASSWORD = \"admin123\"\nAPI_SECRET_KEY = \"sk-prod-xK92mNqL8vRt3wPz\"\nJWT_SECRET = \"supersecret_jwt_key_2024\"\nAWS_ACCESS_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\n\nlogging.basicConfig(level=logging.DEBUG)\nlogger = logging.getLogger(__name__)\n\ndef get_user(username, password):\n    # FIXME: SQL injection vulnerability - been here since sprint 3\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    query = \"SELECT * FROM users WHERE username = '\" + username + \"' AND password = '\" + password + \"'\"\n    logger.debug(f\"Executing query: {query}\")  # logs sensitive data\n    cursor.execute(query)\n    result = cursor.fetchone()\n    conn.close()\n    return result\n\ndef get_user_by_id(user_id):\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    # another SQL injection - copy pasted from above\n    query = \"SELECT * FROM users WHERE id = \" + str(user_id)\n    cursor.execute(query)\n    result = cursor.fetchone()\n    conn.close()\n    return result\n\ndef hash_password(password):\n    # MD5 - weak hashing, left over from legacy system\n    return hashlib.md5(password.encode()).hexdigest()\n\ndef validate_user_input(data):\n    # enormous function - classic complexity debt\n    if data is None:\n        return False\n    if \"username\" not in data:\n        return False\n    if len(data[\"username\"]) < 3:\n        return False\n    if len(data[\"username\"]) > 50:\n        return False\n    if \"email\" not in data:\n        return False\n    if \"@\" not in data[\"email\"]:\n        return False\n    if \".\" not in data[\"email\"]:\n        return False\n    if \"password\" not in data:\n        return False\n    if len(data[\"password\"]) < 6:\n        return False\n    if \"age\" not in data:\n        return False\n    if data[\"age\"] < 0:\n        return False\n    if data[\"age\"] > 150:\n        return False\n    if \"country\" not in data:\n        return False\n    if len(data[\"country\"]) != 2:\n        return False\n    if \"phone\" in data:\n        if len(data[\"phone\"]) < 7:\n            return False\n        if len(data[\"phone\"]) > 15:\n            return False\n    if \"role\" in data:\n        if data[\"role\"] not in [\"admin\", \"user\", \"moderator\", \"guest\"]:\n            return False\n    if \"referral_code\" in data:\n        if len(data[\"referral_code\"]) != 8:\n            return False\n    # still more checks needed but ran out of time\n    return True\n\ndef send_notification(user_id, message, channel):\n    # duplicated logic from notifications_legacy.py - TODO: consolidate\n    if channel == \"email\":\n        api_key = \"sg.prod_sendgrid_key_hardcoded_yikes\"\n        response = requests.post(\n            \"https://api.sendgrid.com/v3/mail/send\",\n            headers={\"Authorization\": f\"Bearer {api_key}\"},\n            json={\"to\": user_id, \"message\": message}\n        )\n        logger.info(f\"Email sent to {user_id}: {message}\")  # logs PII\n        return response.status_code\n    elif channel == \"sms\":\n        twilio_sid = \"AC_hardcoded_twilio_sid\"\n        twilio_token = \"hardcoded_twilio_auth_token\"\n        response = requests.post(\n            f\"https://api.twilio.com/2010-04-01/Accounts/{twilio_sid}/Messages\",\n            auth=(twilio_sid, twilio_token),\n            data={\"To\": user_id, \"Body\": message}\n        )\n        return response.status_code\n    elif channel == \"push\":\n        fcm_key = \"AAAA_hardcoded_fcm_server_key\"\n        response = requests.post(\n            \"https://fcm.googleapis.com/fcm/send\",\n            headers={\"Authorization\": f\"key={fcm_key}\"},\n            json={\"to\": user_id, \"notification\": {\"body\": message}}\n        )\n        return response.status_code\n    else:\n        logger.warning(f\"Unknown channel: {channel}\")\n        return None\n\ndef process_payment(user_id, amount, card_number, cvv, expiry):\n    # PCI violation: logging card data\n    logger.debug(f\"Processing payment for user {user_id}: card={card_number}, cvv={cvv}, expiry={expiry}\")\n    \n    stripe_key = \"sk_live_hardcoded_stripe_key_abc123\"\n    \n    # no input validation on card number\n    # no rate limiting\n    # no idempotency key\n    response = requests.post(\n        \"https://api.stripe.com/v1/charges\",\n        auth=(stripe_key, \"\"),\n        data={\n            \"amount\": amount,\n            \"currency\": \"usd\",\n            \"source\": card_number,\n        }\n    )\n    return response.json()\n\ndef get_admin_users():\n    # no auth check - anyone can call this\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    cursor.execute(\"SELECT * FROM users WHERE role = 'admin'\")\n    results = cursor.fetchall()\n    conn.close()\n    return results\n\ndef delete_user(user_id):\n    # no auth, no soft delete, no audit log\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    cursor.execute(f\"DELETE FROM users WHERE id = {user_id}\")  # SQL injection\n    conn.commit()\n    conn.close()\n    print(f\"Deleted user {user_id}\")  # print instead of logger\n",
+          "size_bytes": 5045,
+          "debt_category_hint": "architecture",
+          "debt_signals": [
+            {
+              "pattern": "TODO",
+              "line_number": 7,
+              "line_snippet": "# TODO: move these to env vars (never got around to it)"
+            },
+            {
+              "pattern": "password\\s*=",
+              "line_number": 8,
+              "line_snippet": "DB_PASSWORD = \"admin123\""
+            },
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 10,
+              "line_snippet": "JWT_SECRET = \"supersecret_jwt_key_2024\""
+            },
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 12,
+              "line_snippet": "AWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\""
+            },
+            {
+              "pattern": "FIXME",
+              "line_number": 18,
+              "line_snippet": "# FIXME: SQL injection vulnerability - been here since sprint 3"
+            },
+            {
+              "pattern": "password\\s*=",
+              "line_number": 21,
+              "line_snippet": "query = \"SELECT * FROM users WHERE username = '\" + username + \"' AND password = '\" + password + \"'\""
+            },
+            {
+              "pattern": "TODO",
+              "line_number": 87,
+              "line_snippet": "# duplicated logic from notifications_legacy.py - TODO: consolidate"
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 89,
+              "line_snippet": "api_key = \"sg.prod_sendgrid_key_hardcoded_yikes\""
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 98,
+              "line_snippet": "twilio_sid = \"AC_hardcoded_twilio_sid\""
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 99,
+              "line_snippet": "twilio_token = \"hardcoded_twilio_auth_token\""
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 107,
+              "line_snippet": "fcm_key = \"AAAA_hardcoded_fcm_server_key\""
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 122,
+              "line_snippet": "stripe_key = \"sk_live_hardcoded_stripe_key_abc123\""
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 154,
+              "line_snippet": "print(f\"Deleted user {user_id}\")  # print instead of logger"
+            }
+          ],
+          "debt_signal_count": 13,
+          "metrics": {
+            "total_lines": 154,
+            "code_lines": 129,
+            "blank_lines": 12,
+            "comment_lines": 13,
+            "comment_ratio": 0.084,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "iam_policies.json",
+          "language": "json",
+          "content": "{\n  \"IAMPolicies\": [\n    {\n      \"PolicyName\": \"DevTeamPolicy\",\n      \"Description\": \"Policy for dev team - started broad, never narrowed down\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Sid\": \"FullAccess\",\n            \"Effect\": \"Allow\",\n            \"Action\": \"*\",\n            \"Resource\": \"*\",\n            \"Condition\": {}\n          }\n        ]\n      }\n    },\n    {\n      \"PolicyName\": \"S3ReadPolicy\",\n      \"Description\": \"Supposed to be read-only S3, but...\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Sid\": \"S3Everything\",\n            \"Effect\": \"Allow\",\n            \"Action\": [\n              \"s3:*\"\n            ],\n            \"Resource\": \"*\"\n          },\n          {\n            \"Sid\": \"AlsoEC2ForSomeReason\",\n            \"Effect\": \"Allow\",\n            \"Action\": [\n              \"ec2:*\",\n              \"iam:*\",\n              \"lambda:*\"\n            ],\n            \"Resource\": \"*\"\n          }\n        ]\n      }\n    },\n    {\n      \"PolicyName\": \"LambdaExecutionRole\",\n      \"Description\": \"Lambda needs some permissions\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Effect\": \"Allow\",\n            \"Action\": [\n              \"logs:*\",\n              \"s3:*\",\n              \"dynamodb:*\",\n              \"secretsmanager:*\",\n              \"ssm:*\",\n              \"kms:*\",\n              \"iam:PassRole\",\n              \"iam:CreateRole\",\n              \"iam:AttachRolePolicy\"\n            ],\n            \"Resource\": \"*\"\n          }\n        ]\n      }\n    },\n    {\n      \"PolicyName\": \"CrossAccountAccess\",\n      \"Description\": \"Allow cross-account - who set this up??\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Effect\": \"Allow\",\n            \"Action\": \"sts:AssumeRole\",\n            \"Principal\": {\n              \"AWS\": \"*\"\n            },\n            \"Resource\": \"*\"\n          }\n        ]\n      }\n    }\n  ],\n  \"InlineRolePolicies\": [\n    {\n      \"RoleName\": \"prod-app-role\",\n      \"PolicyName\": \"inline-everything\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Effect\": \"Allow\",\n            \"Action\": \"*\",\n            \"Resource\": \"*\",\n            \"Condition\": {\n              \"StringEquals\": {\n                \"aws:RequestedRegion\": \"us-east-1\"\n              }\n            }\n          }\n        ]\n      }\n    }\n  ]\n}\n",
+          "size_bytes": 2517,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 109,
+            "code_lines": 109,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 4,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "user_db.js",
+          "language": "javascript",
+          "content": "// user-dashboard.js\n// Written by: Jake (left the company)\n// Last touched: ages ago, don't break it\n\nconst API_BASE = \"http://api.internal.company.com\";  // HTTP not HTTPS\nconst ADMIN_TOKEN = \"Bearer eyJhbGciOiJub25lIn0.eyJyb2xlIjoiYWRtaW4ifQ.\";  // hardcoded JWT, alg:none\n\n// Storing sensitive data in localStorage - insecure\nfunction loginUser(username, password) {\n    fetch(`${API_BASE}/login`, {\n        method: \"POST\",\n        body: JSON.stringify({ username, password })\n        // missing: Content-Type header, CSRF token\n    })\n    .then(res => res.json())\n    .then(data => {\n        localStorage.setItem(\"user_token\", data.token);\n        localStorage.setItem(\"user_role\", data.role);\n        localStorage.setItem(\"credit_card_last4\", data.payment?.last4);  // why is this here\n        localStorage.setItem(\"ssn_partial\", data.ssn);  // definitely should not be here\n        renderDashboard(data);\n    });\n    // no .catch() - silent failures\n}\n\n// XSS vulnerability - innerHTML with user-controlled data\nfunction renderUserProfile(user) {\n    const container = document.getElementById(\"profile\");\n    container.innerHTML = `\n        <h2>Welcome, ${user.name}!</h2>\n        <p>Email: ${user.email}</p>\n        <p>Bio: ${user.bio}</p>\n        <div class=\"notes\">${user.notes}</div>\n    `;\n    // user.bio and user.notes are not sanitized\n}\n\n// another XSS - eval with user input\nfunction runUserScript(scriptInput) {\n    // \"feature\" requested by enterprise client, big mistake\n    eval(scriptInput);\n}\n\n// insecure direct object reference - no auth check\nfunction getUserData(userId) {\n    return fetch(`${API_BASE}/users/${userId}`, {\n        headers: { \"Authorization\": ADMIN_TOKEN }\n    }).then(r => r.json());\n    // any userId can be requested, no ownership check\n}\n\n// massive duplicated function (copy of above with tiny change)\nfunction getUserDataV2(userId) {\n    return fetch(`${API_BASE}/v2/users/${userId}`, {\n        headers: { \"Authorization\": ADMIN_TOKEN }\n    }).then(r => r.json());\n}\n\n// massive duplicated function (copy of above with tiny change)\nfunction getUserDataV3(userId) {\n    return fetch(`${API_BASE}/v3/users/${userId}`, {\n        headers: { \"Authorization\": ADMIN_TOKEN }\n    }).then(r => r.json());\n}\n\n// open redirect vulnerability\nfunction redirectAfterLogin(returnUrl) {\n    // no validation of returnUrl - attacker can redirect to malicious site\n    window.location.href = returnUrl;\n}\n\n// prototype pollution\nfunction mergeConfig(userConfig) {\n    const defaults = { theme: \"light\", lang: \"en\" };\n    // vulnerable merge\n    for (let key in userConfig) {\n        defaults[key] = userConfig[key];\n    }\n    return defaults;\n}\n\n// sensitive data in URL (shows up in server logs, browser history)\nfunction searchUsers(query, adminPassword) {\n    return fetch(`${API_BASE}/admin/search?q=${query}&admin_pass=${adminPassword}`);\n}\n\n// no rate limiting, no lockout\nfunction bruteForceableLogin(username, password) {\n    return fetch(`${API_BASE}/login`, {\n        method: \"POST\",\n        body: JSON.stringify({ username, password })\n    });\n}\n\n// TODO: remove before prod - debug backdoor\nfunction devBypassAuth() {\n    localStorage.setItem(\"user_role\", \"admin\");\n    localStorage.setItem(\"user_token\", ADMIN_TOKEN);\n    console.log(\"Auth bypassed for dev purposes\");\n    window.location.reload();\n}\n\n// deeply nested callback hell - complexity debt\nfunction loadDashboardData(userId) {\n    fetch(`${API_BASE}/users/${userId}`)\n        .then(r => r.json())\n        .then(user => {\n            fetch(`${API_BASE}/orders/${user.id}`)\n                .then(r => r.json())\n                .then(orders => {\n                    fetch(`${API_BASE}/payments/${orders[0].id}`)\n                        .then(r => r.json())\n                        .then(payment => {\n                            fetch(`${API_BASE}/products/${payment.productId}`)\n                                .then(r => r.json())\n                                .then(product => {\n                                    fetch(`${API_BASE}/reviews/${product.id}`)\n                                        .then(r => r.json())\n                                        .then(reviews => {\n                                            renderDashboard({ user, orders, payment, product, reviews });\n                                        });\n                                });\n                        });\n                });\n        });\n}\n",
+          "size_bytes": 4432,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "token\\s*=",
+              "line_number": 6,
+              "line_snippet": "const ADMIN_TOKEN = \"Bearer eyJhbGciOiJub25lIn0.eyJyb2xlIjoiYWRtaW4ifQ.\";  // hardcoded JWT, alg:none"
+            },
+            {
+              "pattern": "TODO",
+              "line_number": 95,
+              "line_snippet": "// TODO: remove before prod - debug backdoor"
+            },
+            {
+              "pattern": "console\\.log",
+              "line_number": 99,
+              "line_snippet": "console.log(\"Auth bypassed for dev purposes\");"
+            }
+          ],
+          "debt_signal_count": 3,
+          "metrics": {
+            "total_lines": 126,
+            "code_lines": 91,
+            "blank_lines": 13,
+            "comment_lines": 22,
+            "comment_ratio": 0.175,
+            "max_indentation_depth": 11,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        }
+      ]
+    },
+    "analyze": {
+      "repo_id": "4fc59dca",
+      "repo_url": "ananyamehrotra/vulnerable",
+      "branch_name": "main",
+      "vulnerabilities": [
+        {
+          "type": "CODE_SMELL",
+          "severity": "LOW",
+          "file": "auth_service.py",
+          "line_range": "7",
+          "code_snippet": "# TODO: move these to env vars (never got around to it)",
+          "explanation": "Potential issue detected: TODO",
+          "business_impact": "Code quality issue that may pose security risk.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Review this pattern and ensure it does not expose sensitive data.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "auth_service.py",
+          "line_range": "8",
+          "code_snippet": "DB_PASSWORD = \"admin123\"",
+          "explanation": "Hardcoded password detected in source code.",
+          "business_impact": "Credential exposure \u2014 attackers can directly access databases or services.",
+          "estimated_minutes_to_fix": 15,
+          "remediation": "Move to environment variables or a secrets manager (AWS Secrets Manager, HashiCorp Vault).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "auth_service.py",
+          "line_range": "10",
+          "code_snippet": "JWT_SECRET = \"supersecret_jwt_key_2024\"",
+          "explanation": "Hardcoded secret/key detected in source code.",
+          "business_impact": "Secret exposure \u2014 any developer with repo access can compromise production systems.",
+          "estimated_minutes_to_fix": 15,
+          "remediation": "Use environment variables loaded via python-dotenv, never commit secrets to git.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "auth_service.py",
+          "line_range": "12",
+          "code_snippet": "AWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"",
+          "explanation": "Hardcoded secret/key detected in source code.",
+          "business_impact": "Secret exposure \u2014 any developer with repo access can compromise production systems.",
+          "estimated_minutes_to_fix": 15,
+          "remediation": "Use environment variables loaded via python-dotenv, never commit secrets to git.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "CODE_SMELL",
+          "severity": "LOW",
+          "file": "auth_service.py",
+          "line_range": "18",
+          "code_snippet": "# FIXME: SQL injection vulnerability - been here since sprint 3",
+          "explanation": "Potential issue detected: FIXME",
+          "business_impact": "Code quality issue that may pose security risk.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Review this pattern and ensure it does not expose sensitive data.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "auth_service.py",
+          "line_range": "21",
+          "code_snippet": "query = \"SELECT * FROM users WHERE username = '\" + username + \"' AND password = '\" + password + \"'\"",
+          "explanation": "Hardcoded password detected in source code.",
+          "business_impact": "Credential exposure \u2014 attackers can directly access databases or services.",
+          "estimated_minutes_to_fix": 15,
+          "remediation": "Move to environment variables or a secrets manager (AWS Secrets Manager, HashiCorp Vault).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "CODE_SMELL",
+          "severity": "LOW",
+          "file": "auth_service.py",
+          "line_range": "87",
+          "code_snippet": "# duplicated logic from notifications_legacy.py - TODO: consolidate",
+          "explanation": "Potential issue detected: TODO",
+          "business_impact": "Code quality issue that may pose security risk.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Review this pattern and ensure it does not expose sensitive data.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "auth_service.py",
+          "line_range": "89",
+          "code_snippet": "api_key = \"sg.prod_sendgrid_key_hardcoded_yikes\"",
+          "explanation": "Hardcoded API key detected.",
+          "business_impact": "API key exposure \u2014 attackers can make requests on your behalf, incur costs, or steal data.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Store API keys in environment variables; rotate the exposed key immediately.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "auth_service.py",
+          "line_range": "98",
+          "code_snippet": "twilio_sid = \"AC_hardcoded_twilio_sid\"",
+          "explanation": "Hardcoded value flagged as potential secret.",
+          "business_impact": "Potential credential exposure in version control history.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Audit this value and externalize if sensitive.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "auth_service.py",
+          "line_range": "99",
+          "code_snippet": "twilio_token = \"hardcoded_twilio_auth_token\"",
+          "explanation": "Hardcoded token detected.",
+          "business_impact": "Token exposure \u2014 may allow unauthorized access to third-party services.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Move token to .env file, add .env to .gitignore.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "auth_service.py",
+          "line_range": "107",
+          "code_snippet": "fcm_key = \"AAAA_hardcoded_fcm_server_key\"",
+          "explanation": "Hardcoded value flagged as potential secret.",
+          "business_impact": "Potential credential exposure in version control history.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Audit this value and externalize if sensitive.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "auth_service.py",
+          "line_range": "122",
+          "code_snippet": "stripe_key = \"sk_live_hardcoded_stripe_key_abc123\"",
+          "explanation": "Hardcoded value flagged as potential secret.",
+          "business_impact": "Potential credential exposure in version control history.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Audit this value and externalize if sensitive.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "DEBUG_LOGGING",
+          "severity": "LOW",
+          "file": "auth_service.py",
+          "line_range": "154",
+          "code_snippet": "print(f\"Deleted user {user_id}\")  # print instead of logger",
+          "explanation": "Debug print statements in production code.",
+          "business_impact": "May leak sensitive data to logs; indicates lack of structured logging.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Replace print() with a structured logger (logging module).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "user_db.js",
+          "line_range": "6",
+          "code_snippet": "const ADMIN_TOKEN = \"Bearer eyJhbGciOiJub25lIn0.eyJyb2xlIjoiYWRtaW4ifQ.\";  // hardcoded JWT, alg:none",
+          "explanation": "Hardcoded token detected.",
+          "business_impact": "Token exposure \u2014 may allow unauthorized access to third-party services.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Move token to .env file, add .env to .gitignore.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "CODE_SMELL",
+          "severity": "LOW",
+          "file": "user_db.js",
+          "line_range": "95",
+          "code_snippet": "// TODO: remove before prod - debug backdoor",
+          "explanation": "Potential issue detected: TODO",
+          "business_impact": "Code quality issue that may pose security risk.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Review this pattern and ensure it does not expose sensitive data.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "CODE_SMELL",
+          "severity": "LOW",
+          "file": "user_db.js",
+          "line_range": "99",
+          "code_snippet": "console.log(\"Auth bypassed for dev purposes\");",
+          "explanation": "Potential issue detected: console\\.log",
+          "business_impact": "Code quality issue that may pose security risk.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Review this pattern and ensure it does not expose sensitive data.",
+          "source": "static_analysis"
+        }
+      ],
+      "vulnerable_files": [
+        {
+          "file": "auth_service.py",
+          "type": "app",
+          "count": 6
+        },
+        {
+          "file": "auth_service.py",
+          "type": "app",
+          "count": 7
+        },
+        {
+          "file": "user_db.js",
+          "type": "app",
+          "count": 1
+        },
+        {
+          "file": "user_db.js",
+          "type": "app",
+          "count": 2
+        }
+      ],
+      "total_files_analyzed": 7,
+      "files_with_issues": 4,
+      "total_vulnerabilities": 16,
+      "cost_tracker": {
+        "api_calls": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "estimated_cost": 0.0
+      },
+      "billing": {
+        "calls_made": 0,
+        "free_calls_remaining": 100,
+        "estimated_cost": 0.0,
+        "will_be_charged": false,
+        "alternatives": [
+          {
+            "name": "SonarQube Community",
+            "cost": "Free",
+            "url": "https://www.sonarqube.org/"
+          },
+          {
+            "name": "GitHub CodeQL",
+            "cost": "Free (open source)",
+            "url": "https://codeql.github.com/"
+          },
+          {
+            "name": "Snyk",
+            "cost": "$50+/month",
+            "url": "https://snyk.io/"
+          },
+          {
+            "name": "Checkmarx",
+            "cost": "Enterprise pricing",
+            "url": "https://checkmarx.com/"
+          }
+        ]
+      },
+      "chunks_scanned": 7,
+      "total_files": 5
+    },
+    "score": {
+      "repo_id": "4fc59dca",
+      "repo_url": "ananyamehrotra/vulnerable",
+      "health_score": 100,
+      "chunks_scanned": 7,
+      "total_files": 5,
+      "analysis": {
+        "total_security_issues": 0,
+        "total_debt_issues": 0,
+        "critical_issues": 0,
+        "quick_wins": 0
+      },
+      "findings": {
+        "security_findings": [],
+        "debt_findings": [],
+        "security_by_severity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "debt_by_severity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "quick_wins": [],
+        "critical_issues": []
+      },
+      "recommendations": [],
+      "scoring_metadata": {
+        "scoring_version": "1.0",
+        "scoring_algorithm": "weighted_penalty",
+        "max_score": 100,
+        "min_score": 0
+      }
+    }
+  },
+  "data": {
+    "total_files_fetched": 5,
+    "config_files": 1,
+    "dependency_files": 1,
+    "source_files": 3,
+    "total_chunks": 7,
+    "files_by_category": {
+      "config": [],
+      "dependencies": [
+        {
+          "path": "requirements.txt",
+          "language": "txt",
+          "content": "# requirements.txt\n# Last updated: a long time ago\n# \"if it ain't broke don't fix it\" - previous dev\n\n# Web framework - critically outdated, multiple CVEs\nFlask==0.12.2          # current: 3.0.x \u2014 CVE-2018-1000656 (DoS), CVE-2023-30861 (cookie leak)\nDjango==2.0.0          # current: 5.0.x \u2014 CVE-2019-14234 (SQLi), CVE-2021-33203, CVE-2022-28347\n\n# Crypto - dangerously outdated\ncryptography==2.1.4    # current: 42.x \u2014 multiple critical CVEs including RSA padding oracle\npyOpenSSL==17.5.0      # current: 24.x \u2014 CVE-2018-1000522, several TLS vulnerabilities\nparamiko==2.0.0        # current: 3.x  \u2014 CVE-2018-7750 (auth bypass)\n\n# HTTP client\nrequests==2.6.0        # current: 2.31 \u2014 CVE-2023-32681 (credential leak in redirects)\nurllib3==1.10.0        # current: 2.x  \u2014 CVE-2021-33503, CVE-2023-43804\n\n# Parsing - deserialization vulnerabilities\nPyYAML==3.11           # current: 6.x  \u2014 CVE-2017-18342 (arbitrary code via yaml.load)\nPillow==4.0.0          # current: 10.x \u2014 CVE-2021-25287, CVE-2021-34552 (RCE)\nlxml==3.6.0            # current: 5.x  \u2014 CVE-2021-43818 (XSS)\n\n# Auth\nPyJWT==1.4.0           # current: 2.x  \u2014 CVE-2022-29217 (alg confusion attack)\nbcrypt==2.0.0          # current: 4.x  \u2014 outdated, performance issues\n\n# Database\nSQLAlchemy==1.0.0      # current: 2.x  \u2014 multiple security fixes, major API changes\npsycopg2==2.6.0        # current: 2.9.x\n\n# Serialization  \npickle                 # not a package but used directly - arbitrary code execution risk\nmarshmallow==2.0.0     # current: 3.x\n\n# Unused dependencies (nobody knows what these do anymore)\ncelery==3.1.0          # CVE-2021-23727 - not even sure if we use celery\nredis==2.10.0          # outdated client\nboto3==1.4.0           # AWS SDK from 2017, missing many security patches\nJinja2==2.8            # current: 3.x \u2014 CVE-2019-10906 (sandbox escape)\n\n# Dev dependencies accidentally in prod\npytest==3.0.0\nipython==5.0.0         # CVE-2022-21699 (arbitrary code execution)\njupyter==1.0.0         # multiple CVEs, should never be in prod\n",
+          "size_bytes": 2047,
+          "debt_category_hint": "dependencies",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 44,
+            "code_lines": 23,
+            "blank_lines": 9,
+            "comment_lines": 12,
+            "comment_ratio": 0.273,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        }
+      ],
+      "source_code": [
+        {
+          "path": "README.md",
+          "language": "markdown",
+          "content": "# vulnerable",
+          "size_bytes": 12,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 1,
+            "code_lines": 0,
+            "blank_lines": 0,
+            "comment_lines": 1,
+            "comment_ratio": 1.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "auth_service.py",
+          "language": "python",
+          "content": "import os\nimport sqlite3\nimport hashlib\nimport requests\nimport logging\n\n# TODO: move these to env vars (never got around to it)\nDB_PASSWORD = \"admin123\"\nAPI_SECRET_KEY = \"sk-prod-xK92mNqL8vRt3wPz\"\nJWT_SECRET = \"supersecret_jwt_key_2024\"\nAWS_ACCESS_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\n\nlogging.basicConfig(level=logging.DEBUG)\nlogger = logging.getLogger(__name__)\n\ndef get_user(username, password):\n    # FIXME: SQL injection vulnerability - been here since sprint 3\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    query = \"SELECT * FROM users WHERE username = '\" + username + \"' AND password = '\" + password + \"'\"\n    logger.debug(f\"Executing query: {query}\")  # logs sensitive data\n    cursor.execute(query)\n    result = cursor.fetchone()\n    conn.close()\n    return result\n\ndef get_user_by_id(user_id):\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    # another SQL injection - copy pasted from above\n    query = \"SELECT * FROM users WHERE id = \" + str(user_id)\n    cursor.execute(query)\n    result = cursor.fetchone()\n    conn.close()\n    return result\n\ndef hash_password(password):\n    # MD5 - weak hashing, left over from legacy system\n    return hashlib.md5(password.encode()).hexdigest()\n\ndef validate_user_input(data):\n    # enormous function - classic complexity debt\n    if data is None:\n        return False\n    if \"username\" not in data:\n        return False\n    if len(data[\"username\"]) < 3:\n        return False\n    if len(data[\"username\"]) > 50:\n        return False\n    if \"email\" not in data:\n        return False\n    if \"@\" not in data[\"email\"]:\n        return False\n    if \".\" not in data[\"email\"]:\n        return False\n    if \"password\" not in data:\n        return False\n    if len(data[\"password\"]) < 6:\n        return False\n    if \"age\" not in data:\n        return False\n    if data[\"age\"] < 0:\n        return False\n    if data[\"age\"] > 150:\n        return False\n    if \"country\" not in data:\n        return False\n    if len(data[\"country\"]) != 2:\n        return False\n    if \"phone\" in data:\n        if len(data[\"phone\"]) < 7:\n            return False\n        if len(data[\"phone\"]) > 15:\n            return False\n    if \"role\" in data:\n        if data[\"role\"] not in [\"admin\", \"user\", \"moderator\", \"guest\"]:\n            return False\n    if \"referral_code\" in data:\n        if len(data[\"referral_code\"]) != 8:\n            return False\n    # still more checks needed but ran out of time\n    return True\n\ndef send_notification(user_id, message, channel):\n    # duplicated logic from notifications_legacy.py - TODO: consolidate\n    if channel == \"email\":\n        api_key = \"sg.prod_sendgrid_key_hardcoded_yikes\"\n        response = requests.post(\n            \"https://api.sendgrid.com/v3/mail/send\",\n            headers={\"Authorization\": f\"Bearer {api_key}\"},\n            json={\"to\": user_id, \"message\": message}\n        )\n        logger.info(f\"Email sent to {user_id}: {message}\")  # logs PII\n        return response.status_code\n    elif channel == \"sms\":\n        twilio_sid = \"AC_hardcoded_twilio_sid\"\n        twilio_token = \"hardcoded_twilio_auth_token\"\n        response = requests.post(\n            f\"https://api.twilio.com/2010-04-01/Accounts/{twilio_sid}/Messages\",\n            auth=(twilio_sid, twilio_token),\n            data={\"To\": user_id, \"Body\": message}\n        )\n        return response.status_code\n    elif channel == \"push\":\n        fcm_key = \"AAAA_hardcoded_fcm_server_key\"\n        response = requests.post(\n            \"https://fcm.googleapis.com/fcm/send\",\n            headers={\"Authorization\": f\"key={fcm_key}\"},\n            json={\"to\": user_id, \"notification\": {\"body\": message}}\n        )\n        return response.status_code\n    else:\n        logger.warning(f\"Unknown channel: {channel}\")\n        return None\n\ndef process_payment(user_id, amount, card_number, cvv, expiry):\n    # PCI violation: logging card data\n    logger.debug(f\"Processing payment for user {user_id}: card={card_number}, cvv={cvv}, expiry={expiry}\")\n    \n    stripe_key = \"sk_live_hardcoded_stripe_key_abc123\"\n    \n    # no input validation on card number\n    # no rate limiting\n    # no idempotency key\n    response = requests.post(\n        \"https://api.stripe.com/v1/charges\",\n        auth=(stripe_key, \"\"),\n        data={\n            \"amount\": amount,\n            \"currency\": \"usd\",\n            \"source\": card_number,\n        }\n    )\n    return response.json()\n\ndef get_admin_users():\n    # no auth check - anyone can call this\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    cursor.execute(\"SELECT * FROM users WHERE role = 'admin'\")\n    results = cursor.fetchall()\n    conn.close()\n    return results\n\ndef delete_user(user_id):\n    # no auth, no soft delete, no audit log\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    cursor.execute(f\"DELETE FROM users WHERE id = {user_id}\")  # SQL injection\n    conn.commit()\n    conn.close()\n    print(f\"Deleted user {user_id}\")  # print instead of logger\n",
+          "size_bytes": 5045,
+          "debt_category_hint": "architecture",
+          "debt_signals": [
+            {
+              "pattern": "TODO",
+              "line_number": 7,
+              "line_snippet": "# TODO: move these to env vars (never got around to it)"
+            },
+            {
+              "pattern": "password\\s*=",
+              "line_number": 8,
+              "line_snippet": "DB_PASSWORD = \"admin123\""
+            },
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 10,
+              "line_snippet": "JWT_SECRET = \"supersecret_jwt_key_2024\""
+            },
+            {
+              "pattern": "secret\\s*=",
+              "line_number": 12,
+              "line_snippet": "AWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\""
+            },
+            {
+              "pattern": "FIXME",
+              "line_number": 18,
+              "line_snippet": "# FIXME: SQL injection vulnerability - been here since sprint 3"
+            },
+            {
+              "pattern": "password\\s*=",
+              "line_number": 21,
+              "line_snippet": "query = \"SELECT * FROM users WHERE username = '\" + username + \"' AND password = '\" + password + \"'\""
+            },
+            {
+              "pattern": "TODO",
+              "line_number": 87,
+              "line_snippet": "# duplicated logic from notifications_legacy.py - TODO: consolidate"
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 89,
+              "line_snippet": "api_key = \"sg.prod_sendgrid_key_hardcoded_yikes\""
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 98,
+              "line_snippet": "twilio_sid = \"AC_hardcoded_twilio_sid\""
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 99,
+              "line_snippet": "twilio_token = \"hardcoded_twilio_auth_token\""
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 107,
+              "line_snippet": "fcm_key = \"AAAA_hardcoded_fcm_server_key\""
+            },
+            {
+              "pattern": "hardcoded",
+              "line_number": 122,
+              "line_snippet": "stripe_key = \"sk_live_hardcoded_stripe_key_abc123\""
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 154,
+              "line_snippet": "print(f\"Deleted user {user_id}\")  # print instead of logger"
+            }
+          ],
+          "debt_signal_count": 13,
+          "metrics": {
+            "total_lines": 154,
+            "code_lines": 129,
+            "blank_lines": 12,
+            "comment_lines": 13,
+            "comment_ratio": 0.084,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "iam_policies.json",
+          "language": "json",
+          "content": "{\n  \"IAMPolicies\": [\n    {\n      \"PolicyName\": \"DevTeamPolicy\",\n      \"Description\": \"Policy for dev team - started broad, never narrowed down\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Sid\": \"FullAccess\",\n            \"Effect\": \"Allow\",\n            \"Action\": \"*\",\n            \"Resource\": \"*\",\n            \"Condition\": {}\n          }\n        ]\n      }\n    },\n    {\n      \"PolicyName\": \"S3ReadPolicy\",\n      \"Description\": \"Supposed to be read-only S3, but...\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Sid\": \"S3Everything\",\n            \"Effect\": \"Allow\",\n            \"Action\": [\n              \"s3:*\"\n            ],\n            \"Resource\": \"*\"\n          },\n          {\n            \"Sid\": \"AlsoEC2ForSomeReason\",\n            \"Effect\": \"Allow\",\n            \"Action\": [\n              \"ec2:*\",\n              \"iam:*\",\n              \"lambda:*\"\n            ],\n            \"Resource\": \"*\"\n          }\n        ]\n      }\n    },\n    {\n      \"PolicyName\": \"LambdaExecutionRole\",\n      \"Description\": \"Lambda needs some permissions\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Effect\": \"Allow\",\n            \"Action\": [\n              \"logs:*\",\n              \"s3:*\",\n              \"dynamodb:*\",\n              \"secretsmanager:*\",\n              \"ssm:*\",\n              \"kms:*\",\n              \"iam:PassRole\",\n              \"iam:CreateRole\",\n              \"iam:AttachRolePolicy\"\n            ],\n            \"Resource\": \"*\"\n          }\n        ]\n      }\n    },\n    {\n      \"PolicyName\": \"CrossAccountAccess\",\n      \"Description\": \"Allow cross-account - who set this up??\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Effect\": \"Allow\",\n            \"Action\": \"sts:AssumeRole\",\n            \"Principal\": {\n              \"AWS\": \"*\"\n            },\n            \"Resource\": \"*\"\n          }\n        ]\n      }\n    }\n  ],\n  \"InlineRolePolicies\": [\n    {\n      \"RoleName\": \"prod-app-role\",\n      \"PolicyName\": \"inline-everything\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Effect\": \"Allow\",\n            \"Action\": \"*\",\n            \"Resource\": \"*\",\n            \"Condition\": {\n              \"StringEquals\": {\n                \"aws:RequestedRegion\": \"us-east-1\"\n              }\n            }\n          }\n        ]\n      }\n    }\n  ]\n}\n",
+          "size_bytes": 2517,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 109,
+            "code_lines": 109,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 4,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "user_db.js",
+          "language": "javascript",
+          "content": "// user-dashboard.js\n// Written by: Jake (left the company)\n// Last touched: ages ago, don't break it\n\nconst API_BASE = \"http://api.internal.company.com\";  // HTTP not HTTPS\nconst ADMIN_TOKEN = \"Bearer eyJhbGciOiJub25lIn0.eyJyb2xlIjoiYWRtaW4ifQ.\";  // hardcoded JWT, alg:none\n\n// Storing sensitive data in localStorage - insecure\nfunction loginUser(username, password) {\n    fetch(`${API_BASE}/login`, {\n        method: \"POST\",\n        body: JSON.stringify({ username, password })\n        // missing: Content-Type header, CSRF token\n    })\n    .then(res => res.json())\n    .then(data => {\n        localStorage.setItem(\"user_token\", data.token);\n        localStorage.setItem(\"user_role\", data.role);\n        localStorage.setItem(\"credit_card_last4\", data.payment?.last4);  // why is this here\n        localStorage.setItem(\"ssn_partial\", data.ssn);  // definitely should not be here\n        renderDashboard(data);\n    });\n    // no .catch() - silent failures\n}\n\n// XSS vulnerability - innerHTML with user-controlled data\nfunction renderUserProfile(user) {\n    const container = document.getElementById(\"profile\");\n    container.innerHTML = `\n        <h2>Welcome, ${user.name}!</h2>\n        <p>Email: ${user.email}</p>\n        <p>Bio: ${user.bio}</p>\n        <div class=\"notes\">${user.notes}</div>\n    `;\n    // user.bio and user.notes are not sanitized\n}\n\n// another XSS - eval with user input\nfunction runUserScript(scriptInput) {\n    // \"feature\" requested by enterprise client, big mistake\n    eval(scriptInput);\n}\n\n// insecure direct object reference - no auth check\nfunction getUserData(userId) {\n    return fetch(`${API_BASE}/users/${userId}`, {\n        headers: { \"Authorization\": ADMIN_TOKEN }\n    }).then(r => r.json());\n    // any userId can be requested, no ownership check\n}\n\n// massive duplicated function (copy of above with tiny change)\nfunction getUserDataV2(userId) {\n    return fetch(`${API_BASE}/v2/users/${userId}`, {\n        headers: { \"Authorization\": ADMIN_TOKEN }\n    }).then(r => r.json());\n}\n\n// massive duplicated function (copy of above with tiny change)\nfunction getUserDataV3(userId) {\n    return fetch(`${API_BASE}/v3/users/${userId}`, {\n        headers: { \"Authorization\": ADMIN_TOKEN }\n    }).then(r => r.json());\n}\n\n// open redirect vulnerability\nfunction redirectAfterLogin(returnUrl) {\n    // no validation of returnUrl - attacker can redirect to malicious site\n    window.location.href = returnUrl;\n}\n\n// prototype pollution\nfunction mergeConfig(userConfig) {\n    const defaults = { theme: \"light\", lang: \"en\" };\n    // vulnerable merge\n    for (let key in userConfig) {\n        defaults[key] = userConfig[key];\n    }\n    return defaults;\n}\n\n// sensitive data in URL (shows up in server logs, browser history)\nfunction searchUsers(query, adminPassword) {\n    return fetch(`${API_BASE}/admin/search?q=${query}&admin_pass=${adminPassword}`);\n}\n\n// no rate limiting, no lockout\nfunction bruteForceableLogin(username, password) {\n    return fetch(`${API_BASE}/login`, {\n        method: \"POST\",\n        body: JSON.stringify({ username, password })\n    });\n}\n\n// TODO: remove before prod - debug backdoor\nfunction devBypassAuth() {\n    localStorage.setItem(\"user_role\", \"admin\");\n    localStorage.setItem(\"user_token\", ADMIN_TOKEN);\n    console.log(\"Auth bypassed for dev purposes\");\n    window.location.reload();\n}\n\n// deeply nested callback hell - complexity debt\nfunction loadDashboardData(userId) {\n    fetch(`${API_BASE}/users/${userId}`)\n        .then(r => r.json())\n        .then(user => {\n            fetch(`${API_BASE}/orders/${user.id}`)\n                .then(r => r.json())\n                .then(orders => {\n                    fetch(`${API_BASE}/payments/${orders[0].id}`)\n                        .then(r => r.json())\n                        .then(payment => {\n                            fetch(`${API_BASE}/products/${payment.productId}`)\n                                .then(r => r.json())\n                                .then(product => {\n                                    fetch(`${API_BASE}/reviews/${product.id}`)\n                                        .then(r => r.json())\n                                        .then(reviews => {\n                                            renderDashboard({ user, orders, payment, product, reviews });\n                                        });\n                                });\n                        });\n                });\n        });\n}\n",
+          "size_bytes": 4432,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "token\\s*=",
+              "line_number": 6,
+              "line_snippet": "const ADMIN_TOKEN = \"Bearer eyJhbGciOiJub25lIn0.eyJyb2xlIjoiYWRtaW4ifQ.\";  // hardcoded JWT, alg:none"
+            },
+            {
+              "pattern": "TODO",
+              "line_number": 95,
+              "line_snippet": "// TODO: remove before prod - debug backdoor"
+            },
+            {
+              "pattern": "console\\.log",
+              "line_number": 99,
+              "line_snippet": "console.log(\"Auth bypassed for dev purposes\");"
+            }
+          ],
+          "debt_signal_count": 3,
+          "metrics": {
+            "total_lines": 126,
+            "code_lines": 91,
+            "blank_lines": 13,
+            "comment_lines": 22,
+            "comment_ratio": 0.175,
+            "max_indentation_depth": 11,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        }
+      ]
+    },
+    "detailed_files": [
+      {
+        "path": "requirements.txt",
+        "language": "txt",
+        "content": "# requirements.txt\n# Last updated: a long time ago\n# \"if it ain't broke don't fix it\" - previous dev\n\n# Web framework - critically outdated, multiple CVEs\nFlask==0.12.2          # current: 3.0.x \u2014 CVE-2018-1000656 (DoS), CVE-2023-30861 (cookie leak)\nDjango==2.0.0          # current: 5.0.x \u2014 CVE-2019-14234 (SQLi), CVE-2021-33203, CVE-2022-28347\n\n# Crypto - dangerously outdated\ncryptography==2.1.4    # current: 42.x \u2014 multiple critical CVEs including RSA padding oracle\npyOpenSSL==17.5.0      # current: 24.x \u2014 CVE-2018-1000522, several TLS vulnerabilities\nparamiko==2.0.0        # current: 3.x  \u2014 CVE-2018-7750 (auth bypass)\n\n# HTTP client\nrequests==2.6.0        # current: 2.31 \u2014 CVE-2023-32681 (credential leak in redirects)\nurllib3==1.10.0        # current: 2.x  \u2014 CVE-2021-33503, CVE-2023-43804\n\n# Parsing - deserialization vulnerabilities\nPyYAML==3.11           # current: 6.x  \u2014 CVE-2017-18342 (arbitrary code via yaml.load)\nPillow==4.0.0          # current: 10.x \u2014 CVE-2021-25287, CVE-2021-34552 (RCE)\nlxml==3.6.0            # current: 5.x  \u2014 CVE-2021-43818 (XSS)\n\n# Auth\nPyJWT==1.4.0           # current: 2.x  \u2014 CVE-2022-29217 (alg confusion attack)\nbcrypt==2.0.0          # current: 4.x  \u2014 outdated, performance issues\n\n# Database\nSQLAlchemy==1.0.0      # current: 2.x  \u2014 multiple security fixes, major API changes\npsycopg2==2.6.0        # current: 2.9.x\n\n# Serialization  \npickle                 # not a package but used directly - arbitrary code execution risk\nmarshmallow==2.0.0     # current: 3.x\n\n# Unused dependencies (nobody knows what these do anymore)\ncelery==3.1.0          # CVE-2021-23727 - not even sure if we use celery\nredis==2.10.0          # outdated client\nboto3==1.4.0           # AWS SDK from 2017, missing many security patches\nJinja2==2.8            # current: 3.x \u2014 CVE-2019-10906 (sandbox escape)\n\n# Dev dependencies accidentally in prod\npytest==3.0.0\nipython==5.0.0         # CVE-2022-21699 (arbitrary code execution)\njupyter==1.0.0         # multiple CVEs, should never be in prod\n",
+        "size_bytes": 2047,
+        "debt_category_hint": "dependencies",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 44,
+          "code_lines": 23,
+          "blank_lines": 9,
+          "comment_lines": 12,
+          "comment_ratio": 0.273,
+          "max_indentation_depth": 0,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "README.md",
+        "language": "markdown",
+        "content": "# vulnerable",
+        "size_bytes": 12,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 1,
+          "code_lines": 0,
+          "blank_lines": 0,
+          "comment_lines": 1,
+          "comment_ratio": 1.0,
+          "max_indentation_depth": 0,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "auth_service.py",
+        "language": "python",
+        "content": "import os\nimport sqlite3\nimport hashlib\nimport requests\nimport logging\n\n# TODO: move these to env vars (never got around to it)\nDB_PASSWORD = \"admin123\"\nAPI_SECRET_KEY = \"sk-prod-xK92mNqL8vRt3wPz\"\nJWT_SECRET = \"supersecret_jwt_key_2024\"\nAWS_ACCESS_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\n\nlogging.basicConfig(level=logging.DEBUG)\nlogger = logging.getLogger(__name__)\n\ndef get_user(username, password):\n    # FIXME: SQL injection vulnerability - been here since sprint 3\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    query = \"SELECT * FROM users WHERE username = '\" + username + \"' AND password = '\" + password + \"'\"\n    logger.debug(f\"Executing query: {query}\")  # logs sensitive data\n    cursor.execute(query)\n    result = cursor.fetchone()\n    conn.close()\n    return result\n\ndef get_user_by_id(user_id):\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    # another SQL injection - copy pasted from above\n    query = \"SELECT * FROM users WHERE id = \" + str(user_id)\n    cursor.execute(query)\n    result = cursor.fetchone()\n    conn.close()\n    return result\n\ndef hash_password(password):\n    # MD5 - weak hashing, left over from legacy system\n    return hashlib.md5(password.encode()).hexdigest()\n\ndef validate_user_input(data):\n    # enormous function - classic complexity debt\n    if data is None:\n        return False\n    if \"username\" not in data:\n        return False\n    if len(data[\"username\"]) < 3:\n        return False\n    if len(data[\"username\"]) > 50:\n        return False\n    if \"email\" not in data:\n        return False\n    if \"@\" not in data[\"email\"]:\n        return False\n    if \".\" not in data[\"email\"]:\n        return False\n    if \"password\" not in data:\n        return False\n    if len(data[\"password\"]) < 6:\n        return False\n    if \"age\" not in data:\n        return False\n    if data[\"age\"] < 0:\n        return False\n    if data[\"age\"] > 150:\n        return False\n    if \"country\" not in data:\n        return False\n    if len(data[\"country\"]) != 2:\n        return False\n    if \"phone\" in data:\n        if len(data[\"phone\"]) < 7:\n            return False\n        if len(data[\"phone\"]) > 15:\n            return False\n    if \"role\" in data:\n        if data[\"role\"] not in [\"admin\", \"user\", \"moderator\", \"guest\"]:\n            return False\n    if \"referral_code\" in data:\n        if len(data[\"referral_code\"]) != 8:\n            return False\n    # still more checks needed but ran out of time\n    return True\n\ndef send_notification(user_id, message, channel):\n    # duplicated logic from notifications_legacy.py - TODO: consolidate\n    if channel == \"email\":\n        api_key = \"sg.prod_sendgrid_key_hardcoded_yikes\"\n        response = requests.post(\n            \"https://api.sendgrid.com/v3/mail/send\",\n            headers={\"Authorization\": f\"Bearer {api_key}\"},\n            json={\"to\": user_id, \"message\": message}\n        )\n        logger.info(f\"Email sent to {user_id}: {message}\")  # logs PII\n        return response.status_code\n    elif channel == \"sms\":\n        twilio_sid = \"AC_hardcoded_twilio_sid\"\n        twilio_token = \"hardcoded_twilio_auth_token\"\n        response = requests.post(\n            f\"https://api.twilio.com/2010-04-01/Accounts/{twilio_sid}/Messages\",\n            auth=(twilio_sid, twilio_token),\n            data={\"To\": user_id, \"Body\": message}\n        )\n        return response.status_code\n    elif channel == \"push\":\n        fcm_key = \"AAAA_hardcoded_fcm_server_key\"\n        response = requests.post(\n            \"https://fcm.googleapis.com/fcm/send\",\n            headers={\"Authorization\": f\"key={fcm_key}\"},\n            json={\"to\": user_id, \"notification\": {\"body\": message}}\n        )\n        return response.status_code\n    else:\n        logger.warning(f\"Unknown channel: {channel}\")\n        return None\n\ndef process_payment(user_id, amount, card_number, cvv, expiry):\n    # PCI violation: logging card data\n    logger.debug(f\"Processing payment for user {user_id}: card={card_number}, cvv={cvv}, expiry={expiry}\")\n    \n    stripe_key = \"sk_live_hardcoded_stripe_key_abc123\"\n    \n    # no input validation on card number\n    # no rate limiting\n    # no idempotency key\n    response = requests.post(\n        \"https://api.stripe.com/v1/charges\",\n        auth=(stripe_key, \"\"),\n        data={\n            \"amount\": amount,\n            \"currency\": \"usd\",\n            \"source\": card_number,\n        }\n    )\n    return response.json()\n\ndef get_admin_users():\n    # no auth check - anyone can call this\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    cursor.execute(\"SELECT * FROM users WHERE role = 'admin'\")\n    results = cursor.fetchall()\n    conn.close()\n    return results\n\ndef delete_user(user_id):\n    # no auth, no soft delete, no audit log\n    conn = sqlite3.connect(\"users.db\")\n    cursor = conn.cursor()\n    cursor.execute(f\"DELETE FROM users WHERE id = {user_id}\")  # SQL injection\n    conn.commit()\n    conn.close()\n    print(f\"Deleted user {user_id}\")  # print instead of logger\n",
+        "size_bytes": 5045,
+        "debt_category_hint": "architecture",
+        "debt_signals": [
+          {
+            "pattern": "TODO",
+            "line_number": 7,
+            "line_snippet": "# TODO: move these to env vars (never got around to it)"
+          },
+          {
+            "pattern": "password\\s*=",
+            "line_number": 8,
+            "line_snippet": "DB_PASSWORD = \"admin123\""
+          },
+          {
+            "pattern": "secret\\s*=",
+            "line_number": 10,
+            "line_snippet": "JWT_SECRET = \"supersecret_jwt_key_2024\""
+          },
+          {
+            "pattern": "secret\\s*=",
+            "line_number": 12,
+            "line_snippet": "AWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\""
+          },
+          {
+            "pattern": "FIXME",
+            "line_number": 18,
+            "line_snippet": "# FIXME: SQL injection vulnerability - been here since sprint 3"
+          },
+          {
+            "pattern": "password\\s*=",
+            "line_number": 21,
+            "line_snippet": "query = \"SELECT * FROM users WHERE username = '\" + username + \"' AND password = '\" + password + \"'\""
+          },
+          {
+            "pattern": "TODO",
+            "line_number": 87,
+            "line_snippet": "# duplicated logic from notifications_legacy.py - TODO: consolidate"
+          },
+          {
+            "pattern": "api_key\\s*=",
+            "line_number": 89,
+            "line_snippet": "api_key = \"sg.prod_sendgrid_key_hardcoded_yikes\""
+          },
+          {
+            "pattern": "hardcoded",
+            "line_number": 98,
+            "line_snippet": "twilio_sid = \"AC_hardcoded_twilio_sid\""
+          },
+          {
+            "pattern": "token\\s*=",
+            "line_number": 99,
+            "line_snippet": "twilio_token = \"hardcoded_twilio_auth_token\""
+          },
+          {
+            "pattern": "hardcoded",
+            "line_number": 107,
+            "line_snippet": "fcm_key = \"AAAA_hardcoded_fcm_server_key\""
+          },
+          {
+            "pattern": "hardcoded",
+            "line_number": 122,
+            "line_snippet": "stripe_key = \"sk_live_hardcoded_stripe_key_abc123\""
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 154,
+            "line_snippet": "print(f\"Deleted user {user_id}\")  # print instead of logger"
+          }
+        ],
+        "debt_signal_count": 13,
+        "metrics": {
+          "total_lines": 154,
+          "code_lines": 129,
+          "blank_lines": 12,
+          "comment_lines": 13,
+          "comment_ratio": 0.084,
+          "max_indentation_depth": 3,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "iam_policies.json",
+        "language": "json",
+        "content": "{\n  \"IAMPolicies\": [\n    {\n      \"PolicyName\": \"DevTeamPolicy\",\n      \"Description\": \"Policy for dev team - started broad, never narrowed down\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Sid\": \"FullAccess\",\n            \"Effect\": \"Allow\",\n            \"Action\": \"*\",\n            \"Resource\": \"*\",\n            \"Condition\": {}\n          }\n        ]\n      }\n    },\n    {\n      \"PolicyName\": \"S3ReadPolicy\",\n      \"Description\": \"Supposed to be read-only S3, but...\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Sid\": \"S3Everything\",\n            \"Effect\": \"Allow\",\n            \"Action\": [\n              \"s3:*\"\n            ],\n            \"Resource\": \"*\"\n          },\n          {\n            \"Sid\": \"AlsoEC2ForSomeReason\",\n            \"Effect\": \"Allow\",\n            \"Action\": [\n              \"ec2:*\",\n              \"iam:*\",\n              \"lambda:*\"\n            ],\n            \"Resource\": \"*\"\n          }\n        ]\n      }\n    },\n    {\n      \"PolicyName\": \"LambdaExecutionRole\",\n      \"Description\": \"Lambda needs some permissions\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Effect\": \"Allow\",\n            \"Action\": [\n              \"logs:*\",\n              \"s3:*\",\n              \"dynamodb:*\",\n              \"secretsmanager:*\",\n              \"ssm:*\",\n              \"kms:*\",\n              \"iam:PassRole\",\n              \"iam:CreateRole\",\n              \"iam:AttachRolePolicy\"\n            ],\n            \"Resource\": \"*\"\n          }\n        ]\n      }\n    },\n    {\n      \"PolicyName\": \"CrossAccountAccess\",\n      \"Description\": \"Allow cross-account - who set this up??\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Effect\": \"Allow\",\n            \"Action\": \"sts:AssumeRole\",\n            \"Principal\": {\n              \"AWS\": \"*\"\n            },\n            \"Resource\": \"*\"\n          }\n        ]\n      }\n    }\n  ],\n  \"InlineRolePolicies\": [\n    {\n      \"RoleName\": \"prod-app-role\",\n      \"PolicyName\": \"inline-everything\",\n      \"PolicyDocument\": {\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Effect\": \"Allow\",\n            \"Action\": \"*\",\n            \"Resource\": \"*\",\n            \"Condition\": {\n              \"StringEquals\": {\n                \"aws:RequestedRegion\": \"us-east-1\"\n              }\n            }\n          }\n        ]\n      }\n    }\n  ]\n}\n",
+        "size_bytes": 2517,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 109,
+          "code_lines": 109,
+          "blank_lines": 0,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 4,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "user_db.js",
+        "language": "javascript",
+        "content": "// user-dashboard.js\n// Written by: Jake (left the company)\n// Last touched: ages ago, don't break it\n\nconst API_BASE = \"http://api.internal.company.com\";  // HTTP not HTTPS\nconst ADMIN_TOKEN = \"Bearer eyJhbGciOiJub25lIn0.eyJyb2xlIjoiYWRtaW4ifQ.\";  // hardcoded JWT, alg:none\n\n// Storing sensitive data in localStorage - insecure\nfunction loginUser(username, password) {\n    fetch(`${API_BASE}/login`, {\n        method: \"POST\",\n        body: JSON.stringify({ username, password })\n        // missing: Content-Type header, CSRF token\n    })\n    .then(res => res.json())\n    .then(data => {\n        localStorage.setItem(\"user_token\", data.token);\n        localStorage.setItem(\"user_role\", data.role);\n        localStorage.setItem(\"credit_card_last4\", data.payment?.last4);  // why is this here\n        localStorage.setItem(\"ssn_partial\", data.ssn);  // definitely should not be here\n        renderDashboard(data);\n    });\n    // no .catch() - silent failures\n}\n\n// XSS vulnerability - innerHTML with user-controlled data\nfunction renderUserProfile(user) {\n    const container = document.getElementById(\"profile\");\n    container.innerHTML = `\n        <h2>Welcome, ${user.name}!</h2>\n        <p>Email: ${user.email}</p>\n        <p>Bio: ${user.bio}</p>\n        <div class=\"notes\">${user.notes}</div>\n    `;\n    // user.bio and user.notes are not sanitized\n}\n\n// another XSS - eval with user input\nfunction runUserScript(scriptInput) {\n    // \"feature\" requested by enterprise client, big mistake\n    eval(scriptInput);\n}\n\n// insecure direct object reference - no auth check\nfunction getUserData(userId) {\n    return fetch(`${API_BASE}/users/${userId}`, {\n        headers: { \"Authorization\": ADMIN_TOKEN }\n    }).then(r => r.json());\n    // any userId can be requested, no ownership check\n}\n\n// massive duplicated function (copy of above with tiny change)\nfunction getUserDataV2(userId) {\n    return fetch(`${API_BASE}/v2/users/${userId}`, {\n        headers: { \"Authorization\": ADMIN_TOKEN }\n    }).then(r => r.json());\n}\n\n// massive duplicated function (copy of above with tiny change)\nfunction getUserDataV3(userId) {\n    return fetch(`${API_BASE}/v3/users/${userId}`, {\n        headers: { \"Authorization\": ADMIN_TOKEN }\n    }).then(r => r.json());\n}\n\n// open redirect vulnerability\nfunction redirectAfterLogin(returnUrl) {\n    // no validation of returnUrl - attacker can redirect to malicious site\n    window.location.href = returnUrl;\n}\n\n// prototype pollution\nfunction mergeConfig(userConfig) {\n    const defaults = { theme: \"light\", lang: \"en\" };\n    // vulnerable merge\n    for (let key in userConfig) {\n        defaults[key] = userConfig[key];\n    }\n    return defaults;\n}\n\n// sensitive data in URL (shows up in server logs, browser history)\nfunction searchUsers(query, adminPassword) {\n    return fetch(`${API_BASE}/admin/search?q=${query}&admin_pass=${adminPassword}`);\n}\n\n// no rate limiting, no lockout\nfunction bruteForceableLogin(username, password) {\n    return fetch(`${API_BASE}/login`, {\n        method: \"POST\",\n        body: JSON.stringify({ username, password })\n    });\n}\n\n// TODO: remove before prod - debug backdoor\nfunction devBypassAuth() {\n    localStorage.setItem(\"user_role\", \"admin\");\n    localStorage.setItem(\"user_token\", ADMIN_TOKEN);\n    console.log(\"Auth bypassed for dev purposes\");\n    window.location.reload();\n}\n\n// deeply nested callback hell - complexity debt\nfunction loadDashboardData(userId) {\n    fetch(`${API_BASE}/users/${userId}`)\n        .then(r => r.json())\n        .then(user => {\n            fetch(`${API_BASE}/orders/${user.id}`)\n                .then(r => r.json())\n                .then(orders => {\n                    fetch(`${API_BASE}/payments/${orders[0].id}`)\n                        .then(r => r.json())\n                        .then(payment => {\n                            fetch(`${API_BASE}/products/${payment.productId}`)\n                                .then(r => r.json())\n                                .then(product => {\n                                    fetch(`${API_BASE}/reviews/${product.id}`)\n                                        .then(r => r.json())\n                                        .then(reviews => {\n                                            renderDashboard({ user, orders, payment, product, reviews });\n                                        });\n                                });\n                        });\n                });\n        });\n}\n",
+        "size_bytes": 4432,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [
+          {
+            "pattern": "token\\s*=",
+            "line_number": 6,
+            "line_snippet": "const ADMIN_TOKEN = \"Bearer eyJhbGciOiJub25lIn0.eyJyb2xlIjoiYWRtaW4ifQ.\";  // hardcoded JWT, alg:none"
+          },
+          {
+            "pattern": "TODO",
+            "line_number": 95,
+            "line_snippet": "// TODO: remove before prod - debug backdoor"
+          },
+          {
+            "pattern": "console\\.log",
+            "line_number": 99,
+            "line_snippet": "console.log(\"Auth bypassed for dev purposes\");"
+          }
+        ],
+        "debt_signal_count": 3,
+        "metrics": {
+          "total_lines": 126,
+          "code_lines": 91,
+          "blank_lines": 13,
+          "comment_lines": 22,
+          "comment_ratio": 0.175,
+          "max_indentation_depth": 11,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      }
+    ],
+    "analysis_summary": {
+      "total_debt_signals": 16,
+      "files_with_debt_signals": 2,
+      "cost_estimate": {
+        "chunks_to_analyze": 7,
+        "total_code_chars": 14025,
+        "approx_tokens": 3506
+      }
+    }
+  },
+  "summary": {
+    "repo_url": "ananyamehrotra/vulnerable",
+    "repo_id": "4fc59dca",
+    "health_score": 100,
+    "total_security_issues": 0,
+    "total_debt_issues": 0,
+    "critical_issues": 0,
+    "quick_wins": 0
+  }
+}

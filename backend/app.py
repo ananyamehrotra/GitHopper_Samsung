@@ -1,4 +1,5 @@
 from flask import Flask, render_template, jsonify, request
+from ai.aggregator import aggregate_all
 from flask_cors import CORS
 import os
 from pathlib import Path
@@ -24,6 +25,64 @@ CORS(app)
 mcp_store = MCPMemoryStore()
 continuous_pipeline = ContinuousIntelligencePipeline(store=mcp_store)
 watch_manager = ContinuousWatchManager(pipeline=continuous_pipeline)
+
+
+def build_aggregated_analysis(repo_url, branch_name="main", continuous=False, generate_fixes=True):
+    """
+    Run the requested analysis pipeline and normalize its output into the
+    frontend-friendly aggregated shape used across the report pages.
+    """
+    github_token = os.environ.get('GITHUB_TOKEN')
+
+    if continuous:
+        result = continuous_pipeline.run(
+            repo_url=repo_url,
+            github_token=github_token,
+            branch_name=branch_name,
+            generate_fixes=generate_fixes,
+        )
+
+        if result.get('status') == 'success':
+            data_stage = result.get('data', {})
+            vulns = data_stage.get('security_findings', []) + data_stage.get('debt_findings', [])
+            billing_info = result.get('billing', {})
+            agg = aggregate_all(vulns, billing_info, branch_name)
+        else:
+            agg = aggregate_all([], {}, branch_name)
+
+        return result, agg
+
+    pipeline = GitHopperPipeline()
+    result = pipeline.run_full_pipeline(repo_url, github_token, branch_name)
+
+    if result.get('status') == 'success':
+        repo_id = result['summary']['repo_id']
+        results_dir = os.path.join(os.path.dirname(__file__), 'scan_results')
+        os.makedirs(results_dir, exist_ok=True)
+
+        results_file = os.path.join(results_dir, f'{repo_id}_pipeline.json')
+        with open(results_file, 'w') as f:
+            json.dump(result, f, indent=2)
+
+        print(f"[ANALYZE] Pipeline complete: Health score {result['summary']['health_score']}")
+    else:
+        print(f"[ANALYZE] Pipeline failed: {result.get('error', 'Unknown error')}")
+
+    if result.get('status') == 'success':
+        analyze_stage = result.get('stages', {}).get('analyze', {})
+        vulns = analyze_stage.get('vulnerabilities', [])
+        if not vulns and 'findings' in analyze_stage:
+            vulns = analyze_stage.get('findings', [])
+
+        if not vulns:
+            vulns = analyze_stage.get('security_findings', []) + analyze_stage.get('debt_findings', [])
+
+        billing_info = analyze_stage.get('billing', {})
+        agg = aggregate_all(vulns, billing_info, branch_name)
+    else:
+        agg = aggregate_all([], {}, branch_name)
+
+    return result, agg
 
 # Add headers to allow Firebase auth popups
 @app.after_request
@@ -344,26 +403,13 @@ def analyze_repo():
         print(f"[ANALYZE] Repository: {repo_url}")
         print(f"[ANALYZE] Branch: {branch_name}")
 
-        # Use the full pipeline
-        pipeline = GitHopperPipeline()
-        github_token = os.environ.get('GITHUB_TOKEN')
-        result = pipeline.run_full_pipeline(repo_url, github_token, branch_name)
-
-        if result.get('status') == 'success':
-            # Save results
-            repo_id = result['summary']['repo_id']
-            results_dir = os.path.join(os.path.dirname(__file__), 'scan_results')
-            os.makedirs(results_dir, exist_ok=True)
-
-            results_file = os.path.join(results_dir, f'{repo_id}_pipeline.json')
-            with open(results_file, 'w') as f:
-                json.dump(result, f, indent=2)
-
-            print(f"[ANALYZE] Pipeline complete: Health score {result['summary']['health_score']}")
-        else:
-            print(f"[ANALYZE] Pipeline failed: {result.get('error', 'Unknown error')}")
-
-        return jsonify(result), 200
+        _, agg = build_aggregated_analysis(repo_url, branch_name=branch_name, continuous=False)
+        return jsonify({
+            "security_audit": agg["security_audit"],
+            "debt_report": agg["debt_report"],
+            "health_score": agg["health_score"],
+            "branch_analysis": agg["branch_analysis"]
+        }), 200
 
     except Exception as e:
         import traceback
@@ -389,20 +435,69 @@ def analyze_repo_continuous():
         if not repo_url:
             return jsonify({'error': 'repo_url is required'}), 400
 
-        github_token = os.environ.get('GITHUB_TOKEN')
-        result = continuous_pipeline.run(
-            repo_url=repo_url,
-            github_token=github_token,
+        _, agg = build_aggregated_analysis(
+            repo_url,
             branch_name=branch_name,
+            continuous=True,
             generate_fixes=generate_fixes,
         )
-        return jsonify(result), 200
+            
+        return jsonify({
+            "security_audit": agg["security_audit"],
+            "debt_report": agg["debt_report"],
+            "health_score": agg["health_score"],
+            "branch_analysis": agg["branch_analysis"]
+        }), 200
 
     except Exception as e:
         import traceback
         error_msg = str(e)
         tb = traceback.format_exc()
         print(f"\n[ERROR] Exception in analyze_repo_continuous: {error_msg}")
+        print(f"[ERROR] Traceback:\n{tb}\n")
+        return jsonify({'error': error_msg, 'type': type(e).__name__}), 500
+
+
+@app.route('/api/debt-report', methods=['POST'])
+def get_debt_report():
+    """
+    Fetch a technical debt report directly for the requested repository/branch.
+    This lets the debt page load independently of router state.
+    """
+    try:
+        data = request.get_json() or {}
+        repo_url = data.get('repo_url')
+        branch_name = data.get('branch_name', 'main')
+        scan_mode = data.get('scan_mode', 'classic')
+        continuous = scan_mode == 'continuous' or bool(data.get('continuous'))
+        generate_fixes = data.get('generate_fixes', True)
+
+        if not repo_url:
+            return jsonify({'error': 'repo_url is required'}), 400
+
+        if not repo_url.startswith('http'):
+            repo_url = f"https://github.com/{repo_url}"
+
+        print(f"[DEBT] Loading debt report for {repo_url} ({branch_name}, mode={scan_mode})")
+        _, agg = build_aggregated_analysis(
+            repo_url,
+            branch_name=branch_name,
+            continuous=continuous,
+            generate_fixes=generate_fixes,
+        )
+
+        return jsonify({
+            "repo_url": repo_url,
+            "branch_name": branch_name,
+            "scan_mode": "continuous" if continuous else "classic",
+            "debt_report": agg["debt_report"]
+        }), 200
+
+    except Exception as e:
+        import traceback
+        error_msg = str(e)
+        tb = traceback.format_exc()
+        print(f"\n[ERROR] Exception in get_debt_report: {error_msg}")
         print(f"[ERROR] Traceback:\n{tb}\n")
         return jsonify({'error': error_msg, 'type': type(e).__name__}), 500
 
@@ -553,3 +648,5 @@ if __name__ == '__main__':
     print("=" * 60)
     
     app.run(host='0.0.0.0', port=5000, debug=True)
+
+

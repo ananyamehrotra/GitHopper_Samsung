@@ -1,0 +1,134 @@
+{
+  "status": "success",
+  "pipeline": "complete",
+  "execution_time_seconds": 1.796092,
+  "stages": {
+    "fetch": {
+      "repo_id": "b8bfee72",
+      "repo_url": "octocat/Hello-World",
+      "total_files": 0,
+      "categories": {
+        "config": 0,
+        "dependencies": 0,
+        "source_code": 0
+      },
+      "chunks": [],
+      "files": []
+    },
+    "analyze": {
+      "repo_id": "b8bfee72",
+      "repo_url": "octocat/Hello-World",
+      "branch_name": "main",
+      "vulnerabilities": [],
+      "vulnerable_files": [],
+      "total_files_analyzed": 0,
+      "files_with_issues": 0,
+      "total_vulnerabilities": 0,
+      "cost_tracker": {
+        "api_calls": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "estimated_cost": 0.0
+      },
+      "billing": {
+        "calls_made": 0,
+        "free_calls_remaining": 100,
+        "estimated_cost": 0.0,
+        "will_be_charged": false,
+        "alternatives": [
+          {
+            "name": "SonarQube Community",
+            "cost": "Free",
+            "url": "https://www.sonarqube.org/"
+          },
+          {
+            "name": "GitHub CodeQL",
+            "cost": "Free (open source)",
+            "url": "https://codeql.github.com/"
+          },
+          {
+            "name": "Snyk",
+            "cost": "$50+/month",
+            "url": "https://snyk.io/"
+          },
+          {
+            "name": "Checkmarx",
+            "cost": "Enterprise pricing",
+            "url": "https://checkmarx.com/"
+          }
+        ]
+      },
+      "chunks_scanned": 0,
+      "total_files": 0
+    },
+    "score": {
+      "repo_id": "b8bfee72",
+      "repo_url": "octocat/Hello-World",
+      "health_score": 100,
+      "chunks_scanned": 0,
+      "total_files": 0,
+      "analysis": {
+        "total_security_issues": 0,
+        "total_debt_issues": 0,
+        "critical_issues": 0,
+        "quick_wins": 0
+      },
+      "findings": {
+        "security_findings": [],
+        "debt_findings": [],
+        "security_by_severity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "debt_by_severity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "quick_wins": [],
+        "critical_issues": []
+      },
+      "recommendations": [],
+      "scoring_metadata": {
+        "scoring_version": "1.0",
+        "scoring_algorithm": "weighted_penalty",
+        "max_score": 100,
+        "min_score": 0
+      }
+    }
+  },
+  "data": {
+    "total_files_fetched": 0,
+    "config_files": 0,
+    "dependency_files": 0,
+    "source_files": 0,
+    "total_chunks": 0,
+    "files_by_category": {
+      "config": [],
+      "dependencies": [],
+      "source_code": []
+    },
+    "detailed_files": [],
+    "analysis_summary": {
+      "total_debt_signals": 0,
+      "files_with_debt_signals": 0,
+      "cost_estimate": {
+        "chunks_to_analyze": 0,
+        "total_code_chars": 0,
+        "approx_tokens": 0
+      }
+    }
+  },
+  "summary": {
+    "repo_url": "octocat/Hello-World",
+    "repo_id": "b8bfee72",
+    "health_score": 100,
+    "total_security_issues": 0,
+    "total_debt_issues": 0,
+    "critical_issues": 0,
+    "quick_wins": 0
+  }
+}
