@@ -470,24 +470,98 @@ export function AnalyseBranchesPage() {
 
     return (
         <>
-            <style>{CSS}</style>
-            <Plasma color="#72ea1e" speed={0.6} direction="forward" scale={1.1} opacity={0.1} mouseInteractive />
-            <ThemeToggle /><UserProfile />
 
-            {/* Interactive cursor glow */}
-            <div style={{
-                position: "fixed",
-                pointerEvents: "none",
-                left: cursorPos.x - 40,
-                top: cursorPos.y - 40,
-                width: "80px",
-                height: "80px",
-                borderRadius: "50%",
-                background: `radial-gradient(circle, ${isDark ? "rgba(114,234,30,0.15)" : "rgba(114,234,30,0.08)"}, transparent)`,
-                boxShadow: `0 0 40px ${isDark ? "rgba(114,234,30,0.1)" : "rgba(114,234,30,0.05)"}`,
-                transition: "all 0.15s ease-out",
-                zIndex: -1,
-            }} />
+            <Plasma color="#72ea1e" speed={0.6} direction="forward" scale={1.1} opacity={0.1} mouseInteractive={true} />
+            <ThemeToggle />
+            <UserProfile />
+            <div className="page-shell" style={{ padding: "40px" }}>
+                <section className="scan-hero" aria-label="analyse branches section">
+                    <div className="scan-content">
+                        <h2 className="scan-title" style={{ marginBottom: "30px" }}>
+                            <span className="scan-word">BEDROCK</span>
+                            <span className="scan-ampersand">&</span>
+                            <span className="secure-word">ANALYSIS</span>
+                        </h2>
+
+                        {/* Repository Info */}
+                        <div style={{
+                            background: "rgba(114, 234, 30, 0.1)",
+                            border: "1px solid #72ea1e",
+                            borderRadius: "8px",
+                            padding: "20px",
+                            marginBottom: "20px"
+                        }}>
+                            <p style={{ margin: "0 0 10px 0", color: "#a1d96a", fontSize: "12px" }}>Repository</p>
+                            <p style={{ margin: "0 0 15px 0", color: "#d9ffb8", fontSize: "14px", fontFamily: "monospace", wordBreak: "break-all" }}>
+                                {repoUrl || analyze.repo_url}
+                            </p>
+                            <p style={{ margin: "0 0 10px 0", color: "#a1d96a", fontSize: "12px" }}>Branch</p>
+                            <p style={{ margin: "0", color: "#d9ffb8", fontSize: "14px", fontFamily: "monospace" }}>
+                                {analyze.branch_name || "main"}
+                            </p>
+                        </div>
+
+                        <div style={{ marginBottom: "30px", textAlign: "left" }}>
+                            <button
+                                onClick={() => navigate("/dashboard")}
+                                style={{
+                                    padding: "8px 20px",
+                                    background: "transparent",
+                                    color: "#72ea1e",
+                                    border: "1px solid #72ea1e",
+                                    borderRadius: "4px",
+                                    cursor: "pointer",
+                                    fontSize: "14px",
+                                    fontWeight: "bold",
+                                    transition: "all 0.2s ease-in-out"
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.background = "#72ea1e";
+                                    e.target.style.color = "#000";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.background = "transparent";
+                                    e.target.style.color = "#72ea1e";
+                                }}
+                            >
+                                ← Back to Dashboard
+                            </button>
+                        </div>
+
+                        {/* Summary Cards */}
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px", marginBottom: "30px" }}>
+                            <div style={{
+                                background: "rgba(114, 234, 30, 0.1)",
+                                border: "1px solid #72ea1e",
+                                borderRadius: "8px",
+                                padding: "20px",
+                                textAlign: "center"
+                            }}>
+                                <h4 style={{ color: "#72ea1e", marginTop: 0 }}>Total Files</h4>
+                                <p style={{ fontSize: "32px", color: "#d9ffb8", margin: "10px 0" }}>{filesSummary.total}</p>
+                            </div>
+                            <div style={{
+                                background: "rgba(255, 107, 107, 0.1)",
+                                border: "1px solid #ff6b6b",
+                                borderRadius: "8px",
+                                padding: "20px",
+                                textAlign: "center"
+                            }}>
+                                <h4 style={{ color: "#ff6b6b", marginTop: 0 }}>Files with Issues</h4>
+                                <p style={{ fontSize: "32px", color: "#ff9999", margin: "10px 0" }}>{filesSummary.withIssues}</p>
+                            </div>
+                            <div style={{
+                                background: "rgba(255, 152, 0, 0.1)",
+                                border: "1px solid #ff9800",
+                                borderRadius: "8px",
+                                padding: "20px",
+                                textAlign: "center"
+                            }}>
+                                <h4 style={{ color: "#ff9800", marginTop: 0 }}>Vulnerabilities Found</h4>
+                                <p style={{ fontSize: "32px", color: "#ffb74d", margin: "10px 0" }}>{filesSummary.totalVulnerabilities}</p>
+                            </div>
+                        </div>
+
 
             <div className="page-shell" style={{ padding: "clamp(20px, 5vw, 64px) clamp(16px, 4vw, 64px) clamp(60px, 20vh, 100px)", maxWidth: "clamp(320px, 100%, 1060px)", margin: "0 auto", width: "100%" }}>
 

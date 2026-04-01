@@ -11,6 +11,8 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from aggregator import aggregate_all
+
 # ---------------------------------------------------------------------------
 # File Classification
 # ---------------------------------------------------------------------------
@@ -422,7 +424,13 @@ def scan_chunk(chunk: dict, branch_name: str = "main") -> dict:
 
     prompt = generate_security_prompt(filename, content, file_type, branch_name)
     result = invoke_bedrock(prompt, filename)
-    vulnerabilities = result.get("vulnerabilities", [])
+    # handle DEPENDENCY_PROMPT which returns "findings" instead of "vulnerabilities"
+    vulnerabilities = result.get("vulnerabilities") or result.get("findings", [])
+
+    # stamp file_type and filename on every vuln so aggregator can categorize correctly
+    for v in vulnerabilities:
+        v["file_type"] = file_type
+        v["file"] = v.get("file", filename)
 
     # If Bedrock returned nothing AND we have debt signals, also inject static findings
     if not vulnerabilities and debt_signals and _bedrock_access_denied:
@@ -478,6 +486,9 @@ def scan_all_chunks(chunks: list, branch_name: str = "main") -> dict:
     print(f"Estimated cost: ${cost_tracker['estimated_cost']:.4f}")
     print(f"{'='*60}\n")
 
+    # STEP 2: Aggregate findings into category-specific reports for scorers
+    aggregated_data = aggregate_all(all_vulnerabilities, cost_tracker.copy(), branch_name)
+
     return {
         "vulnerable_files": vulnerable_files,
         "vulnerabilities": all_vulnerabilities,
@@ -496,5 +507,7 @@ def scan_all_chunks(chunks: list, branch_name: str = "main") -> dict:
                 {"name": "Snyk", "cost": "$50+/month", "url": "https://snyk.io/"},
                 {"name": "Checkmarx", "cost": "Enterprise pricing", "url": "https://checkmarx.com/"}
             ]
-        }
+        },
+        # NEW: Aggregated data for the 4 scorers
+        "aggregated": aggregated_data
     }

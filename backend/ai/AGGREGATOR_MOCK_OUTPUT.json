@@ -1,0 +1,301 @@
+/*
+  MOCK JSON RETURNED FROM AGGREGATOR LAYER
+  ==========================================
+  
+  This is what gets returned in the "aggregated" field from bedrock_client.scan_all_chunks()
+  Each of the 4 scorers receives its specialized data structure below.
+*/
+
+{
+  "aggregated": {
+    
+    // ============ SCORER 1: SECURITY AUDIT ============
+    "security_audit": {
+      "audit_type": "SECURITY_AUDIT",
+      "findings": [
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "config/db.py",
+          "line": 14,
+          "explanation": "AWS secret key directly embedded in source code. Visible to anyone with repo access.",
+          "vulnerable_code": "AWS_SECRET = 'AKIAIOSFODNN7EXAMPLE'",
+          "fix": "Move to environment variable",
+          "remediated_code": "AWS_SECRET = os.getenv('AWS_SECRET_KEY')",
+          "estimated_minutes_to_fix": 10,
+          "business_impact": "Data breach if account compromised",
+          "file_type": "app"
+        },
+        {
+          "type": "SQL_INJECTION",
+          "severity": "CRITICAL",
+          "file": "src/app.py",
+          "line": 45,
+          "explanation": "User input directly concatenated into SQL query",
+          "vulnerable_code": "query = f'SELECT * FROM users WHERE id={user_id}'",
+          "fix": "Use parameterized queries",
+          "remediated_code": "cursor.execute('SELECT * FROM users WHERE id=?', (user_id,))",
+          "estimated_minutes_to_fix": 15,
+          "business_impact": "Attacker can steal/modify database records",
+          "file_type": "app"
+        },
+        {
+          "type": "PUBLIC_S3_BUCKET",
+          "severity": "CRITICAL",
+          "file": "infrastructure/s3.tf",
+          "resource": "aws_s3_bucket.data",
+          "explanation": "S3 bucket configured with public read access",
+          "vulnerable_code": "acl = 'public-read'",
+          "fix": "Set acl to private and use bucket policies",
+          "remediated_code": "acl = 'private'",
+          "estimated_minutes_to_fix": 20,
+          "business_impact": "All objects in bucket are world-readable - data breach",
+          "file_type": "iac"
+        },
+        {
+          "type": "WILDCARD_IAM_PERMISSION",
+          "severity": "CRITICAL",
+          "file": "identity/lambda-role.json",
+          "statement": 1,
+          "explanation": "IAM policy allows all actions (*) on all resources (*)",
+          "vulnerable_code": "{ 'Effect': 'Allow', 'Action': 'iam:*', 'Resource': '*' }",
+          "fix": "Specify only needed actions and resources",
+          "remediated_code": "{ 'Effect': 'Allow', 'Action': ['iam:GetUser'], 'Resource': 'arn:aws:iam::account:user/lambda' }",
+          "estimated_minutes_to_fix": 45,
+          "business_impact": "Privilege escalation - attacker can grant themselves permissions",
+          "file_type": "iam"
+        }
+      ],
+      "summary": {
+        "total_issues": 4,
+        "critical": 4,
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "categories": {
+          "app_security": 2,
+          "infrastructure": 1,
+          "iam_risks": 1
+        }
+      },
+      "risk_indicators": {
+        "has_critical": true,
+        "has_high": false,
+        "critical_percentage": 100
+      }
+    },
+
+    // ============ SCORER 2: DEBT REPORT ============
+    "debt_report": {
+      "report_type": "DEBT_REPORT",
+      "findings": [
+        {
+          "type": "FUNCTION_TOO_COMPLEX",
+          "severity": "MEDIUM",
+          "file": "src/processor.py",
+          "function": "process_user_data",
+          "lines": "45-120",
+          "explanation": "Function is 75 lines with 6 nested levels. Hard to test and maintain.",
+          "fix": "Split into smaller functions",
+          "remediated_code": "def validate_user()... def process_data()... def format_response()...",
+          "estimated_minutes_to_fix": 60,
+          "business_impact": "Hard to maintain, prone to bugs, slow development",
+          "file_type": "debt"
+        },
+        {
+          "type": "CODE_DUPLICATION",
+          "severity": "MEDIUM",
+          "file": "src/utils.py",
+          "explanation": "Same validation logic repeated 3 times",
+          "fix": "Extract to shared function",
+          "estimated_minutes_to_fix": 30,
+          "business_impact": "Bug fixes need to be applied in 3 places",
+          "file_type": "debt"
+        },
+        {
+          "type": "OUTDATED_DEPENDENCY",
+          "severity": "HIGH",
+          "file": "requirements.txt",
+          "package": "flask==1.0.0",
+          "current_version": "1.0.0",
+          "recommended_version": "2.3.0",
+          "explanation": "Flask 1.0.0 is 5+ years old with 12+ security vulnerabilities",
+          "fix": "pip install --upgrade flask",
+          "estimated_minutes_to_fix": 5,
+          "business_impact": "Known security exploits, should not use in production",
+          "file_type": "deps"
+        },
+        {
+          "type": "UNPINNED_VERSION",
+          "severity": "MEDIUM",
+          "file": "requirements.txt",
+          "package": "requests",
+          "explanation": "requests version not pinned. Could auto-upgrade to breaking version",
+          "fix": "Pin to specific version: requests==2.31.0",
+          "estimated_minutes_to_fix": 2,
+          "business_impact": "Unexpected version changes break code",
+          "file_type": "deps"
+        }
+      ],
+      "summary": {
+        "total_issues": 4,
+        "critical": 0,
+        "high": 1,
+        "medium": 3,
+        "low": 0,
+        "categories": {
+          "code_complexity": 2,
+          "dependency_issues": 2
+        }
+      },
+      "effort_estimate": {
+        "total_minutes": 97,
+        "total_hours": 1.6,
+        "sprints_needed": 0.1
+      }
+    },
+
+    // ============ SCORER 3: BRANCH ANALYSIS ============
+    "branch_analysis": {
+      "analysis_type": "BRANCH_ANALYSIS",
+      "branch": "main",
+      "findings": [
+        // (same as above 8 findings from security_audit + debt_report)
+      ],
+      "summary": {
+        "total_issues": 8,
+        "breakdown": {
+          "security_issues": 2,
+          "infrastructure_misconfigs": 1,
+          "iam_policy_risks": 1,
+          "dependency_problems": 2,
+          "code_debt": 2
+        }
+      },
+      "by_severity": {
+        "critical": 4,
+        "high": 1,
+        "medium": 3,
+        "low": 0
+      }
+    },
+
+    // ============ SCORER 4: HEALTH SCORE ============
+    "health_score": {
+      "score_type": "HEALTH_SCORE",
+      "overall_health": 32,
+      "dimension_scores": {
+        "security": 20,
+        "infrastructure": 25,
+        "iam_security": 10,
+        "code_quality": 45,
+        "dependencies": 35
+      },
+      "issue_summary": {
+        "total_issues": 8,
+        "critical": 4,
+        "high": 1,
+        "medium": 3,
+        "low": 0
+      },
+      "cost_info": {
+        "api_calls": 6,
+        "input_tokens": 2400,
+        "output_tokens": 1200,
+        "estimated_cost": 0.0237
+      },
+      "recommendations": [
+        "🔴 URGENT: Fix 4 critical vulnerabilities immediately",
+        "⚠️ Repo is in critical state - do not deploy",
+        "- Start with Critical issues in Security Audit",
+        "- Then address High severity issues"
+      ]
+    },
+
+    // ============ RAW CATEGORIZATION (for reference) ============
+    "categorized": {
+      "security": {
+        "critical": 2,
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "findings": [
+          // HARDCODED_SECRET, SQL_INJECTION findings
+        ]
+      },
+      "infrastructure": {
+        "critical": 1,
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "findings": [
+          // PUBLIC_S3_BUCKET finding
+        ]
+      },
+      "iam_security": {
+        "critical": 1,
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "findings": [
+          // WILDCARD_IAM_PERMISSION finding
+        ]
+      },
+      "dependencies": {
+        "critical": 0,
+        "high": 1,
+        "medium": 1,
+        "low": 0,
+        "findings": [
+          // OUTDATED_DEPENDENCY, UNPINNED_VERSION findings
+        ]
+      },
+      "code_quality": {
+        "critical": 0,
+        "high": 0,
+        "medium": 2,
+        "low": 0,
+        "findings": [
+          // FUNCTION_TOO_COMPLEX, CODE_DUPLICATION findings
+        ]
+      }
+    }
+  }
+}
+
+/*
+  SUMMARY OF WHAT EACH SCORER GETS:
+  ==================================
+
+  1. SECURITY_AUDIT SCORER
+     Input: security_audit object
+     Output to UI: 
+       - 4 critical security issues found
+       - 100% are critical
+       - 2 app vulnerabilities, 1 infrastructure, 1 IAM
+       - Recommendation: "DO NOT DEPLOY - Fix critical issues"
+
+  2. DEBT_REPORT SCORER  
+     Input: debt_report object
+     Output to UI:
+       - 4 debt issues found
+       - Effort: 1.6 hours
+       - Fix time: ~1 sprint
+       - Recommendation: "Plan refactoring over next sprint"
+
+  3. BRANCH_ANALYSIS SCORER
+     Input: branch_analysis object (branch="main")
+     Output to UI:
+       - Total: 8 issues across branch
+       - Breakdown by type
+       - Filter/sort by severity
+       - Per-branch comparison
+
+  4. HEALTH_SCORE SCORER
+     Input: health_score object
+     Output to UI:
+       - Overall: 32/100 (CRITICAL)
+       - Dimension breakdown (security=20, iam=10, etc)
+       - Recommendations
+       - Cost tracking
+*/
