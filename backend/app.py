@@ -65,39 +65,44 @@ def scan_repo():
             print(f"[SCAN] Step 1 DONE: Fetched {len(files)} files")
         except Exception as fetch_error:
             print(f"[SCAN] GitHub API Error: {str(fetch_error)}")
-            # Fallback: Return mock data structure for demo
-            print(f"[SCAN] Using mock data (rate limit fallback)...")
-            files = [
-                {
-                    'path': 'config/database.py',
-                    'language': 'python',
-                    'content': 'DB_PASSWORD = "hardcoded_secret"',
-                    'debt_signal_count': 2,
-                    'debt_signals': ['hardcoded_secret', 'no_error_handling'],
-                    'debt_category_hint': 'code_quality',
-                    'metrics': {}
-                },
-                {
-                    'path': 'requirements.txt',
-                    'language': 'text',
-                    'content': 'requests==2.25.1\ndjango==3.0.0',
-                    'debt_signal_count': 1,
-                    'debt_signals': ['outdated_dependency'],
-                    'debt_category_hint': 'dependencies',
-                    'metrics': {}
+            # Fallback: Return simple mock response with chunking info
+            print(f"[SCAN] Using mock chunking (rate limit fallback)...")
+            response_data = {
+                'status': 'success',
+                'repo_url': repo_url,
+                'message': 'Scan initiated (mock mode - GitHub rate limited)',
+                'data': {
+                    'total_files_fetched': 5,
+                    'config_files': 1,
+                    'dependency_files': 1,
+                    'source_files': 3,
+                    'total_chunks': 8,
+                    'files_by_category': {
+                        'config': [{'path': 'config/database.py', 'language': 'python'}],
+                        'dependencies': [{'path': 'requirements.txt', 'language': 'text'}],
+                        'source_code': [
+                            {'path': 'main.py', 'language': 'python'},
+                            {'path': 'app.js', 'language': 'javascript'},
+                            {'path': 'utils.py', 'language': 'python'}
+                        ]
+                    },
+                    'analysis_summary': {
+                        'total_debt_signals': 5,
+                        'files_with_debt_signals': 2,
+                        'cost_estimate': {
+                            'notes': 'Mock data - GitHub API rate limited',
+                            'chunks_to_analyze': 8,
+                            'total_code_chars': 2400,
+                            'approx_tokens': 600
+                        }
+                    }
                 }
-            ]
+            }
+            return jsonify(response_data), 200
         
         # 2. Categorize
         print(f"[SCAN] Step 2: Categorizing files...")
-        try:
-            config_files, dep_files, source_code = categorize_files(files)
-        except:
-            # Fallback categorization
-            config_files = [f for f in files if 'config' in f.get('path', '').lower()]
-            dep_files = [f for f in files if f.get('debt_category_hint') == 'dependencies']
-            source_code = [f for f in files if f not in config_files and f not in dep_files]
-        
+        config_files, dep_files, source_code = categorize_files(files)
         print(f"[SCAN] Step 2 DONE: {len(config_files)} config, {len(dep_files)} deps, {len(source_code)} source")
         
         # 3. Chunk
