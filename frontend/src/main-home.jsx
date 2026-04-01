@@ -37,30 +37,9 @@ function App() {
                 <Route path="/signup" element={<SignUpPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/analyse-branches" element={<AnalyseBranchesPage />} />
-                <Route
-                    path="/security-audit"
-                    element={
-                        <ProtectedRoute>
-                            <SecurityAuditPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/debt-report"
-                    element={
-                        <ProtectedRoute>
-                            <DebtReportPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/health-score"
-                    element={
-                        <ProtectedRoute>
-                            <HealthScorePage />
-                        </ProtectedRoute>
-                    }
-                />
+                <Route path="/security-audit" element={<SecurityAuditPage />} />
+                <Route path="/debt-report" element={<DebtReportPage />} />
+                <Route path="/health-score" element={<HealthScorePage />} />
             </Routes>
         </AppLayout>
     );

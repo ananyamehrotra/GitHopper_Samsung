@@ -142,13 +142,13 @@ Dependencies:
 {code_chunk}"""
 
     else:
-        return f"""You are a senior security engineer. Analyze this code for vulnerabilities.
+        return f"""You are a senior code quality engineer and security specialist. Analyze this code for BOTH security vulnerabilities AND technical debt.
 
 File: {filename}
 Branch: {branch_name}
 File Type: Application Code
 
-Check for:
+Security Check List:
 - Hardcoded secrets, API keys, passwords
 - SQL injection or command injection
 - Dangerous functions (eval, exec)
@@ -156,20 +156,29 @@ Check for:
 - Authentication flaws
 - Data exposure
 
-Return ONLY valid JSON with no preamble:
-{{
-  "vulnerabilities": [
-    {{
-      "type": "HARDCODED_SECRET|SQL_INJECTION|UNSAFE_EVAL|etc",
-      "severity": "CRITICAL|HIGH|MEDIUM|LOW",
-      "line_range": "10-15",
-      "explanation": "What the vulnerability is",
-      "business_impact": "Risk to business (data breach, account compromise, etc)",
-      "estimated_minutes_to_fix": 10,
-      "remediation": "How to fix it"
-    }}
-  ]
-}}
+Code Quality/Debt Check List:
+- High cyclomatic complexity (deeply nested code)
+- Long functions (>50 lines)
+- Code duplication
+- Missing error handling
+- Missing comments for complex logic
+- Poor variable naming
+- Large parameter lists (>3 params)
+- Dead code or unused imports
+
+Return ONLY valid JSON array with no preamble. Mix security findings and code quality findings:
+[
+  {{
+    "type": "HARDCODED_SECRET|SQL_INJECTION|UNSAFE_EVAL|COMPLEXITY|CODE_DUPLICATION|MISSING_HANDLER|etc",
+    "severity": "CRITICAL|HIGH|MEDIUM|LOW",
+    "file": "{filename}",
+    "line_range": "10-15",
+    "explanation": "What the issue is",
+    "business_impact": "Risk to business",
+    "estimated_minutes_to_fix": 10,
+    "remediation": "How to fix it"
+  }}
+]
 
 Code:
 {code_chunk}"""
@@ -375,15 +384,25 @@ def invoke_bedrock(prompt: str, filename: str = "") -> dict:
                     part = part[4:].strip()
                 try:
                     result = json.loads(part)
-                    print(f"   Parsed JSON from code fence. Found {len(result.get('vulnerabilities', []))} vulnerabilities")
-                    return result
+                    # Handle both old format {"vulnerabilities": [...]} and new format [...]
+                    if isinstance(result, list):
+                        print(f"   Parsed JSON array from code fence. Found {len(result)} findings")
+                        return {"vulnerabilities": result}
+                    else:
+                        print(f"   Parsed JSON dict from code fence. Found {len(result.get('vulnerabilities', []))} vulnerabilities")
+                        return result
                 except json.JSONDecodeError:
                     continue
 
         # Try parsing the raw text directly
         result = json.loads(text)
-        print(f"   Parsed JSON directly. Found {len(result.get('vulnerabilities', []))} vulnerabilities")
-        return result
+        # Handle both old format {"vulnerabilities": [...]} and new format [...]
+        if isinstance(result, list):
+            print(f"   Parsed JSON array directly. Found {len(result)} findings")
+            return {"vulnerabilities": result}
+        else:
+            print(f"   Parsed JSON dict directly. Found {len(result.get('vulnerabilities', []))} vulnerabilities")
+            return result
 
     except json.JSONDecodeError as e:
         print(f"   JSON parse error: {e}")
@@ -490,6 +509,21 @@ def scan_all_chunks(chunks: list, branch_name: str = "main") -> dict:
                 "count": result["vulnerability_count"]
             })
             all_vulnerabilities.extend(result["vulnerabilities"])
+
+    # IF BEDROCK IS UNAVAILABLE, INJECT MOCK DEBT FINDINGS FOR TESTING
+    if _bedrock_access_denied and len(all_vulnerabilities) == 0:
+        print("\n[MOCK DATA] Bedrock unavailable. Injecting mock technical debt findings for testing...")
+        try:
+            from mock_debt_findings import MOCK_DEBT_FINDINGS
+            all_vulnerabilities.extend(MOCK_DEBT_FINDINGS)
+            vulnerable_files.append({
+                "file": "[MOCK DATA] Multiple files",
+                "type": "mixed",
+                "count": len(MOCK_DEBT_FINDINGS)
+            })
+            print(f"[MOCK DATA] Added {len(MOCK_DEBT_FINDINGS)} mock debt findings for UI testing")
+        except ImportError:
+            print("[WARN] mock_debt_findings module not found. Continuing with empty results.")
 
     print(f"\n{'='*60}")
     print("ANALYSIS COMPLETE")
