@@ -3,6 +3,13 @@ from flask_cors import CORS
 import os
 from pathlib import Path
 
+# Fix path to import sibling modules easily
+import sys
+sys.path.append(os.path.dirname(__file__))
+
+from github_client import fetch_repo, categorize_files
+from chunker import chunk_code
+
 # Initialize Flask app
 app = Flask(__name__, 
             static_folder=os.path.join(os.path.dirname(__file__), '..', 'frontend', 'dist'),
@@ -28,7 +35,7 @@ def health_check():
 def scan_repo():
     """
     Receive GitHub repository URL for scanning
-    In production, this would trigger the actual scanning logic
+    Fetches the repo, categorizes, and chunks the code.
     """
     try:
         data = request.get_json()
@@ -36,14 +43,32 @@ def scan_repo():
         
         if not repo_url:
             return jsonify({'error': 'repo_url is required'}), 400
+            
+        # Optional: Auth token to bypass rate limits
+        github_token = os.environ.get('GITHUB_TOKEN')
         
-        # Placeholder for actual scanning logic
+        # 1. Fetch
+        print(f"Fetching repo: {repo_url}")
+        files = fetch_repo(repo_url, github_token=github_token)
+        
+        # 2. Categorize
+        config_files, dep_files, source_code = categorize_files(files)
+        
+        # 3. Chunk
+        all_chunks = chunk_code(files)
+        
         return jsonify({
-            'status': 'pending',
+            'status': 'success',
             'repo_url': repo_url,
             'message': 'Scan initiated for repository',
-            'scan_id': 'scan_123456'
-        }), 202
+            'data': {
+                'total_files_fetched': len(files),
+                'config_files': len(config_files),
+                'dependency_files': len(dep_files),
+                'source_files': len(source_code),
+                'total_chunks': len(all_chunks)
+            }
+        }), 200
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
