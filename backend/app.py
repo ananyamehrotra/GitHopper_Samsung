@@ -382,69 +382,6 @@ def get_findings(repo_id):
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/download-report', methods=['POST'])
-def download_report():
-    """
-    Generate and download a scan report as JSON
-    Accepts scan results in request body
-    """
-    try:
-        data = request.get_json()
-        
-        if not data:
-            return jsonify({'error': 'No scan data provided'}), 400
-        
-        # Extract key info for report
-        repo_url = data.get('repo_url', 'Unknown Repository')
-        branch_name = data.get('branch_name', 'main')
-        scan_result = data.get('scanResult', {})
-        
-        # Build comprehensive report
-        analyze = scan_result.get('stages', {}).get('analyze', {})
-        
-        report = {
-            'report_metadata': {
-                'generated_at': __import__('datetime').datetime.now().isoformat(),
-                'report_type': 'Security & Code Quality Scan',
-                'version': '1.0.0'
-            },
-            'repository_info': {
-                'url': repo_url,
-                'branch': branch_name
-            },
-            'summary': {
-                'total_files_analyzed': analyze.get('total_files_analyzed', 0),
-                'files_with_issues': analyze.get('files_with_issues', 0),
-                'total_vulnerabilities': analyze.get('total_vulnerabilities', 0),
-                'status': 'completed'
-            },
-            'vulnerable_files': analyze.get('vulnerable_files', []),
-            'vulnerabilities': analyze.get('vulnerabilities', []),
-            'billing_info': analyze.get('billing', {})
-        }
-        
-        # Return as downloadable JSON
-        from flask import send_file
-        from io import BytesIO
-        
-        report_json = json.dumps(report, indent=2)
-        report_bytes = BytesIO(report_json.encode('utf-8'))
-        
-        timestamp = __import__('datetime').datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f"GitHopper_Report_{timestamp}.json"
-        
-        return send_file(
-            report_bytes,
-            mimetype='application/json',
-            as_attachment=True,
-            download_name=filename
-        )
-    
-    except Exception as e:
-        print(f"[ERROR] Download report failed: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-
 @app.route('/', methods=['GET'])
 def index():
     """Serve the main page"""

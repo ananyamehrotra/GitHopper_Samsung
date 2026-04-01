@@ -14,41 +14,6 @@ export function AnalyseBranchesPage() {
     const scanResult = location.state?.scanResult;
     const repoUrl = location.state?.repoUrl;
     const [expandedVulnerability, setExpandedVulnerability] = useState(null);
-    const [downloading, setDownloading] = useState(false);
-
-    const handleDownloadReport = async () => {
-        setDownloading(true);
-        try {
-            const response = await fetch('http://localhost:5000/api/download-report', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    repo_url: repoUrl || scanResult.stages?.analyze?.repo_url,
-                    branch_name: scanResult.stages?.analyze?.branch_name || 'main',
-                    scanResult: scanResult
-                })
-            });
-
-            if (response.ok) {
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `GitHopper_Report_${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-            } else {
-                alert('Failed to download report');
-            }
-        } catch (error) {
-            console.error('Download error:', error);
-            alert('Error downloading report: ' + error.message);
-        } finally {
-            setDownloading(false);
-        }
-    };
 
     if (!scanResult) {
         return (
@@ -107,41 +72,16 @@ export function AnalyseBranchesPage() {
                             border: "1px solid #72ea1e",
                             borderRadius: "8px",
                             padding: "20px",
-                            marginBottom: "30px",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "flex-start"
+                            marginBottom: "30px"
                         }}>
-                            <div>
-                                <p style={{ margin: "0 0 10px 0", color: "#a1d96a", fontSize: "12px" }}>Repository</p>
-                                <p style={{ margin: "0 0 15px 0", color: "#d9ffb8", fontSize: "14px", fontFamily: "monospace", wordBreak: "break-all" }}>
-                                    {repoUrl || analyze.repo_url}
-                                </p>
-                                <p style={{ margin: "0 0 10px 0", color: "#a1d96a", fontSize: "12px" }}>Branch</p>
-                                <p style={{ margin: "0", color: "#d9ffb8", fontSize: "14px", fontFamily: "monospace" }}>
-                                    {analyze.branch_name || "main"}
-                                </p>
-                            </div>
-                            <button 
-                                onClick={handleDownloadReport}
-                                disabled={downloading}
-                                style={{
-                                    padding: "10px 20px",
-                                    background: "#72ea1e",
-                                    color: "#000",
-                                    border: "none",
-                                    borderRadius: "4px",
-                                    cursor: downloading ? "not-allowed" : "pointer",
-                                    fontSize: "13px",
-                                    fontWeight: "bold",
-                                    whiteSpace: "nowrap",
-                                    opacity: downloading ? 0.6 : 1,
-                                    transition: "all 0.3s"
-                                }}
-                                title="Download scan results as JSON report"
-                            >
-                                {downloading ? "Generating..." : "📥 Download Report"}
-                            </button>
+                            <p style={{ margin: "0 0 10px 0", color: "#a1d96a", fontSize: "12px" }}>Repository</p>
+                            <p style={{ margin: "0 0 15px 0", color: "#d9ffb8", fontSize: "14px", fontFamily: "monospace", wordBreak: "break-all" }}>
+                                {repoUrl || analyze.repo_url}
+                            </p>
+                            <p style={{ margin: "0 0 10px 0", color: "#a1d96a", fontSize: "12px" }}>Branch</p>
+                            <p style={{ margin: "0", color: "#d9ffb8", fontSize: "14px", fontFamily: "monospace" }}>
+                                {analyze.branch_name || "main"}
+                            </p>
                         </div>
 
                         {/* Summary Cards */}

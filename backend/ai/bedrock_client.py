@@ -287,7 +287,13 @@ def scan_chunk(chunk: dict, branch_name: str = "main") -> dict:
 
     prompt = generate_security_prompt(filename, content, file_type, branch_name)
     result = invoke_bedrock(prompt, filename)
-    vulnerabilities = result.get("vulnerabilities", [])
+    # handle DEPENDENCY_PROMPT which returns "findings" instead of "vulnerabilities"
+    vulnerabilities = result.get("vulnerabilities") or result.get("findings", [])
+
+    # stamp file_type and filename on every vuln so aggregator can categorize correctly
+    for v in vulnerabilities:
+        v["file_type"] = file_type
+        v["file"] = v.get("file", filename)
 
     print(f"   Found {len(vulnerabilities)} vulnerabilities")
 
