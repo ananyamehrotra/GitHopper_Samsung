@@ -1,0 +1,122 @@
+.user-profile {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    z-index: 11;
+}
+
+.profile-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--green);
+    background: transparent;
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: "Space Grotesk", sans-serif;
+}
+
+.profile-button:hover {
+    background: var(--green);
+    color: #000000;
+    box-shadow: 0 8px 24px rgba(76, 172, 0, 0.3);
+}
+
+.profile-button:active {
+    transform: scale(0.95);
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: 56px;
+    right: 0;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--green);
+    border-radius: 12px;
+    min-width: 200px;
+    box-shadow: 0 8px 32px rgba(76, 172, 0, 0.15);
+    z-index: 12;
+    overflow: hidden;
+    animation: dropdownSlide 0.2s ease;
+    backdrop-filter: blur(10px);
+}
+
+[data-theme="light"] .profile-dropdown {
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px rgba(76, 172, 0, 0.2);
+}
+
+@keyframes dropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(76, 172, 0, 0.4);
+}
+
+.user-email {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    word-break: break-all;
+    letter-spacing: 0;
+    font-family: "Rajdhani", "Space Grotesk", sans-serif;
+    font-style: normal;
+}
+
+.logout-button {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    color: #ff5555;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.3s ease;
+    font-family: "Rajdhani", "Space Grotesk", sans-serif;
+    text-align: left;
+    font-style: normal;
+}
+
+.logout-button:hover {
+    background: rgba(76, 172, 0, 0.15);
+    color: #ff5555;
+    border-left: 3px solid var(--green);
+    padding-left: 13px;
+}
+
+@media (max-width: 768px) {
+    .user-profile {
+        top: 16px;
+        right: 16px;
+    }
+
+    .profile-button {
+        width: 36px;
+        height: 36px;
+    }
+
+    .profile-dropdown {
+        min-width: 160px;
+    }
+}
