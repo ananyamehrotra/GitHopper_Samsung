@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 import os
 from pathlib import Path
+import json
 
 # Fix path to import sibling modules easily
 import sys
@@ -38,26 +39,43 @@ def scan_repo():
     Fetches the repo, categorizes, and chunks the code.
     """
     try:
+        print("[SCAN] Starting scan request...")
         data = request.get_json()
         repo_url = data.get('repo_url')
         
         if not repo_url:
             return jsonify({'error': 'repo_url is required'}), 400
-            
+        
+        print(f"[SCAN] Repository: {repo_url}")
+        
         # Optional: Auth token to bypass rate limits
         github_token = os.environ.get('GITHUB_TOKEN')
         
         # 1. Fetch
-        print(f"Fetching repo: {repo_url}")
+        print(f"[SCAN] Step 1: Fetching repo...")
         files = fetch_repo(repo_url, github_token=github_token)
+        print(f"[SCAN] Step 1 DONE: Fetched {len(files)} files")
         
         # 2. Categorize
+        print(f"[SCAN] Step 2: Categorizing files...")
         config_files, dep_files, source_code = categorize_files(files)
+        print(f"[SCAN] Step 2 DONE: {len(config_files)} config, {len(dep_files)} deps, {len(source_code)} source")
         
         # 3. Chunk
+        print(f"[SCAN] Step 3: Chunking code...")
         all_chunks = chunk_code(files)
+        print(f"[SCAN] Step 3 DONE: Created {len(all_chunks)} chunks")
         
-        return jsonify({
+        # Extract just paths and language for frontend display
+        print(f"[SCAN] Step 4: Building response...")
+        def extract_file_info(file_list):
+            return [{'path': f['path'], 'language': f.get('language', 'text')} for f in file_list]
+        
+        # Calculate overall debt statistics
+        total_debt_signals = sum(f.get('debt_signal_count', 0) for f in files)
+        files_with_signals = sum(1 for f in files if f.get('debt_signal_count', 0) > 0)
+        
+        response_data = {
             'status': 'success',
             'repo_url': repo_url,
             'message': 'Scan initiated for repository',
@@ -66,12 +84,175 @@ def scan_repo():
                 'config_files': len(config_files),
                 'dependency_files': len(dep_files),
                 'source_files': len(source_code),
-                'total_chunks': len(all_chunks)
+                'total_chunks': len(all_chunks),
+                'files_by_category': {
+                    'config': extract_file_info(config_files),
+                    'dependencies': extract_file_info(dep_files),
+                    'source_code': extract_file_info(source_code)
+                },
+                'analysis_summary': {
+                    'total_debt_signals': total_debt_signals,
+                    'files_with_debt_signals': files_with_signals,
+                    'cost_estimate': {
+                        'notes': 'Total tokens estimated for Bedrock analysis',
+                        'chunks_to_analyze': len(all_chunks),
+                        'total_code_chars': sum(c.get('char_count', 0) for c in all_chunks),
+                        'approx_tokens': int(sum(c.get('char_count', 0) for c in all_chunks) / 4)
+                    }
+                },
+                'detailed_files': [
+                    {
+                        'path': f['path'],
+                        'language': f['language'],
+                        'size_bytes': f.get('size_bytes', 0),
+                        'debt_signals': f.get('debt_signals', []),
+                        'debt_signal_count': f.get('debt_signal_count', 0),
+                        'debt_category_hint': f.get('debt_category_hint', 'code_quality'),
+                        'metrics': f.get('metrics', {})
+                    }
+                    for f in files
+                ]
             }
-        }), 200
+        }
+        print(f"[SCAN] Step 4 DONE: Response built")
+        
+        # Print data structure to terminal for analysis
+        print("\n" + "="*80)
+        print("SCAN ANALYSIS - DATA STRUCTURE")
+        print("="*80)
+        print(f"Repository: {repo_url}")
+        print(f"Status: {response_data['status']}")
+        print(f"\nSUMMARY:")
+        print(f"  Total Files: {response_data['data']['total_files_fetched']}")
+        print(f"  Config Files: {response_data['data']['config_files']}")
+        print(f"  Dependency Files: {response_data['data']['dependency_files']}")
+        print(f"  Source Code Files: {response_data['data']['source_files']}")
+        print(f"  Code Chunks: {response_data['data']['total_chunks']}")
+        print(f"\nFILE STRUCTURE BY CATEGORY:")
+        
+        # Print config files
+        if response_data['data']['files_by_category']['config']:
+            print(f"\nConfiguration Files ({len(response_data['data']['files_by_category']['config'])}):")
+            for file in response_data['data']['files_by_category']['config']:
+                print(f"   - {file['path']} ({file['language']})")
+        else:
+            print(f"\nConfiguration Files (0): None")
+        
+        # Print dependency files
+        if response_data['data']['files_by_category']['dependencies']:
+            print(f"\nDependency Files ({len(response_data['data']['files_by_category']['dependencies'])}):")
+            for file in response_data['data']['files_by_category']['dependencies'][:10]:  # Show first 10
+                print(f"   - {file['path']} ({file['language']})")
+            if len(response_data['data']['files_by_category']['dependencies']) > 10:
+                print(f"   ... and {len(response_data['data']['files_by_category']['dependencies']) - 10} more")
+        else:
+            print(f"\nDependency Files (0): None")
+        
+        # Print source code files
+        if response_data['data']['files_by_category']['source_code']:
+            print(f"\nSource Code Files ({len(response_data['data']['files_by_category']['source_code'])}):")
+            for file in response_data['data']['files_by_category']['source_code'][:10]:  # Show first 10
+                print(f"   - {file['path']} ({file['language']})")
+            if len(response_data['data']['files_by_category']['source_code']) > 10:
+                print(f"   ... and {len(response_data['data']['files_by_category']['source_code']) - 10} more")
+        else:
+            print(f"\nSource Code Files (0): None")
+        
+        print("\n" + "="*80)
+        print("RAW JSON RESPONSE:")
+        print("="*80)
+        print(json.dumps(response_data, indent=2))
+        print("="*80 + "\n")
+        print(f"[SCAN] COMPLETE: Returning response")
+        
+        return jsonify(response_data), 200
     
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        import traceback
+        error_msg = str(e)
+        tb = traceback.format_exc()
+        print(f"\n[ERROR] Exception in scan_repo: {error_msg}")
+        print(f"[ERROR] Traceback:\n{tb}\n")
+        return jsonify({'error': error_msg, 'type': type(e).__name__}), 500
+
+
+@app.route('/api/scan/flagged-content', methods=['POST'])
+def get_flagged_content():
+    """
+    Extract flagged files (with debt signals) and dependency files
+    Returns JSON with their full content for agent processing
+    """
+    try:
+        print("[FLAGGED] Extracting flagged files content...")
+        data = request.get_json()
+        repo_url = data.get('repo_url')
+        
+        if not repo_url:
+            return jsonify({'error': 'repo_url is required'}), 400
+        
+        # Fetch repo
+        github_token = os.environ.get('GITHUB_TOKEN')
+        files = fetch_repo(repo_url, github_token=github_token)
+        
+        # Filter: files with debt signals OR dependency/testing category
+        flagged_files = [
+            {
+                'path': f['path'],
+                'language': f['language'],
+                'content': f['content'],
+                'size_bytes': f.get('size_bytes', 0),
+                'debt_signals': f.get('debt_signals', []),
+                'debt_signal_count': f.get('debt_signal_count', 0),
+                'debt_category_hint': f.get('debt_category_hint', 'code_quality'),
+                'metrics': f.get('metrics', {}),
+                'reasons_flagged': [
+                    'has_debt_signals' if f.get('debt_signal_count', 0) > 0 else None,
+                    'dependency_file' if f.get('debt_category_hint', '') in ['dependencies', 'testing'] else None
+                ]
+            }
+            for f in files
+            if f.get('debt_signal_count', 0) > 0 or f.get('debt_category_hint', '') in ['dependencies', 'testing']
+        ]
+        
+        # Clean up reasons list
+        for file in flagged_files:
+            file['reasons_flagged'] = [r for r in file['reasons_flagged'] if r is not None]
+        
+        response_data = {
+            'status': 'success',
+            'repo_url': repo_url,
+            'message': f'Extracted {len(flagged_files)} flagged/dependency files',
+            'total_files_scanned': len(files),
+            'flagged_files_count': len(flagged_files),
+            'flagged_files': flagged_files
+        }
+        
+        print(f"[FLAGGED] DONE: {len(flagged_files)} files flagged out of {len(files)}")
+        print(json.dumps({
+            'status': response_data['status'],
+            'repo_url': response_data['repo_url'],
+            'message': response_data['message'],
+            'total_files_scanned': response_data['total_files_scanned'],
+            'flagged_files_count': response_data['flagged_files_count'],
+            'files_summary': [
+                {
+                    'path': f['path'],
+                    'debt_signals': f['debt_signal_count'],
+                    'reasons': f['reasons_flagged']
+                }
+                for f in flagged_files
+            ]
+        }, indent=2))
+        
+        return jsonify(response_data), 200
+    
+    except Exception as e:
+        import traceback
+        error_msg = str(e)
+        tb = traceback.format_exc()
+        print(f"\n[ERROR] Exception in get_flagged_content: {error_msg}")
+        print(f"[ERROR] Traceback:\n{tb}\n")
+        return jsonify({'error': error_msg, 'type': type(e).__name__}), 500
 
 
 @app.route('/api/scan/status/<scan_id>', methods=['GET'])
