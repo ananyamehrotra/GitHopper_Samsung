@@ -4,7 +4,6 @@ import { ThemeToggle } from "../components/ThemeToggle";
 import { UserProfile } from "../components/UserProfile";
 import { Plasma } from "../components/Plasma";
 import { useTheme } from "../context/ThemeContext";
-import ResultsPage from "./ResultsPage";
 import "./DashboardPage.css";
 import "./AnalyseBranchesPage.css";
 
@@ -14,7 +13,7 @@ export function AnalyseBranchesPage() {
     const { isDark } = useTheme();
     const scanResult = location.state?.scanResult;
     const repoUrl = location.state?.repoUrl;
-    const [useNewUI, setUseNewUI] = useState(true);  // Toggle new terminal UI
+    const [expandedVulnerability, setExpandedVulnerability] = useState(null);
 
     if (!scanResult) {
         return (
@@ -42,62 +41,6 @@ export function AnalyseBranchesPage() {
             </>
         );
     }
-
-    // Prepare data for new UI
-    const analyzeData = {
-        repo_url: repoUrl || scanResult.stages?.analyze?.repo_url || '',
-        vulnerable_files: scanResult.stages?.analyze?.vulnerable_files || [],
-        vulnerabilities: scanResult.stages?.analyze?.vulnerabilities || [],
-        total_files_analyzed: scanResult.stages?.analyze?.total_files_analyzed || 0,
-        files_with_issues: scanResult.stages?.analyze?.files_with_issues || 0,
-        total_vulnerabilities: scanResult.stages?.analyze?.total_vulnerabilities || 0,
-        billing: scanResult.stages?.analyze?.billing || {},
-        cost_tracker: scanResult.stages?.analyze?.cost_tracker || {},
-    };
-
-    // If using new terminal UI, render the professional results page
-    if (useNewUI) {
-        return <ResultsPage analysisData={analyzeData} onBack={() => navigate("/dashboard")} />;
-    }
-
-    // Fallback to original UI
-    return (
-        <>
-            <Plasma color="#72ea1e" speed={0.6} direction="forward" scale={1.1} opacity={0.1} mouseInteractive={true} />
-            <ThemeToggle />
-            <UserProfile />
-            <div className="page-shell" style={{ padding: "40px" }}>
-                <button onClick={() => setUseNewUI(true)} style={{
-                    marginBottom: "20px",
-                    padding: "10px 20px",
-                    background: "#72ea1e",
-                    color: "#000",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    fontWeight: "bold"
-                }}>
-                    Switch to New Terminal UI
-                </button>
-                <button onClick={() => navigate("/dashboard")} style={{
-                    marginLeft: "10px",
-                    marginBottom: "20px",
-                    padding: "10px 20px",
-                    background: "transparent",
-                    border: "1px solid #72ea1e",
-                    color: "#72ea1e",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    fontWeight: "bold"
-                }}>
-                    Back to Dashboard
-                </button>
-            </div>
-        </>
-    );
-}
 
     const analyze = scanResult.stages?.analyze || {};
     const vulnerableFiles = analyze.vulnerable_files || [];

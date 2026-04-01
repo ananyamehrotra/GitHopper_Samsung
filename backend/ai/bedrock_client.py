@@ -9,11 +9,10 @@ import logging
 import sys
 import os
 
-# Add ai directory to path for prompts imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # ---------------------------------------------------------------------------
-# File Classification (copied from utils to avoid import issues)
+# File Classification
 # ---------------------------------------------------------------------------
 
 IAC_EXTENSIONS = {".tf", ".tfvars"}
@@ -25,44 +24,27 @@ DEP_FILES = {
 }
 
 def classify_file(filename: str) -> str:
-    """
-    Routes a file to the correct scan prompt.
-    
-    Returns one of:
-        'iam'   → IAM policy scan
-        'iac'   → Infrastructure-as-code scan
-        'deps'  → Dependency health scan
-        'app'   → App code security + debt scan
-    """
     name = filename.lower()
     base = name.rsplit("/", 1)[-1]
     ext = "." + base.rsplit(".", 1)[-1] if "." in base else ""
 
-    # dependency files
     if base in DEP_FILES:
         return "deps"
-
-    # IAM — JSON files with policy-related names
     if ext == ".json" and any(kw in name for kw in IAM_KEYWORDS):
         return "iam"
-
-    # IaC — Terraform
     if ext in IAC_EXTENSIONS:
         return "iac"
-
-    # IaC — CloudFormation YAML
     if ext in {".yaml", ".yml"} and any(kw in name for kw in IAC_KEYWORDS):
         return "iac"
 
     return "app"
 
 # ---------------------------------------------------------------------------
-# Dynamic Prompt Generation (based on actual file content)
+# Dynamic Prompt Generation
 # ---------------------------------------------------------------------------
 
 def generate_security_prompt(filename: str, code_chunk: str, file_type: str, branch_name: str) -> str:
-    """Generate dynamic security prompt based on actual file content and type"""
-    
+
     if file_type == "iam":
         return f"""You are an IAM security specialist. Analyze this IAM policy for overly permissive permissions.
 
@@ -92,7 +74,7 @@ Return ONLY valid JSON with no preamble:
 
 IAM Policy:
 {code_chunk}"""
-    
+
     elif file_type == "iac":
         return f"""You are a cloud security engineer. Analyze this infrastructure code for misconfigurations.
 
@@ -123,7 +105,7 @@ Return ONLY valid JSON with no preamble:
 
 Infrastructure Code:
 {code_chunk}"""
-    
+
     elif file_type == "deps":
         return f"""You are a dependency security analyst. Analyze this dependency file.
 
@@ -156,8 +138,8 @@ Return ONLY valid JSON with no preamble:
 
 Dependencies:
 {code_chunk}"""
-    
-    else:  # app code
+
+    else:
         return f"""You are a senior security engineer. Analyze this code for vulnerabilities.
 
 File: {filename}
@@ -190,25 +172,22 @@ Return ONLY valid JSON with no preamble:
 Code:
 {code_chunk}"""
 
-
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-MODEL_ID = "anthropic.claude-opus-4-6-v1"
-REGION = "ap-south-2"
+MODEL_ID = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+REGION = "us-east-1"
 MAX_TOKENS = 2048
 
 logger = logging.getLogger(__name__)
 
-# Use session with default profile to ensure correct credentials
 session = boto3.Session(profile_name="default")
 bedrock = session.client("bedrock-runtime", region_name=REGION)
 
 # ---------------------------------------------------------------------------
-# Bedrock invocation
+# Cost tracking
 # ---------------------------------------------------------------------------
 
-# Track cost metrics
 cost_tracker = {
     "api_calls": 0,
     "input_tokens": 0,
@@ -216,16 +195,13 @@ cost_tracker = {
     "estimated_cost": 0.0
 }
 
-# Opus 4.6 pricing: $3 per 1M input tokens, $15 per 1M output tokens
-CLAUDE_OPUS_INPUT_COST = 0.000003
-CLAUDE_OPUS_OUTPUT_COST = 0.000015
+CLAUDE_HAIKU_INPUT_COST = 0.000001
+CLAUDE_HAIKU_OUTPUT_COST = 0.000005
 
-# Billing threshold - when user gets charged
-BILLING_THRESHOLD_CALLS = 100  # After 100 calls
-BILLING_THRESHOLD_COST = 5.0   # After $5 spent
+BILLING_THRESHOLD_CALLS = 100
+BILLING_THRESHOLD_COST = 5.0
 
 def reset_cost_tracker():
-    """Reset cost metrics for new analysis"""
     global cost_tracker
     cost_tracker = {
         "api_calls": 0,
@@ -234,22 +210,22 @@ def reset_cost_tracker():
         "estimated_cost": 0.0
     }
 
+# ---------------------------------------------------------------------------
+# Bedrock invocation
+# ---------------------------------------------------------------------------
+
 def invoke_bedrock(prompt: str, filename: str = "") -> dict:
-    """
-    Sends a prompt to Claude via Bedrock.
-    Returns parsed JSON dict with vulnerabilities.
-    Uses Bedrock's actual response format (not OpenAI).
-    """
     global cost_tracker
     cost_tracker["api_calls"] += 1
-    
+
     print(f"\n🔍 BEDROCK ANALYSIS: {filename}")
     print(f"   Prompt length: {len(prompt)} chars")
-    
+
     try:
         response = bedrock.invoke_model(
             modelId=MODEL_ID,
             body=json.dumps({
+                "anthropic_version": "bedrock-2023-05-31",
                 "messages": [
                     {"role": "user", "content": prompt}
                 ],
@@ -257,30 +233,25 @@ def invoke_bedrock(prompt: str, filename: str = "") -> dict:
                 "temperature": 0.2
             })
         )
-        
-        # Parse Bedrock response (correct format)
+
         raw = json.loads(response["body"].read())
         text = raw['content'][0]['text'].strip()
-        
+
         print(f"   Response length: {len(text)} chars")
         print(f"   Response preview: {text[:200]}...")
-        
-        # Track token usage
+
         if 'usage' in raw:
             cost_tracker["input_tokens"] += raw['usage'].get('input_tokens', 0)
             cost_tracker["output_tokens"] += raw['usage'].get('output_tokens', 0)
         else:
-            # Estimate
             cost_tracker["input_tokens"] += len(prompt) // 4
             cost_tracker["output_tokens"] += len(text) // 4
-        
-        # Calculate cost
+
         cost_tracker["estimated_cost"] = (
-            (cost_tracker["input_tokens"] * CLAUDE_OPUS_INPUT_COST) +
-            (cost_tracker["output_tokens"] * CLAUDE_OPUS_OUTPUT_COST)
+            (cost_tracker["input_tokens"] * CLAUDE_HAIKU_INPUT_COST) +
+            (cost_tracker["output_tokens"] * CLAUDE_HAIKU_OUTPUT_COST)
         )
 
-        # Strip markdown if needed
         if text.startswith("```"):
             text = text.split("```")[1]
             if text.startswith("json"):
@@ -301,38 +272,23 @@ def invoke_bedrock(prompt: str, filename: str = "") -> dict:
         traceback.print_exc()
         return {"vulnerabilities": []}
 
-
 # ---------------------------------------------------------------------------
 # Per-chunk scanning
 # ---------------------------------------------------------------------------
 
 def scan_chunk(chunk: dict, branch_name: str = "main") -> dict:
-    """
-    Analyzes a single code chunk using dynamic Bedrock prompt.
-    
-    Input: chunk {"file": "app.py", "code": "..."}
-    Output: {
-        "file": "app.py",
-        "file_type": "app",
-        "vulnerabilities": [...],
-        "has_issues": bool
-    }
-    """
     filename = chunk.get("file") or chunk.get("filename", "unknown")
     content = chunk.get("code") or chunk.get("content", "")
     file_type = classify_file(filename)
-    
+
     print(f"\n📄 Scanning: {filename} (type: {file_type}, size: {len(content)} chars)")
-    
-    # Generate dynamic prompt based on file type and content
+
     prompt = generate_security_prompt(filename, content, file_type, branch_name)
-    
-    # Invoke Bedrock with dynamic prompt
     result = invoke_bedrock(prompt, filename)
     vulnerabilities = result.get("vulnerabilities", [])
-    
+
     print(f"   Found {len(vulnerabilities)} vulnerabilities")
-    
+
     return {
         "file": filename,
         "file_type": file_type,
@@ -343,30 +299,25 @@ def scan_chunk(chunk: dict, branch_name: str = "main") -> dict:
 
 
 def scan_all_chunks(chunks: list, branch_name: str = "main") -> dict:
-    """
-    Scans all chunks with dynamic per-repo prompts.
-    Returns summary of vulnerable files + detailed analysis.
-    """
     reset_cost_tracker()
-    
+
     print(f"\n{'='*60}")
     print(f"🔬 BEDROCK ANALYSIS STARTING")
     print(f"{'='*60}")
     print(f"Total chunks to analyze: {len(chunks)}")
     print(f"Branch: {branch_name}")
     print(f"{'='*60}")
-    
+
     vulnerable_files = []
     all_vulnerabilities = []
-    
+
     for i, chunk in enumerate(chunks, 1):
         filename = chunk.get("file") or chunk.get("filename", "unknown")
         print(f"\n[{i}/{len(chunks)}] Processing: {filename}")
         logger.info(f"Analyzing chunk {i}/{len(chunks)}: {filename}")
-        
+
         result = scan_chunk(chunk, branch_name)
-        
-        # Collect vulnerable files
+
         if result["has_issues"]:
             vulnerable_files.append({
                 "file": filename,
@@ -374,7 +325,7 @@ def scan_all_chunks(chunks: list, branch_name: str = "main") -> dict:
                 "count": result["vulnerability_count"]
             })
             all_vulnerabilities.extend(result["vulnerabilities"])
-    
+
     print(f"\n{'='*60}")
     print(f"📊 ANALYSIS COMPLETE")
     print(f"{'='*60}")
@@ -383,7 +334,7 @@ def scan_all_chunks(chunks: list, branch_name: str = "main") -> dict:
     print(f"API calls made: {cost_tracker['api_calls']}")
     print(f"Estimated cost: ${cost_tracker['estimated_cost']:.4f}")
     print(f"{'='*60}\n")
-    
+
     return {
         "vulnerable_files": vulnerable_files,
         "vulnerabilities": all_vulnerabilities,

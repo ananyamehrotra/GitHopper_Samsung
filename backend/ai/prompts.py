@@ -61,7 +61,7 @@ Branch: {branch_name}
 IMPORTANT: Report ALL vulnerabilities found, even if there are many.
 Return ONLY valid JSON with ALL findings:
 {{
-  "findings": [
+  "vulnerabilities": [
     {{
       "type": "SQL_INJECTION",
       "severity": "CRITICAL",
@@ -135,7 +135,7 @@ Branch: {branch_name}
 
 Return ONLY valid JSON with ALL findings, even if multiple:
 {{
-  "findings": [
+  "vulnerabilities": [
     {{
       "type": "PUBLIC_S3_BUCKET",
       "severity": "CRITICAL",
@@ -209,7 +209,7 @@ Branch: {branch_name}
 
 Return ONLY valid JSON with ANY findings detected:
 {{
-  "findings": [
+  "vulnerabilities": [
     {{
       "type": "WILDCARD_IAM_ACTION",
       "severity": "CRITICAL",
@@ -284,7 +284,7 @@ Branch: {branch_name}
 
 Return ONLY valid JSON with all debt identified:
 {{
-  "findings": [
+  "vulnerabilities": [
     {{
       "type": "FUNCTION_TOO_COMPLEX",
       "severity": "MEDIUM",
