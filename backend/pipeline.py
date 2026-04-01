@@ -142,14 +142,12 @@ class GitHopperPipeline:
         """Stage 1: Fetch repository data"""
         try:
             if self.mock_mode:
-                # Mock data for testing
+                print(f"[FETCH] MOCK_MODE=true — using mock data")
                 return self._mock_fetch(repo_url)
-            
+
             if self.use_lambda:
                 # Call fetcher lambda
-                payload = {
-                    'repo_url': repo_url
-                }
+                payload = {'repo_url': repo_url}
                 if github_token:
                     payload['github_token'] = github_token
 
@@ -158,29 +156,39 @@ class GitHopperPipeline:
                     InvocationType='RequestResponse',
                     Payload=json.dumps(payload)
                 )
-
                 result = json.loads(response['Payload'].read())
                 fetch_data = json.loads(result['body'])
+                return fetch_data
 
             else:
-                # Local execution
-                from lambdas.fetcher.handler import lambda_handler
-                event = {'repo_url': repo_url}
-                if github_token:
-                    event['github_token'] = github_token
+                # Local execution: call github_client + chunker directly (no lambda indirection)
+                print(f"[FETCH] Local mode — calling github_client directly for {repo_url}")
+                files = fetch_repo(repo_url, github_token=github_token)
+                print(f"[FETCH] Fetched {len(files)} files from GitHub")
 
-                result = lambda_handler(event, None)
-                fetch_data = json.loads(result['body'])
+                chunks = chunk_code(files)
+                print(f"[FETCH] Created {len(chunks)} chunks")
 
-            if result.get('statusCode') != 200:
-                print(f"[FETCH] GitHub API error, falling back to mock mode...")
-                return self._mock_fetch(repo_url)
+                repo_id = hashlib.md5(repo_url.encode()).hexdigest()[:8]
 
-            return fetch_data
+                return {
+                    'repo_id': repo_id,
+                    'repo_url': repo_url,
+                    'total_files': len(files),
+                    'categories': {
+                        'config': sum(1 for f in files if f.get('debt_category_hint') == 'architecture'),
+                        'dependencies': sum(1 for f in files if f.get('debt_category_hint') == 'dependencies'),
+                        'source_code': sum(1 for f in files if f.get('debt_category_hint') not in ('architecture', 'dependencies'))
+                    },
+                    'chunks': chunks,
+                    'files': files
+                }
 
         except Exception as e:
-            print(f"[FETCH] Exception during fetch: {str(e)}")
-            print(f"[FETCH] Falling back to mock mode...")
+            print(f"[FETCH] ❌ Exception during fetch: {type(e).__name__}: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            print(f"[FETCH] ⚠️  Falling back to mock mode (set MOCK_MODE=true to suppress this)")
             return self._mock_fetch(repo_url)
 
     def _mock_fetch(self, repo_url):
@@ -369,25 +377,46 @@ def long_function():
 # CLI interface for testing
 if __name__ == '__main__':
     import argparse
+    from dotenv import load_dotenv
+
+    # Load .env so GITHUB_TOKEN is available
+    load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
     parser = argparse.ArgumentParser(description='GitHopper Full Pipeline')
     parser.add_argument('repo_url', help='GitHub repository URL')
-    parser.add_argument('--token', help='GitHub token (optional)')
+    parser.add_argument('--token', help='GitHub token (optional, falls back to GITHUB_TOKEN env var)')
     parser.add_argument('--use-lambda', action='store_true', help='Use Lambda functions')
     parser.add_argument('--mock', action='store_true', help='Use mock data for testing')
+    parser.add_argument('--branch', default='main', help='Branch to analyze (default: main)')
 
     args = parser.parse_args()
 
     if args.use_lambda:
         os.environ['USE_LAMBDA'] = 'true'
-    
+
     if args.mock:
         os.environ['MOCK_MODE'] = 'true'
 
+    # Use --token first, then fall back to env var
+    github_token = args.token or os.environ.get('GITHUB_TOKEN')
+    if github_token:
+        print(f"[CLI] Using GitHub token: {github_token[:8]}...{github_token[-4:]}")
+    else:
+        print("[CLI] ⚠️  No GitHub token found — may hit rate limits on public repos")
+
     pipeline = GitHopperPipeline()
-    result = pipeline.run_full_pipeline(args.repo_url, args.token)
+    result = pipeline.run_full_pipeline(args.repo_url, github_token, args.branch)
 
     print("\n" + "="*60)
-    print("FINAL RESULT")
+    print("FINAL RESULT SUMMARY")
     print("="*60)
-    print(json.dumps(result, indent=2))
+    summary = result.get('summary', {})
+    print(f"Status:           {result.get('status')}")
+    print(f"Health Score:     {summary.get('health_score')}")
+    print(f"Security Issues:  {summary.get('total_security_issues')}")
+    print(f"Debt Issues:      {summary.get('total_debt_issues')}")
+    print(f"Critical Issues:  {summary.get('critical_issues')}")
+    print(f"Quick Wins:       {summary.get('quick_wins')}")
+    if result.get('status') == 'error':
+        print(f"\n❌ Error: {result.get('error')}")
+    print("="*60)
