@@ -234,13 +234,17 @@ def reset_cost_tracker():
         "estimated_cost": 0.0
     }
 
-def invoke_bedrock(prompt: str) -> dict:
+def invoke_bedrock(prompt: str, filename: str = "") -> dict:
     """
     Sends a prompt to Claude via Bedrock.
     Returns parsed JSON dict with vulnerabilities.
+    Uses Bedrock's actual response format (not OpenAI).
     """
     global cost_tracker
     cost_tracker["api_calls"] += 1
+    
+    print(f"\n🔍 BEDROCK ANALYSIS: {filename}")
+    print(f"   Prompt length: {len(prompt)} chars")
     
     try:
         response = bedrock.invoke_model(
@@ -253,8 +257,13 @@ def invoke_bedrock(prompt: str) -> dict:
                 "temperature": 0.2
             })
         )
+        
+        # Parse Bedrock response (correct format)
         raw = json.loads(response["body"].read())
         text = raw['content'][0]['text'].strip()
+        
+        print(f"   Response length: {len(text)} chars")
+        print(f"   Response preview: {text[:200]}...")
         
         # Track token usage
         if 'usage' in raw:
@@ -276,70 +285,21 @@ def invoke_bedrock(prompt: str) -> dict:
             text = text.split("```")[1]
             if text.startswith("json"):
                 text = text[4:]
+            text = text.rstrip("`").strip()
 
-        return json.loads(text)
-
-    except json.JSONDecodeError as e:
-        logger.error(f"JSON parse error: {e}")
-        return {"vulnerabilities": []}
-    except Exception as e:
-        logger.error(f"Bedrock error: {e}")
-        return {"vulnerabilities": []}
-
-def invoke_bedrock(prompt: str) -> dict:
-    """
-    Sends a prompt to Claude via Bedrock.
-    Returns parsed JSON dict, or {"findings": []} on failure.
-    Also tracks API calls and token usage for cost calculation.
-    """
-    global cost_tracker
-    cost_tracker["api_calls"] += 1
-    
-    try:
-        response = bedrock.invoke_model(
-            modelId=MODEL_ID,
-            body=json.dumps({
-                "messages": [
-                    {"role": "user", "content": prompt}
-                ],
-                "max_tokens": MAX_TOKENS,
-                "temperature": 0.1
-            })
-        )
-        raw = json.loads(response["body"].read())
-        text = raw['choices'][0]['message']['content'].strip()
-        
-        # Track token usage if available in response
-        if 'usage' in raw:
-            cost_tracker["input_tokens"] += raw['usage'].get('input_tokens', 0)
-            cost_tracker["output_tokens"] += raw['usage'].get('output_tokens', 0)
-        else:
-            # Estimate token count (rough approximation)
-            prompt_tokens = len(prompt) // 4
-            response_tokens = len(text) // 4
-            cost_tracker["input_tokens"] += prompt_tokens
-            cost_tracker["output_tokens"] += response_tokens
-        
-        # Calculate estimated cost
-        cost_tracker["estimated_cost"] = (
-            (cost_tracker["input_tokens"] * CLAUDE_OPUS_INPUT_COST) +
-            (cost_tracker["output_tokens"] * CLAUDE_OPUS_OUTPUT_COST)
-        )
-
-        # strip markdown fences if model adds them
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-
-        return json.loads(text)
+        result = json.loads(text)
+        print(f"   ✅ Parsed JSON successfully. Found {len(result.get('vulnerabilities', []))} vulnerabilities")
+        return result
 
     except json.JSONDecodeError as e:
-        logger.error(f"JSON parse error from Bedrock: {e}")
-        return {"findings": []}
+        print(f"   ❌ JSON parse error: {e}")
+        print(f"   Raw text: {text[:300] if 'text' in locals() else 'N/A'}")
+        return {"vulnerabilities": []}
     except Exception as e:
-        logger.error(f"Bedrock invocation error: {e}")
-        return {"findings": []}
+        print(f"   ❌ Bedrock error: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"vulnerabilities": []}
 
 
 # ---------------------------------------------------------------------------
@@ -362,12 +322,16 @@ def scan_chunk(chunk: dict, branch_name: str = "main") -> dict:
     content = chunk.get("code") or chunk.get("content", "")
     file_type = classify_file(filename)
     
+    print(f"\n📄 Scanning: {filename} (type: {file_type}, size: {len(content)} chars)")
+    
     # Generate dynamic prompt based on file type and content
     prompt = generate_security_prompt(filename, content, file_type, branch_name)
     
     # Invoke Bedrock with dynamic prompt
-    result = invoke_bedrock(prompt)
+    result = invoke_bedrock(prompt, filename)
     vulnerabilities = result.get("vulnerabilities", [])
+    
+    print(f"   Found {len(vulnerabilities)} vulnerabilities")
     
     return {
         "file": filename,
@@ -385,38 +349,45 @@ def scan_all_chunks(chunks: list, branch_name: str = "main") -> dict:
     """
     reset_cost_tracker()
     
+    print(f"\n{'='*60}")
+    print(f"🔬 BEDROCK ANALYSIS STARTING")
+    print(f"{'='*60}")
+    print(f"Total chunks to analyze: {len(chunks)}")
+    print(f"Branch: {branch_name}")
+    print(f"{'='*60}")
+    
     vulnerable_files = []
     all_vulnerabilities = []
-    unique_files_analyzed = set()  # Track unique files (not chunks)
     
-    for chunk in chunks:
+    for i, chunk in enumerate(chunks, 1):
         filename = chunk.get("file") or chunk.get("filename", "unknown")
-        unique_files_analyzed.add(filename)
-        logger.info(f"Analyzing: {filename}")
+        print(f"\n[{i}/{len(chunks)}] Processing: {filename}")
+        logger.info(f"Analyzing chunk {i}/{len(chunks)}: {filename}")
         
         result = scan_chunk(chunk, branch_name)
         
-        # Collect vulnerable files (deduplicate by filename)
+        # Collect vulnerable files
         if result["has_issues"]:
-            # Check if this file is already in the list
-            existing = next((f for f in vulnerable_files if f["file"] == filename), None)
-            if existing:
-                # Add to count for this file
-                existing["count"] += result["vulnerability_count"]
-                all_vulnerabilities.extend(result["vulnerabilities"])
-            else:
-                # New file with issues
-                vulnerable_files.append({
-                    "file": filename,
-                    "type": result["file_type"],
-                    "count": result["vulnerability_count"]
-                })
-                all_vulnerabilities.extend(result["vulnerabilities"])
+            vulnerable_files.append({
+                "file": filename,
+                "type": result["file_type"],
+                "count": result["vulnerability_count"]
+            })
+            all_vulnerabilities.extend(result["vulnerabilities"])
+    
+    print(f"\n{'='*60}")
+    print(f"📊 ANALYSIS COMPLETE")
+    print(f"{'='*60}")
+    print(f"Total vulnerabilities found: {len(all_vulnerabilities)}")
+    print(f"Files with issues: {len(vulnerable_files)}")
+    print(f"API calls made: {cost_tracker['api_calls']}")
+    print(f"Estimated cost: ${cost_tracker['estimated_cost']:.4f}")
+    print(f"{'='*60}\n")
     
     return {
         "vulnerable_files": vulnerable_files,
         "vulnerabilities": all_vulnerabilities,
-        "total_files_analyzed": len(unique_files_analyzed),
+        "total_files_analyzed": len(chunks),
         "files_with_issues": len(vulnerable_files),
         "total_vulnerabilities": len(all_vulnerabilities),
         "cost_tracker": cost_tracker.copy(),
