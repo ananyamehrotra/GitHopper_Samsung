@@ -1,16 +1,16 @@
 {
   "status": "success",
   "pipeline": "complete",
-  "execution_time_seconds": 15.749773,
+  "execution_time_seconds": 2.142458,
   "stages": {
     "fetch": {
-      "repo_id": "efc09095",
-      "repo_url": "https://github.com/aniketaggarwal/vulnerable-demo-app",
+      "repo_id": "2ca99584",
+      "repo_url": "aniketaggarwal/vulnerable-demo-app",
       "total_files": 6,
       "categories": {
-        "config": 0,
+        "config": 1,
         "dependencies": 0,
-        "source_code": 6
+        "source_code": 5
       },
       "chunks": [
         {
@@ -416,23 +416,189 @@
       ]
     },
     "analyze": {
-      "repo_id": "efc09095",
-      "repo_url": "https://github.com/aniketaggarwal/vulnerable-demo-app",
+      "repo_id": "2ca99584",
+      "repo_url": "aniketaggarwal/vulnerable-demo-app",
       "branch_name": "main",
-      "vulnerabilities": [],
-      "vulnerable_files": [],
+      "vulnerabilities": [
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "README.md",
+          "line_range": "17",
+          "code_snippet": "| DB_PASSWORD hardcoded | HARDCODED_SECRET | CRITICAL |",
+          "explanation": "Hardcoded value flagged as potential secret.",
+          "business_impact": "Potential credential exposure in version control history.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Audit this value and externalize if sensitive.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "README.md",
+          "line_range": "18",
+          "code_snippet": "| STRIPE_KEY hardcoded | HARDCODED_SECRET | CRITICAL |",
+          "explanation": "Hardcoded value flagged as potential secret.",
+          "business_impact": "Potential credential exposure in version control history.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Audit this value and externalize if sensitive.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "README.md",
+          "line_range": "19",
+          "code_snippet": "| AWS keys hardcoded | HARDCODED_SECRET | CRITICAL |",
+          "explanation": "Hardcoded value flagged as potential secret.",
+          "business_impact": "Potential credential exposure in version control history.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Audit this value and externalize if sensitive.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "app.py",
+          "line_range": "18",
+          "code_snippet": "password = data['password']",
+          "explanation": "Hardcoded password detected in source code.",
+          "business_impact": "Credential exposure \u2014 attackers can directly access databases or services.",
+          "estimated_minutes_to_fix": 15,
+          "remediation": "Move to environment variables or a secrets manager (AWS Secrets Manager, HashiCorp Vault).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "app.py",
+          "line_range": "27",
+          "code_snippet": "password = data['password']",
+          "explanation": "Hardcoded password detected in source code.",
+          "business_impact": "Credential exposure \u2014 attackers can directly access databases or services.",
+          "estimated_minutes_to_fix": 15,
+          "remediation": "Move to environment variables or a secrets manager (AWS Secrets Manager, HashiCorp Vault).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "auth/token.py",
+          "line_range": "4",
+          "code_snippet": "SECRET = \"hardcoded_jwt_secret_123\"   # hardcoded secret",
+          "explanation": "Hardcoded secret/key detected in source code.",
+          "business_impact": "Secret exposure \u2014 any developer with repo access can compromise production systems.",
+          "estimated_minutes_to_fix": 15,
+          "remediation": "Use environment variables loaded via python-dotenv, never commit secrets to git.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "config.py",
+          "line_range": "12",
+          "code_snippet": "DB_PASSWORD = \"Pr0d@ccess#2024\"",
+          "explanation": "Hardcoded password detected in source code.",
+          "business_impact": "Credential exposure \u2014 attackers can directly access databases or services.",
+          "estimated_minutes_to_fix": 15,
+          "remediation": "Move to environment variables or a secrets manager (AWS Secrets Manager, HashiCorp Vault).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "config.py",
+          "line_range": "21",
+          "code_snippet": "STRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\"",
+          "explanation": "Hardcoded secret/key detected in source code.",
+          "business_impact": "Secret exposure \u2014 any developer with repo access can compromise production systems.",
+          "estimated_minutes_to_fix": 15,
+          "remediation": "Use environment variables loaded via python-dotenv, never commit secrets to git.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "config.py",
+          "line_range": "24",
+          "code_snippet": "JWT_SECRET = \"my_super_secret_jwt_key_2024\"",
+          "explanation": "Hardcoded secret/key detected in source code.",
+          "business_impact": "Secret exposure \u2014 any developer with repo access can compromise production systems.",
+          "estimated_minutes_to_fix": 15,
+          "remediation": "Use environment variables loaded via python-dotenv, never commit secrets to git.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "config.py",
+          "line_range": "29",
+          "code_snippet": "SENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\"",
+          "explanation": "Hardcoded API key detected.",
+          "business_impact": "API key exposure \u2014 attackers can make requests on your behalf, incur costs, or steal data.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Store API keys in environment variables; rotate the exposed key immediately.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "CRITICAL",
+          "file": "config.py",
+          "line_range": "32",
+          "code_snippet": "FIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\"",
+          "explanation": "Hardcoded API key detected.",
+          "business_impact": "API key exposure \u2014 attackers can make requests on your behalf, incur costs, or steal data.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Store API keys in environment variables; rotate the exposed key immediately.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "config.py",
+          "line_range": "37",
+          "code_snippet": "TWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\"",
+          "explanation": "Hardcoded token detected.",
+          "business_impact": "Token exposure \u2014 may allow unauthorized access to third-party services.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Move token to .env file, add .env to .gitignore.",
+          "source": "static_analysis"
+        }
+      ],
+      "vulnerable_files": [
+        {
+          "file": "README.md",
+          "type": "app",
+          "count": 3
+        },
+        {
+          "file": "app.py",
+          "type": "app",
+          "count": 2
+        },
+        {
+          "file": "auth/token.py",
+          "type": "app",
+          "count": 1
+        },
+        {
+          "file": "config.py",
+          "type": "app",
+          "count": 6
+        }
+      ],
       "total_files_analyzed": 6,
-      "files_with_issues": 0,
-      "total_vulnerabilities": 0,
+      "files_with_issues": 4,
+      "total_vulnerabilities": 12,
       "cost_tracker": {
-        "api_calls": 6,
+        "api_calls": 0,
         "input_tokens": 0,
         "output_tokens": 0,
         "estimated_cost": 0.0
       },
       "billing": {
-        "calls_made": 6,
-        "free_calls_remaining": 94,
+        "calls_made": 0,
+        "free_calls_remaining": 100,
         "estimated_cost": 0.0,
         "will_be_charged": false,
         "alternatives": [
@@ -462,8 +628,8 @@
       "total_files": 6
     },
     "score": {
-      "repo_id": "efc09095",
-      "repo_url": "https://github.com/aniketaggarwal/vulnerable-demo-app",
+      "repo_id": "2ca99584",
+      "repo_url": "aniketaggarwal/vulnerable-demo-app",
       "health_score": 100,
       "chunks_scanned": 6,
       "total_files": 6,
@@ -502,9 +668,9 @@
   },
   "data": {
     "total_files_fetched": 6,
-    "config_files": 0,
+    "config_files": 1,
     "dependency_files": 0,
-    "source_files": 6,
+    "source_files": 5,
     "total_chunks": 6,
     "files_by_category": {
       "config": [
@@ -883,7 +1049,7 @@
   },
   "summary": {
     "repo_url": "aniketaggarwal/vulnerable-demo-app",
-    "repo_id": "efc09095",
+    "repo_id": "2ca99584",
     "health_score": 100,
     "total_security_issues": 0,
     "total_debt_issues": 0,

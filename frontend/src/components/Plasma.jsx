@@ -142,7 +142,7 @@ export const Plasma = ({
         const mesh = new Mesh(gl, { geometry, program });
 
         const handleMouseMove = e => {
-            if (!mouseInteractive) return;
+            if (!mouseInteractive || !containerRef.current) return;
             const rect = containerRef.current.getBoundingClientRect();
             mousePos.current.x = e.clientX - rect.left;
             mousePos.current.y = e.clientY - rect.top;
@@ -156,6 +156,7 @@ export const Plasma = ({
         }
 
         const setSize = () => {
+            if (!containerRef.current) return;
             const rect = containerRef.current.getBoundingClientRect();
             const width = Math.max(1, Math.floor(rect.width));
             const height = Math.max(1, Math.floor(rect.height));

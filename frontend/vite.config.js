@@ -12,8 +12,7 @@ export default defineConfig({
     build: {
         rollupOptions: {
             input: {
-                main: "index.html",
-                roadmap: "roadmap.html"
+                main: "index.html"
             }
         }
     }
