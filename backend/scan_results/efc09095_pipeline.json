@@ -1,7 +1,7 @@
 {
   "status": "success",
   "pipeline": "complete",
-  "execution_time_seconds": 13.028251,
+  "execution_time_seconds": 14.252813,
   "stages": {
     "fetch": {
       "repo_id": "efc09095",
@@ -131,45 +131,55 @@
           "chunk_index": 0,
           "total_chunks": 1,
           "start_line": 1,
-          "end_line": 17,
-          "code": "# App configuration\nimport os\n\n# Database settings\nDB_HOST = \"localhost\"\nDB_NAME = \"production_db\"\nDB_USER = \"admin\"\nDB_PASSWORD = \"supersecret123\"        # hardcoded password\n\n# API Keys\nSTRIPE_KEY = \"sk_live_abc123xyz789\"   # hardcoded stripe key\nAWS_ACCESS_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\n\n# JWT\nJWT_SECRET = \"myjwtsecret\"\nJWT_EXPIRY = None                      # no expiry set",
-          "char_count": 433,
+          "end_line": 38,
+          "code": "import os\n\n# Application Configuration\nAPP_NAME = \"GitHopper\"\nAPP_ENV = \"production\"\nDEBUG = False\n\n# Database\nDB_HOST = \"prod-db.us-east-1.rds.amazonaws.com\"\nDB_NAME = \"githopper_prod\"\nDB_USER = \"admin\"\nDB_PASSWORD = \"Pr0d@ccess#2024\"\n\n# AWS Credentials\nAWS_ACCESS_KEY_ID = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET_ACCESS_KEY = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\nAWS_REGION = \"us-east-1\"\n\n# Stripe\nSTRIPE_SECRET_KEY = \"sk_live_51abc123XYZtest\"\nSTRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\"\n\n# JWT\nJWT_SECRET = \"my_super_secret_jwt_key_2024\"\nJWT_ALGORITHM = \"HS256\"\nJWT_EXPIRY = None\n\n# SendGrid\nSENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\"\n\n# Firebase\nFIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\"\nFIREBASE_PROJECT_ID = \"githopper-prod\"\n\n# Twilio\nTWILIO_ACCOUNT_SID = \"ACabc123xyz789example\"\nTWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\"\nTWILIO_PHONE = \"+1234567890\"",
+          "char_count": 886,
           "debt_category_hint": "architecture",
           "debt_signals": [
             {
               "pattern": "password\\s*=",
-              "line_number": 8,
-              "line_snippet": "DB_PASSWORD = \"supersecret123\"        # hardcoded password"
-            },
-            {
-              "pattern": "hardcoded",
-              "line_number": 11,
-              "line_snippet": "STRIPE_KEY = \"sk_live_abc123xyz789\"   # hardcoded stripe key"
+              "line_number": 12,
+              "line_snippet": "DB_PASSWORD = \"Pr0d@ccess#2024\""
             },
             {
               "pattern": "secret\\s*=",
-              "line_number": 13,
-              "line_snippet": "AWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\""
+              "line_number": 21,
+              "line_snippet": "STRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\""
             },
             {
               "pattern": "secret\\s*=",
-              "line_number": 16,
-              "line_snippet": "JWT_SECRET = \"myjwtsecret\""
+              "line_number": 24,
+              "line_snippet": "JWT_SECRET = \"my_super_secret_jwt_key_2024\""
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 29,
+              "line_snippet": "SENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\""
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 32,
+              "line_snippet": "FIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\""
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 37,
+              "line_snippet": "TWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\""
             }
           ],
           "file_metrics": {
-            "total_lines": 17,
-            "code_lines": 10,
-            "blank_lines": 3,
-            "comment_lines": 4,
-            "comment_ratio": 0.235,
+            "total_lines": 38,
+            "code_lines": 22,
+            "blank_lines": 8,
+            "comment_lines": 8,
+            "comment_ratio": 0.211,
             "max_indentation_depth": 0,
             "long_functions_detected": [],
             "long_function_count": 0
           },
           "is_entry_point": true,
           "contains_tests": false,
-          "context_note": "File: config.py (python) | Lines 1\u201317 (chunk 1 of 1). | Debt signals in this chunk: line 8: DB_PASSWORD = \"supersecret123\"        # hardcoded password; line 11: STRIPE_KEY = \"sk_live_abc123xyz789\"   # hardcoded stripe key; line 13: AWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"; line 16: JWT_SECRET = \"myjwtsecret\""
+          "context_note": "File: config.py (python) | Lines 1\u201338 (chunk 1 of 1). | Debt signals in this chunk: line 12: DB_PASSWORD = \"Pr0d@ccess#2024\"; line 21: STRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\"; line 24: JWT_SECRET = \"my_super_secret_jwt_key_2024\"; line 29: SENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\"; line 32: FIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\""
         },
         {
           "chunk_id": "database.py::chunk_0",
@@ -318,38 +328,48 @@
         {
           "path": "config.py",
           "language": "python",
-          "content": "# App configuration\nimport os\n\n# Database settings\nDB_HOST = \"localhost\"\nDB_NAME = \"production_db\"\nDB_USER = \"admin\"\nDB_PASSWORD = \"supersecret123\"        # hardcoded password\n\n# API Keys\nSTRIPE_KEY = \"sk_live_abc123xyz789\"   # hardcoded stripe key\nAWS_ACCESS_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\n\n# JWT\nJWT_SECRET = \"myjwtsecret\"\nJWT_EXPIRY = None                      # no expiry set",
-          "size_bytes": 433,
+          "content": "import os\n\n# Application Configuration\nAPP_NAME = \"GitHopper\"\nAPP_ENV = \"production\"\nDEBUG = False\n\n# Database\nDB_HOST = \"prod-db.us-east-1.rds.amazonaws.com\"\nDB_NAME = \"githopper_prod\"\nDB_USER = \"admin\"\nDB_PASSWORD = \"Pr0d@ccess#2024\"\n\n# AWS Credentials\nAWS_ACCESS_KEY_ID = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET_ACCESS_KEY = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\nAWS_REGION = \"us-east-1\"\n\n# Stripe\nSTRIPE_SECRET_KEY = \"sk_live_51abc123XYZtest\"\nSTRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\"\n\n# JWT\nJWT_SECRET = \"my_super_secret_jwt_key_2024\"\nJWT_ALGORITHM = \"HS256\"\nJWT_EXPIRY = None\n\n# SendGrid\nSENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\"\n\n# Firebase\nFIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\"\nFIREBASE_PROJECT_ID = \"githopper-prod\"\n\n# Twilio\nTWILIO_ACCOUNT_SID = \"ACabc123xyz789example\"\nTWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\"\nTWILIO_PHONE = \"+1234567890\"",
+          "size_bytes": 886,
           "debt_category_hint": "architecture",
           "debt_signals": [
             {
               "pattern": "password\\s*=",
-              "line_number": 8,
-              "line_snippet": "DB_PASSWORD = \"supersecret123\"        # hardcoded password"
-            },
-            {
-              "pattern": "hardcoded",
-              "line_number": 11,
-              "line_snippet": "STRIPE_KEY = \"sk_live_abc123xyz789\"   # hardcoded stripe key"
+              "line_number": 12,
+              "line_snippet": "DB_PASSWORD = \"Pr0d@ccess#2024\""
             },
             {
               "pattern": "secret\\s*=",
-              "line_number": 13,
-              "line_snippet": "AWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\""
+              "line_number": 21,
+              "line_snippet": "STRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\""
             },
             {
               "pattern": "secret\\s*=",
-              "line_number": 16,
-              "line_snippet": "JWT_SECRET = \"myjwtsecret\""
+              "line_number": 24,
+              "line_snippet": "JWT_SECRET = \"my_super_secret_jwt_key_2024\""
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 29,
+              "line_snippet": "SENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\""
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 32,
+              "line_snippet": "FIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\""
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 37,
+              "line_snippet": "TWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\""
             }
           ],
-          "debt_signal_count": 4,
+          "debt_signal_count": 6,
           "metrics": {
-            "total_lines": 17,
-            "code_lines": 10,
-            "blank_lines": 3,
-            "comment_lines": 4,
-            "comment_ratio": 0.235,
+            "total_lines": 38,
+            "code_lines": 22,
+            "blank_lines": 8,
+            "comment_lines": 8,
+            "comment_ratio": 0.211,
             "max_indentation_depth": 0,
             "long_functions_detected": [],
             "long_function_count": 0
@@ -491,38 +511,48 @@
         {
           "path": "config.py",
           "language": "python",
-          "content": "# App configuration\nimport os\n\n# Database settings\nDB_HOST = \"localhost\"\nDB_NAME = \"production_db\"\nDB_USER = \"admin\"\nDB_PASSWORD = \"supersecret123\"        # hardcoded password\n\n# API Keys\nSTRIPE_KEY = \"sk_live_abc123xyz789\"   # hardcoded stripe key\nAWS_ACCESS_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\n\n# JWT\nJWT_SECRET = \"myjwtsecret\"\nJWT_EXPIRY = None                      # no expiry set",
-          "size_bytes": 433,
+          "content": "import os\n\n# Application Configuration\nAPP_NAME = \"GitHopper\"\nAPP_ENV = \"production\"\nDEBUG = False\n\n# Database\nDB_HOST = \"prod-db.us-east-1.rds.amazonaws.com\"\nDB_NAME = \"githopper_prod\"\nDB_USER = \"admin\"\nDB_PASSWORD = \"Pr0d@ccess#2024\"\n\n# AWS Credentials\nAWS_ACCESS_KEY_ID = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET_ACCESS_KEY = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\nAWS_REGION = \"us-east-1\"\n\n# Stripe\nSTRIPE_SECRET_KEY = \"sk_live_51abc123XYZtest\"\nSTRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\"\n\n# JWT\nJWT_SECRET = \"my_super_secret_jwt_key_2024\"\nJWT_ALGORITHM = \"HS256\"\nJWT_EXPIRY = None\n\n# SendGrid\nSENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\"\n\n# Firebase\nFIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\"\nFIREBASE_PROJECT_ID = \"githopper-prod\"\n\n# Twilio\nTWILIO_ACCOUNT_SID = \"ACabc123xyz789example\"\nTWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\"\nTWILIO_PHONE = \"+1234567890\"",
+          "size_bytes": 886,
           "debt_category_hint": "architecture",
           "debt_signals": [
             {
               "pattern": "password\\s*=",
-              "line_number": 8,
-              "line_snippet": "DB_PASSWORD = \"supersecret123\"        # hardcoded password"
-            },
-            {
-              "pattern": "hardcoded",
-              "line_number": 11,
-              "line_snippet": "STRIPE_KEY = \"sk_live_abc123xyz789\"   # hardcoded stripe key"
+              "line_number": 12,
+              "line_snippet": "DB_PASSWORD = \"Pr0d@ccess#2024\""
             },
             {
               "pattern": "secret\\s*=",
-              "line_number": 13,
-              "line_snippet": "AWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\""
+              "line_number": 21,
+              "line_snippet": "STRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\""
             },
             {
               "pattern": "secret\\s*=",
-              "line_number": 16,
-              "line_snippet": "JWT_SECRET = \"myjwtsecret\""
+              "line_number": 24,
+              "line_snippet": "JWT_SECRET = \"my_super_secret_jwt_key_2024\""
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 29,
+              "line_snippet": "SENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\""
+            },
+            {
+              "pattern": "api_key\\s*=",
+              "line_number": 32,
+              "line_snippet": "FIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\""
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 37,
+              "line_snippet": "TWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\""
             }
           ],
-          "debt_signal_count": 4,
+          "debt_signal_count": 6,
           "metrics": {
-            "total_lines": 17,
-            "code_lines": 10,
-            "blank_lines": 3,
-            "comment_lines": 4,
-            "comment_ratio": 0.235,
+            "total_lines": 38,
+            "code_lines": 22,
+            "blank_lines": 8,
+            "comment_lines": 8,
+            "comment_ratio": 0.211,
             "max_indentation_depth": 0,
             "long_functions_detected": [],
             "long_function_count": 0
@@ -755,38 +785,48 @@
       {
         "path": "config.py",
         "language": "python",
-        "content": "# App configuration\nimport os\n\n# Database settings\nDB_HOST = \"localhost\"\nDB_NAME = \"production_db\"\nDB_USER = \"admin\"\nDB_PASSWORD = \"supersecret123\"        # hardcoded password\n\n# API Keys\nSTRIPE_KEY = \"sk_live_abc123xyz789\"   # hardcoded stripe key\nAWS_ACCESS_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\n\n# JWT\nJWT_SECRET = \"myjwtsecret\"\nJWT_EXPIRY = None                      # no expiry set",
-        "size_bytes": 433,
+        "content": "import os\n\n# Application Configuration\nAPP_NAME = \"GitHopper\"\nAPP_ENV = \"production\"\nDEBUG = False\n\n# Database\nDB_HOST = \"prod-db.us-east-1.rds.amazonaws.com\"\nDB_NAME = \"githopper_prod\"\nDB_USER = \"admin\"\nDB_PASSWORD = \"Pr0d@ccess#2024\"\n\n# AWS Credentials\nAWS_ACCESS_KEY_ID = \"AKIAIOSFODNN7EXAMPLE\"\nAWS_SECRET_ACCESS_KEY = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\"\nAWS_REGION = \"us-east-1\"\n\n# Stripe\nSTRIPE_SECRET_KEY = \"sk_live_51abc123XYZtest\"\nSTRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\"\n\n# JWT\nJWT_SECRET = \"my_super_secret_jwt_key_2024\"\nJWT_ALGORITHM = \"HS256\"\nJWT_EXPIRY = None\n\n# SendGrid\nSENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\"\n\n# Firebase\nFIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\"\nFIREBASE_PROJECT_ID = \"githopper-prod\"\n\n# Twilio\nTWILIO_ACCOUNT_SID = \"ACabc123xyz789example\"\nTWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\"\nTWILIO_PHONE = \"+1234567890\"",
+        "size_bytes": 886,
         "debt_category_hint": "architecture",
         "debt_signals": [
           {
             "pattern": "password\\s*=",
-            "line_number": 8,
-            "line_snippet": "DB_PASSWORD = \"supersecret123\"        # hardcoded password"
-          },
-          {
-            "pattern": "hardcoded",
-            "line_number": 11,
-            "line_snippet": "STRIPE_KEY = \"sk_live_abc123xyz789\"   # hardcoded stripe key"
+            "line_number": 12,
+            "line_snippet": "DB_PASSWORD = \"Pr0d@ccess#2024\""
           },
           {
             "pattern": "secret\\s*=",
-            "line_number": 13,
-            "line_snippet": "AWS_SECRET = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\""
+            "line_number": 21,
+            "line_snippet": "STRIPE_WEBHOOK_SECRET = \"whsec_abc123xyz789\""
           },
           {
             "pattern": "secret\\s*=",
-            "line_number": 16,
-            "line_snippet": "JWT_SECRET = \"myjwtsecret\""
+            "line_number": 24,
+            "line_snippet": "JWT_SECRET = \"my_super_secret_jwt_key_2024\""
+          },
+          {
+            "pattern": "api_key\\s*=",
+            "line_number": 29,
+            "line_snippet": "SENDGRID_API_KEY = \"SG.abc123xyz.EXAMPLE_KEY_HERE\""
+          },
+          {
+            "pattern": "api_key\\s*=",
+            "line_number": 32,
+            "line_snippet": "FIREBASE_API_KEY = \"AIzaSyBMxfOSo8jKEOOrD9GmTyAtjl5JPewEvMA\""
+          },
+          {
+            "pattern": "token\\s*=",
+            "line_number": 37,
+            "line_snippet": "TWILIO_AUTH_TOKEN = \"abc123xyz789authtoken\""
           }
         ],
-        "debt_signal_count": 4,
+        "debt_signal_count": 6,
         "metrics": {
-          "total_lines": 17,
-          "code_lines": 10,
-          "blank_lines": 3,
-          "comment_lines": 4,
-          "comment_ratio": 0.235,
+          "total_lines": 38,
+          "code_lines": 22,
+          "blank_lines": 8,
+          "comment_lines": 8,
+          "comment_ratio": 0.211,
           "max_indentation_depth": 0,
           "long_functions_detected": [],
           "long_function_count": 0
@@ -832,12 +872,12 @@
       }
     ],
     "analysis_summary": {
-      "total_debt_signals": 10,
+      "total_debt_signals": 12,
       "files_with_debt_signals": 4,
       "cost_estimate": {
         "chunks_to_analyze": 6,
-        "total_code_chars": 5776,
-        "approx_tokens": 1444
+        "total_code_chars": 6229,
+        "approx_tokens": 1557
       }
     }
   },

@@ -35,22 +35,8 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignUpPage />} />
-                <Route
-                    path="/dashboard"
-                    element={
-                        <ProtectedRoute>
-                            <DashboardPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/analyse-branches"
-                    element={
-                        <ProtectedRoute>
-                            <AnalyseBranchesPage />
-                        </ProtectedRoute>
-                    }
-                />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/analyse-branches" element={<AnalyseBranchesPage />} />
                 <Route
                     path="/security-audit"
                     element={

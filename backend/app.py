@@ -20,6 +20,13 @@ app = Flask(__name__,
 # Enable CORS for frontend communication
 CORS(app)
 
+# Add headers to allow Firebase auth popups
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
+    response.headers['Cross-Origin-Embedder-Policy'] = 'credentialless'
+    return response
+
 # ==================== API ROUTES ====================
 
 @app.route('/api/health', methods=['GET'])
