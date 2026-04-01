@@ -64,3 +64,215 @@ html.light-mode .page-title {
         padding: 1rem;
     }
 }
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN — Media Queries
+══════════════════════════════════════════════════════════ */
+
+/* Tablet & Small Screens (768px and below) */
+@media (max-width: 768px) {
+    .page-shell {
+        padding: 28px 20px 60px !important;
+        max-width: 100% !important;
+    }
+
+    h1 {
+        font-size: clamp(20px, 5vw, 32px) !important;
+        letter-spacing: 1px !important;
+    }
+
+    /* Title section */
+    >div:first-child {
+        margin-bottom: 32px !important;
+    }
+
+    /* Grid adjustments */
+    [style*="grid"] {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+        gap: 10px !important;
+    }
+
+    /* Card padding */
+    [style*="padding: 22px"] {
+        padding: 16px !important;
+    }
+
+    [style*="padding: 24px"] {
+        padding: 16px !important;
+    }
+
+    /* Font size adjustments for tablets */
+    p {
+        font-size: clamp(10px, 2.5vw, 14px) !important;
+    }
+
+    /* Flex direction change for smaller screens */
+    [style*="display: flex"] {
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+}
+
+/* Mobile Phones (480px and below) */
+@media (max-width: 480px) {
+    .page-shell {
+        padding: 16px 12px 40px !important;
+        max-width: 100% !important;
+    }
+
+    h1 {
+        font-size: clamp(16px, 6vw, 24px) !important;
+        letter-spacing: 0.5px !important;
+        line-height: 1.2 !important;
+    }
+
+    /* Title margins */
+    >div:first-child {
+        margin-bottom: 24px !important;
+    }
+
+    /* Section spacing */
+    [style*="marginTop: 20px"] {
+        margin-top: 12px !important;
+    }
+
+    [style*="gap: 64px"] {
+        gap: 32px !important;
+    }
+
+    [style*="gap: 20px"] {
+        gap: 12px !important;
+    }
+
+    /* Card adjustments */
+    [style*="padding: 22px"] {
+        padding: 12px !important;
+    }
+
+    [style*="padding: 24px"] {
+        padding: 12px !important;
+    }
+
+    [style*="padding: 16px"] {
+        padding: 10px !important;
+    }
+
+    /* Grid to single column */
+    [style*="grid"] {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    /* Font sizes for mobile */
+    p {
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+    }
+
+    span {
+        font-size: 11px !important;
+    }
+
+    /* Vulnerability list items */
+    [style*="padding: 16px 18px"] {
+        padding: 12px 10px !important;
+    }
+
+    /* Expand sections */
+    [style*="marginLeft: 8px"] {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* Badge adjustments */
+    [style*="borderRadius: 999px"] {
+        padding: 6px 10px !important;
+        font-size: 10px !important;
+    }
+}
+
+/* Small Mobile (Under 375px) */
+@media (max-width: 375px) {
+    .page-shell {
+        padding: 12px 8px 30px !important;
+    }
+
+    h1 {
+        font-size: 16px !important;
+    }
+
+    [style*="padding: 12px"] {
+        padding: 8px !important;
+    }
+
+    [style*="gap: 12px"] {
+        gap: 8px !important;
+    }
+
+    p,
+    span {
+        font-size: 11px !important;
+    }
+}
+
+/* Large Screens (1200px and above) */
+@media (min-width: 1200px) {
+    .page-shell {
+        padding: 64px 80px 120px !important;
+        max-width: 1200px !important;
+    }
+
+    /* Grid optimization for larger screens */
+    [style*="grid"] {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+    }
+}
+
+/* Extra Large Screens (1600px and above) */
+@media (min-width: 1600px) {
+    .page-shell {
+        padding: 80px 100px 140px !important;
+        max-width: 1400px !important;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 600px) and (orientation: landscape) {
+    .page-shell {
+        padding: 20px 40px 40px !important;
+    }
+
+    >div:first-child {
+        margin-bottom: 20px !important;
+    }
+
+    h1 {
+        font-size: 24px !important;
+    }
+}
+
+/* Media queries for embedded content (videos, images) */
+@media (max-width: 768px) {
+
+    video,
+    img,
+    iframe {
+        max-width: 100% !important;
+        height: auto !important;
+        display: block !important;
+        margin: 0 auto !important;
+    }
+
+    /* SVG scaling */
+    svg {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+}
+
+/* Cursor glow adjustments for mobile */
+@media (max-width: 768px) {
+    [style*="position: fixed"][style*="pointerEvents: none"] {
+        display: none !important;
+    }
+}
