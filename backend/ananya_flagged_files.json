@@ -1,0 +1,256 @@
+{
+  "flagged_files": [
+    {
+      "content": "Flask==2.3.3\nFlask-CORS==4.0.0\npython-dotenv==1.0.0\nrequests==2.31.0\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "txt",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 4,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 0,
+        "total_lines": 4
+      },
+      "path": "backend/requirements.txt",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 69
+    },
+    {
+      "content": "{\n    \"name\": \"githopperintro\",\n    \"private\": true,\n    \"version\": \"0.0.0\",\n    \"type\": \"module\",\n    \"scripts\": {\n        \"dev\": \"vite\",\n        \"build\": \"vite build\",\n        \"preview\": \"vite preview\"\n    },\n    \"dependencies\": {\n        \"firebase\": \"^12.11.0\",\n        \"gsap\": \"^3.14.2\",\n        \"lenis\": \"^1.3.21\",\n        \"motion\": \"^12.38.0\",\n        \"ogl\": \"^1.0.11\",\n        \"react\": \"^18.3.1\",\n        \"react-dom\": \"^18.3.1\",\n        \"react-router-dom\": \"^7.13.2\",\n        \"three\": \"^0.183.2\"\n    },\n    \"devDependencies\": {\n        \"@tailwindcss/postcss\": \"^4.2.2\",\n        \"@vitejs/plugin-react\": \"^4.4.1\",\n        \"autoprefixer\": \"^10.4.27\",\n        \"postcss\": \"^8.5.8\",\n        \"tailwindcss\": \"^4.2.2\",\n        \"vite\": \"^5.4.10\"\n    }\n}\n",
+      "debt_category_hint": "dependencies",
+      "debt_signal_count": 0,
+      "debt_signals": [],
+      "language": "json",
+      "metrics": {
+        "blank_lines": 0,
+        "code_lines": 30,
+        "comment_lines": 0,
+        "comment_ratio": 0.0,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 2,
+        "total_lines": 30
+      },
+      "path": "frontend/package.json",
+      "reasons_flagged": [
+        "dependency_file"
+      ],
+      "size_bytes": 751
+    },
+    {
+      "content": "# GitHopper Backend\n\nPython Flask backend server for GitHopper - connects to the frontend React application and provides API endpoints for repository scanning.\n\n## Overview\n\nThe backend provides:\n- REST API for repository scanning\n- Health check endpoint\n- CORS support for frontend communication\n- Serving the frontend static files\n- Repository analysis endpoints (placeholder for future implementation)\n\n## Project Structure\n\n```\nbackend/\n\u251c\u2500\u2500 app.py              # Main Flask application\n\u251c\u2500\u2500 requirements.txt    # Python dependencies\n\u251c\u2500\u2500 .env.example        # Environment configuration template\n\u2514\u2500\u2500 README.md           # This file\n```\n\n## Prerequisites\n\n- Python 3.8 or higher\n- pip (Python package manager)\n- Virtual environment (recommended)\n\n## Installation\n\n### 1. Create a Virtual Environment\n\n```bash\n# Windows\npython -m venv venv\nvenv\\Scripts\\activate\n\n# macOS/Linux\npython3 -m venv venv\nsource venv/bin/activate\n```\n\n### 2. Install Dependencies\n\n```bash\npip install -r requirements.txt\n```\n\n### 3. Configure Environment\n\n```bash\n# Copy the example environment file\ncp .env.example .env\n\n# Edit .env with your configuration\n```\n\n## Running the Backend\n\n### Development Server\n\n```bash\npython app.py\n```\n\nThe server will start at `http://localhost:5000`\n\n### With Flask CLI\n\n```bash\nflask run\n```\n\n## API Endpoints\n\n### Health Check\n- **GET** `/api/health`\n- **Description**: Check if backend is running\n- **Response**: \n  ```json\n  {\n    \"status\": \"healthy\",\n    \"message\": \"GitHopper backend is running\",\n    \"version\": \"1.0.0\"\n  }\n  ```\n\n### Scan Repository\n- **POST** `/api/scan`\n- **Description**: Initiate a repository scan\n- **Request Body**:\n  ```json\n  {\n    \"repo_url\": \"https://github.com/username/repo\"\n  }\n  ```\n- **Response** (202 Accepted):\n  ```json\n  {\n    \"status\": \"pending\",\n    \"repo_url\": \"https://github.com/username/repo\",\n    \"message\": \"Scan initiated for repository\",\n    \"scan_id\": \"scan_123456\"\n  }\n  ```\n\n### Get Scan Status\n- **GET** `/api/scan/status/<scan_id>`\n- **Description**: Get the status of an ongoing or completed scan\n- **Response**:\n  ```json\n  {\n    \"scan_id\": \"scan_123456\",\n    \"status\": \"completed\",\n    \"progress\": 100,\n    \"result\": {\n      \"security_issues\": 5,\n      \"technical_debt\": 3,\n      \"health_score\": 78\n    }\n  }\n  ```\n\n## Frontend Integration\n\nThe backend serves the frontend static files automatically. Once you build the frontend:\n\n```bash\ncd ../frontend\nnpm run build\n```\n\nThe built files will be served from `/` and the backend will handle routing.\n\n## CORS Configuration\n\nCORS is enabled to allow the frontend (running on separate port during development) to communicate with the backend. \n\n- Frontend: `http://localhost:5173` (Vite dev server)\n- Backend: `http://localhost:5000` (Flask server)\n\n## Development Workflow\n\n### Terminal 1 - Frontend Development\n```bash\ncd frontend\nnpm install\nnpm run dev\n```\nFrontend will be available at: `http://localhost:5173`\n\n### Terminal 2 - Backend Development\n```bash\ncd backend\n# Create and activate virtual environment\npython -m venv venv\nsource venv/bin/activate  # On Windows: venv\\Scripts\\activate\npip install -r requirements.txt\npython app.py\n```\nBackend will be available at: `http://localhost:5000`\n\n## Environment Variables\n\nSee `.env.example` for available configuration:\n\n| Variable | Description | Default |\n|----------|-------------|---------|\n| FLASK_ENV | Environment type | development |\n| FLASK_DEBUG | Enable debug mode | True |\n| FLASK_APP | Entry point file | app.py |\n| SECRET_KEY | Secret key for sessions | your-secret-key-here |\n\n## Future Implementation\n\nThis backend is prepared for:\n- Actual repository scanning logic\n- Database integration for storing scan results\n- Authentication and authorization\n- Advanced analysis features\n- Caching layer for performance\n- Logging and monitoring\n\n## Troubleshooting\n\n### Port Already in Use\n```bash\n# Change the port in app.py\napp.run(host='0.0.0.0', port=5001, debug=True)\n```\n\n### Module Not Found\n```bash\n# Ensure virtual environment is activated and dependencies installed\npip install -r requirements.txt\n```\n\n### CORS Issues\nEnsure `Flask-CORS` is installed and that routes use `@CORS(app)` or `@cross_origin()`\n\n## License\n\nMIT\n",
+      "debt_category_hint": "code_quality",
+      "debt_signal_count": 1,
+      "debt_signals": [
+        {
+          "line_number": 20,
+          "line_snippet": "\u251c\u2500\u2500 .env.example        # Environment configuration template",
+          "pattern": "TEMP"
+        }
+      ],
+      "language": "markdown",
+      "metrics": {
+        "blank_lines": 47,
+        "code_lines": 123,
+        "comment_lines": 34,
+        "comment_ratio": 0.167,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 1,
+        "total_lines": 204
+      },
+      "path": "backend/README.md",
+      "reasons_flagged": [
+        "has_debt_signals"
+      ],
+      "size_bytes": 4241
+    },
+    {
+      "content": "from flask import Flask, render_template, jsonify, request\nfrom flask_cors import CORS\nimport os\nfrom pathlib import Path\n\n# Fix path to import sibling modules easily\nimport sys\nsys.path.append(os.path.dirname(__file__))\n\nfrom github_client import fetch_repo, categorize_files\nfrom chunker import chunk_code\n\n# Initialize Flask app\napp = Flask(__name__, \n            static_folder=os.path.join(os.path.dirname(__file__), '..', 'frontend', 'dist'),\n            static_url_path='/',\n            template_folder=os.path.join(os.path.dirname(__file__), '..', 'frontend'))\n\n# Enable CORS for frontend communication\nCORS(app)\n\n# ==================== API ROUTES ====================\n\n@app.route('/api/health', methods=['GET'])\ndef health_check():\n    \"\"\"Health check endpoint\"\"\"\n    return jsonify({\n        'status': 'healthy',\n        'message': 'GitHopper backend is running',\n        'version': '1.0.0'\n    }), 200\n\n\n@app.route('/api/scan', methods=['POST'])\ndef scan_repo():\n    \"\"\"\n    Receive GitHub repository URL for scanning\n    Fetches the repo, categorizes, and chunks the code.\n    \"\"\"\n    try:\n        data = request.get_json()\n        repo_url = data.get('repo_url')\n        \n        if not repo_url:\n            return jsonify({'error': 'repo_url is required'}), 400\n            \n        # Optional: Auth token to bypass rate limits\n        github_token = os.environ.get('GITHUB_TOKEN')\n        \n        # 1. Fetch\n        print(f\"Fetching repo: {repo_url}\")\n        files = fetch_repo(repo_url, github_token=github_token)\n        \n        # 2. Categorize\n        config_files, dep_files, source_code = categorize_files(files)\n        \n        # 3. Chunk\n        all_chunks = chunk_code(files)\n        \n        return jsonify({\n            'status': 'success',\n            'repo_url': repo_url,\n            'message': 'Scan initiated for repository',\n            'data': {\n                'total_files_fetched': len(files),\n                'config_files': len(config_files),\n                'dependency_files': len(dep_files),\n                'source_files': len(source_code),\n                'total_chunks': len(all_chunks)\n            }\n        }), 200\n    \n    except Exception as e:\n        return jsonify({'error': str(e)}), 500\n\n\n@app.route('/api/scan/status/<scan_id>', methods=['GET'])\ndef get_scan_status(scan_id):\n    \"\"\"Get the status of a scan\"\"\"\n    return jsonify({\n        'scan_id': scan_id,\n        'status': 'completed',\n        'progress': 100,\n        'result': {\n            'security_issues': 5,\n            'technical_debt': 3,\n            'health_score': 78\n        }\n    }), 200\n\n\n@app.route('/', methods=['GET'])\ndef index():\n    \"\"\"Serve the main page\"\"\"\n    return render_template('index.html')\n\n\n@app.route('/<path:path>', methods=['GET'])\ndef serve_static(path):\n    \"\"\"Serve static files\"\"\"\n    file_path = os.path.join(app.static_folder, path)\n    if os.path.isfile(file_path):\n        return app.send_static_file(path)\n    return render_template('index.html')\n\n\n# ==================== ERROR HANDLERS ====================\n\n@app.errorhandler(404)\ndef not_found(error):\n    \"\"\"Handle 404 errors\"\"\"\n    return jsonify({'error': 'Not found'}), 404\n\n\n@app.errorhandler(500)\ndef server_error(error):\n    \"\"\"Handle 500 errors\"\"\"\n    return jsonify({'error': 'Internal server error'}), 500\n\n\n# ==================== DEVELOPMENT SERVER ====================\n\nif __name__ == '__main__':\n    # Development configuration\n    app.config['ENV'] = 'development'\n    app.config['DEBUG'] = True\n    \n    # Run the Flask development server\n    print(\"=\" * 60)\n    print(\"GitHopper Backend Server\")\n    print(\"=\" * 60)\n    print(\"Server running at: http://localhost:5000\")\n    print(\"API Documentation: http://localhost:5000/api/health\")\n    print(\"=\" * 60)\n    \n    app.run(host='0.0.0.0', port=5000, debug=True)\n",
+      "debt_category_hint": "code_quality",
+      "debt_signal_count": 13,
+      "debt_signals": [
+        {
+          "line_number": 1,
+          "line_snippet": "from flask import Flask, render_template, jsonify, request",
+          "pattern": "TEMP"
+        },
+        {
+          "line_number": 17,
+          "line_snippet": "template_folder=os.path.join(os.path.dirname(__file__), '..', 'frontend'))",
+          "pattern": "TEMP"
+        },
+        {
+          "line_number": 48,
+          "line_snippet": "github_token = os.environ.get('GITHUB_TOKEN')",
+          "pattern": "token\\s*="
+        },
+        {
+          "line_number": 51,
+          "line_snippet": "print(f\"Fetching repo: {repo_url}\")",
+          "pattern": "print\\("
+        },
+        {
+          "line_number": 52,
+          "line_snippet": "files = fetch_repo(repo_url, github_token=github_token)",
+          "pattern": "token\\s*="
+        },
+        {
+          "line_number": 95,
+          "line_snippet": "return render_template('index.html')",
+          "pattern": "TEMP"
+        },
+        {
+          "line_number": 104,
+          "line_snippet": "return render_template('index.html')",
+          "pattern": "TEMP"
+        },
+        {
+          "line_number": 129,
+          "line_snippet": "print(\"=\" * 60)",
+          "pattern": "print\\("
+        },
+        {
+          "line_number": 130,
+          "line_snippet": "print(\"GitHopper Backend Server\")",
+          "pattern": "print\\("
+        },
+        {
+          "line_number": 131,
+          "line_snippet": "print(\"=\" * 60)",
+          "pattern": "print\\("
+        },
+        {
+          "line_number": 132,
+          "line_snippet": "print(\"Server running at: http://localhost:5000\")",
+          "pattern": "print\\("
+        },
+        {
+          "line_number": 133,
+          "line_snippet": "print(\"API Documentation: http://localhost:5000/api/health\")",
+          "pattern": "print\\("
+        },
+        {
+          "line_number": 134,
+          "line_snippet": "print(\"=\" * 60)",
+          "pattern": "print\\("
+        }
+      ],
+      "language": "python",
+      "metrics": {
+        "blank_lines": 31,
+        "code_lines": 93,
+        "comment_lines": 12,
+        "comment_ratio": 0.088,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 4,
+        "total_lines": 136
+      },
+      "path": "backend/app.py",
+      "reasons_flagged": [
+        "has_debt_signals"
+      ],
+      "size_bytes": 3834
+    },
+    {
+      "content": "def chunk_code(files, max_chars=3000):\n    \"\"\"\n    Chunks code files logic-safely so Bedrock token limits aren't hit.\n    \"\"\"\n    chunks = []\n    \n    for file in files:\n        content = file[\"content\"]\n        path = file[\"path\"]\n        lang = file[\"language\"]\n        \n        # Basic chunking: split by character limit.\n        # A more advanced chunker could split by functions/classes.\n        file_len = len(content)\n        \n        # If the file is very small, we keep it as one chunk entirely\n        if file_len <= max_chars:\n            chunks.append({\n                \"file\": path,\n                \"language\": lang,\n                \"code\": content,\n                \"chunk_index\": 0,\n                \"total_chunks\": 1\n            })\n            continue\n            \n        # If larger, we slice it\n        total_chunks = (file_len // max_chars) + (1 if file_len % max_chars > 0 else 0)\n        \n        for i in range(total_chunks):\n            start_idx = i * max_chars\n            end_idx = min(start_idx + max_chars, file_len)\n            chunk_text = content[start_idx:end_idx]\n            \n            chunks.append({\n                \"file\": path,\n                \"language\": lang,\n                \"code\": chunk_text,\n                \"chunk_index\": i,\n                \"total_chunks\": total_chunks\n            })\n            \n    return chunks\n\n# Test the pipeline if executed directly\nif __name__ == \"__main__\":\n    print(\"Testing Chunking Logic...\")\n    sample_files = [{\n        \"path\": \"test.txt\",\n        \"language\": \"txt\",\n        \"content\": \"A\" * 3500\n    }]\n    \n    chunks = chunk_code(sample_files, max_chars=1000)\n    print(f\"Created {len(chunks)} chunks.\")\n    if chunks:\n        print(f\"First chunk length: {len(chunks[0]['code'])}\")\n        print(f\"Last chunk length: {len(chunks[-1]['code'])}\")\n",
+      "debt_category_hint": "code_quality",
+      "debt_signal_count": 4,
+      "debt_signals": [
+        {
+          "line_number": 47,
+          "line_snippet": "print(\"Testing Chunking Logic...\")",
+          "pattern": "print\\("
+        },
+        {
+          "line_number": 55,
+          "line_snippet": "print(f\"Created {len(chunks)} chunks.\")",
+          "pattern": "print\\("
+        },
+        {
+          "line_number": 57,
+          "line_snippet": "print(f\"First chunk length: {len(chunks[0]['code'])}\")",
+          "pattern": "print\\("
+        },
+        {
+          "line_number": 58,
+          "line_snippet": "print(f\"Last chunk length: {len(chunks[-1]['code'])}\")",
+          "pattern": "print\\("
+        }
+      ],
+      "language": "python",
+      "metrics": {
+        "blank_lines": 9,
+        "code_lines": 44,
+        "comment_lines": 5,
+        "comment_ratio": 0.086,
+        "long_function_count": 1,
+        "long_functions_detected": [
+          {
+            "approximate_length_lines": 58,
+            "approximate_start_line": 1,
+            "first_line": "def chunk_code(files, max_chars=3000):"
+          }
+        ],
+        "max_indentation_depth": 4,
+        "total_lines": 58
+      },
+      "path": "backend/chunker.py",
+      "reasons_flagged": [
+        "has_debt_signals"
+      ],
+      "size_bytes": 1829
+    },
+    {
+      "content": "import requests\nfrom urllib.parse import urlparse\n\n# Setup filtering constants\nALLOWED_EXTENSIONS = {\n    '.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.go', '.rb', '.php', \n    '.c', '.cpp', '.h', '.cs', '.md', '.json', '.yml', '.yaml', '.html', '.css'\n}\n\nCRITICAL_FILES = {\n    'package.json', 'requirements.txt', '.env.example', 'pom.xml', \n    'go.mod', 'dockerfile', 'docker-compose.yml'\n}\n\nEXCLUDED_DIRS = {\n    'node_modules', 'venv', '.git', 'build', 'dist', 'out', 'bin', \n    'obj', 'images', 'assets', '.next', '__pycache__', 'coverage'\n}\n\nEXT_MAP = {\n    \"py\": \"python\",\n    \"js\": \"javascript\",\n    \"ts\": \"typescript\",\n    \"java\": \"java\",\n    \"go\": \"go\",\n    \"rb\": \"ruby\",\n    \"php\": \"php\",\n    \"c\": \"c\",\n    \"cpp\": \"cpp\",\n    \"cs\": \"csharp\",\n    \"md\": \"markdown\",\n    \"json\": \"json\",\n    \"yml\": \"yaml\",\n    \"yaml\": \"yaml\",\n    \"html\": \"html\",\n    \"css\": \"css\"\n}\n\ndef parse_repo_url(url):\n    \"\"\"Extract owner and repo from https://github.com/user/repo\"\"\"\n    url = url.strip()\n    if url.endswith('/'):\n        url = url[:-1]\n    if url.endswith('.git'):\n        url = url[:-4]\n        \n    if url.startswith('http'):\n        path = urlparse(url).path.strip('/')\n    else:\n        path = url.strip('/')\n    \n    parts = path.split('/')\n    if len(parts) >= 2:\n        return parts[-2], parts[-1]\n    raise ValueError(f\"Invalid GitHub URL: {url}\")\n\ndef should_keep_file(file_path):\n    \"\"\"Determine if a file should be included in the AI scan.\"\"\"\n    path_parts = file_path.split('/')\n    \n    # 1. Ignore excluded directories\n    if any(excluded in path_parts for excluded in EXCLUDED_DIRS):\n        return False\n        \n    filename = path_parts[-1].lower()\n    \n    # 2. Keep critical configuration and dependency files\n    if filename in CRITICAL_FILES:\n        return True\n        \n    # 3. Check allowed extensions\n    ext = '.' + filename.split('.')[-1] if '.' in filename else ''\n    if ext in ALLOWED_EXTENSIONS:\n        return True\n        \n    return False\n\ndef get_default_branch(owner, repo, headers):\n    \"\"\"Fetch the default branch of a GitHub repository.\"\"\"\n    url = f\"https://api.github.com/repos/{owner}/{repo}\"\n    response = requests.get(url, headers=headers, timeout=10)\n    if response.status_code == 403:\n        raise Exception(\"GitHub rate limit exceeded\")\n    if response.status_code == 200:\n        return response.json().get('default_branch', 'main')\n    return 'main' # Fallback\n\ndef fetch_repo(url, github_token=None, max_files=30):\n    \"\"\"\n    Fetch the useful files from a GitHub repository.\n    Uses GitHub Tree API directly then fetches Raw content to save API limit.\n    \"\"\"\n    owner, repo = parse_repo_url(url)\n    \n    headers = {'Accept': 'application/vnd.github.v3+json'}\n    if github_token:\n        headers['Authorization'] = f'token {github_token}'\n        \n    branch = get_default_branch(owner, repo, headers)\n    \n    # Get the recursive tree\n    tree_url = f\"https://api.github.com/repos/{owner}/{repo}/git/trees/{branch}?recursive=1\"\n    response = requests.get(tree_url, headers=headers, timeout=10)\n    \n    if response.status_code == 403:\n        raise Exception(\"GitHub rate limit exceeded\")\n    if response.status_code != 200:\n        raise Exception(f\"Failed to fetch repo tree (Status {response.status_code}): {response.text}\")\n        \n    tree = response.json().get('tree', [])\n    \n    # Filter tree\n    valid_files = [item for item in tree if item['type'] == 'blob' and should_keep_file(item['path'])]\n    \n    # Optional: Prioritize config files, then regular code. Cap at max_files to prevent massive payloads.\n    valid_files.sort(key=lambda x: 0 if x['path'].split('/')[-1].lower() in CRITICAL_FILES else 1)\n    valid_files = valid_files[:max_files]\n    \n    fetched_files = []\n    \n    for item in valid_files:\n        path = item['path']\n        raw_url = f\"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}\"\n        \n        # We download via Raw endpoint as it rarely ratelimits compared to the API\n        try:\n            file_resp = requests.get(raw_url, timeout=10)\n        except requests.exceptions.RequestException as e:\n            print(f\"Failed to fetch {path}: {e}\")\n            continue\n            \n        if file_resp.status_code == 403:\n            raise Exception(\"GitHub rate limit exceeded\")\n            \n        if file_resp.status_code == 200:\n            content = file_resp.text\n            \n            if not content.strip():\n                continue\n                \n            if len(content) > 10000:\n                continue\n            \n            # Simple language detection based on extension\n            raw_ext = path.split('.')[-1] if '.' in path else 'text'\n            language = EXT_MAP.get(raw_ext.lower(), raw_ext)\n            \n            print(f\"Fetched: {path}\")\n            \n            fetched_files.append({\n                \"path\": path,\n                \"language\": language,\n                \"content\": content\n            })\n            \n    return fetched_files\n\ndef categorize_files(files):\n    \"\"\"\n    Groups fetched files into config, dependencies, and code\n    to allow for optimized, domain-specific AI processing.\n    \"\"\"\n    config, deps, code = [], [], []\n\n    for f in files:\n        name = f[\"path\"].lower()\n        basename = name.split('/')[-1]\n        \n        if basename in [\"package.json\", \"requirements.txt\", \"dockerfile\", \"pom.xml\", \"go.mod\"]:\n            deps.append(f)\n        elif basename.endswith((\".yml\", \".yaml\", \".json\", \".env\", \".env.example\")):\n            config.append(f)\n        else:\n            code.append(f)\n\n    return config, deps, code\n",
+      "debt_category_hint": "code_quality",
+      "debt_signal_count": 3,
+      "debt_signals": [
+        {
+          "line_number": 88,
+          "line_snippet": "def fetch_repo(url, github_token=None, max_files=30):",
+          "pattern": "token\\s*="
+        },
+        {
+          "line_number": 129,
+          "line_snippet": "print(f\"Failed to fetch {path}: {e}\")",
+          "pattern": "print\\("
+        },
+        {
+          "line_number": 148,
+          "line_snippet": "print(f\"Fetched: {path}\")",
+          "pattern": "print\\("
+        }
+      ],
+      "language": "python",
+      "metrics": {
+        "blank_lines": 37,
+        "code_lines": 130,
+        "comment_lines": 9,
+        "comment_ratio": 0.051,
+        "long_function_count": 0,
+        "long_functions_detected": [],
+        "max_indentation_depth": 4,
+        "total_lines": 176
+      },
+      "path": "backend/github_client.py",
+      "reasons_flagged": [
+        "has_debt_signals"
+      ],
+      "size_bytes": 5621
+    }
+  ],
+  "flagged_files_count": 6,
+  "message": "Extracted 6 flagged/dependency files",
+  "repo_url": "ananyamehrotra/githoppermain.git",
+  "status": "success",
+  "total_files_scanned": 29
+}

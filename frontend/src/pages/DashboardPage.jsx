@@ -12,9 +12,49 @@ export function DashboardPage() {
     const { isDark } = useTheme();
     const navigate = useNavigate();
     const [repoUrl, setRepoUrl] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const handleAnalyse = () => {
-        console.log("Analyzing:", repoUrl);
+    const handleAnalyse = async () => {
+        if (!repoUrl.trim()) {
+            setError("Please enter a GitHub repository URL");
+            return;
+        }
+
+        setLoading(true);
+        setError("");
+
+        try {
+            const response = await fetch("http://localhost:5000/api/scan", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    repo_url: repoUrl
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to scan repository: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("Scan results:", data);
+
+            // Navigate to analysis page with results
+            navigate("/analyse-branches", {
+                state: {
+                    scanResult: data,
+                    repoUrl: repoUrl
+                }
+            });
+        } catch (err) {
+            setError(err.message || "Failed to scan repository");
+            console.error("Scan error:", err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -91,11 +131,17 @@ export function DashboardPage() {
                                     value={repoUrl}
                                     onChange={(e) => setRepoUrl(e.target.value)}
                                     className="repo-input"
+                                    disabled={loading}
                                 />
-                                <button className="analyse-button" onClick={handleAnalyse}>
-                                    ANALYSE
+                                <button
+                                    className="analyse-button"
+                                    onClick={handleAnalyse}
+                                    disabled={loading}
+                                >
+                                    {loading ? "SCANNING..." : "ANALYSE"}
                                 </button>
                             </div>
+                            {error && <div style={{ color: "#ff6b6b", marginTop: "10px", fontSize: "14px" }}>{error}</div>}
                         </div>
 
                         <div className="scan-features">

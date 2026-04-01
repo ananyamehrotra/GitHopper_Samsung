@@ -1,5 +1,6 @@
 import requests
 from urllib.parse import urlparse
+from chunker import scan_debt_signals, compute_file_metrics, get_debt_category_hint
 
 # Setup filtering constants
 ALLOWED_EXTENSIONS = {
@@ -99,15 +100,32 @@ def fetch_repo(url, github_token=None, max_files=30):
     branch = get_default_branch(owner, repo, headers)
     
     # Get the recursive tree
+    print(f"[DEBUG] Fetching tree for {owner}/{repo} branch {branch}...")
     tree_url = f"https://api.github.com/repos/{owner}/{repo}/git/trees/{branch}?recursive=1"
-    response = requests.get(tree_url, headers=headers, timeout=10)
+    try:
+        response = requests.get(tree_url, headers=headers, timeout=20)
+    except requests.exceptions.Timeout:
+        raise Exception(f"GitHub API tree request timed out for {owner}/{repo}")
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"GitHub API error fetching tree: {str(e)}")
+    
+    print(f"[DEBUG] Tree response status: {response.status_code}")
     
     if response.status_code == 403:
         raise Exception("GitHub rate limit exceeded")
     if response.status_code != 200:
-        raise Exception(f"Failed to fetch repo tree (Status {response.status_code}): {response.text}")
-        
+        raise Exception(f"Failed to fetch repo tree (Status {response.status_code}): {response.text[:200]}")
+    
+    print(f"[DEBUG] Processing tree response...")    
     tree = response.json().get('tree', [])
+    
+    # Check if response was truncated (large repos)
+    tree_data = response.json()
+    if tree_data.get('truncated'):
+        print(f"[WARN] Tree response was truncated. GitHub limits recursive tree to 100,000 items.")
+        print(f"[WARN] Will use available {len(tree)} items")
+    
+    print(f"[DEBUG] Found {len(tree)} items in tree")
     
     # Filter tree
     valid_files = [item for item in tree if item['type'] == 'blob' and should_keep_file(item['path'])]
@@ -118,15 +136,20 @@ def fetch_repo(url, github_token=None, max_files=30):
     
     fetched_files = []
     
-    for item in valid_files:
+    print(f"[DEBUG] Starting to fetch {len(valid_files)} files...")
+    for idx, item in enumerate(valid_files):
         path = item['path']
         raw_url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}"
         
         # We download via Raw endpoint as it rarely ratelimits compared to the API
         try:
+            print(f"[DEBUG] Fetching file {idx+1}/{len(valid_files)}: {path}")
             file_resp = requests.get(raw_url, timeout=10)
+        except requests.exceptions.Timeout:
+            print(f"[WARN] File fetch timeout: {path}")
+            continue
         except requests.exceptions.RequestException as e:
-            print(f"Failed to fetch {path}: {e}")
+            print(f"[WARN] Failed to fetch {path}: {e}")
             continue
             
         if file_resp.status_code == 403:
@@ -136,21 +159,33 @@ def fetch_repo(url, github_token=None, max_files=30):
             content = file_resp.text
             
             if not content.strip():
+                print(f"[SKIP] Empty file: {path}")
                 continue
                 
             if len(content) > 10000:
+                print(f"[SKIP] File too large ({len(content)} bytes): {path}")
                 continue
             
             # Simple language detection based on extension
             raw_ext = path.split('.')[-1] if '.' in path else 'text'
             language = EXT_MAP.get(raw_ext.lower(), raw_ext)
             
-            print(f"Fetched: {path}")
+            print(f"[OK] Fetched: {path} ({len(content)} bytes)")
+            
+            # Compute analysis metadata
+            debt_signals = scan_debt_signals(content)
+            metrics = compute_file_metrics(content, language)
+            debt_hint = get_debt_category_hint(path)
             
             fetched_files.append({
                 "path": path,
                 "language": language,
-                "content": content
+                "content": content,
+                "size_bytes": len(content.encode('utf-8')),
+                "debt_category_hint": debt_hint,
+                "debt_signals": debt_signals,
+                "debt_signal_count": len(debt_signals),
+                "metrics": metrics,
             })
             
     return fetched_files

@@ -10,10 +10,6 @@ export function HomePage() {
     const { isDark } = useTheme();
     const navigate = useNavigate();
 
-    const handleAnalyse = () => {
-        console.log("Analyzing:", repoUrl);
-    };
-
     return (
         <>
             <Plasma
