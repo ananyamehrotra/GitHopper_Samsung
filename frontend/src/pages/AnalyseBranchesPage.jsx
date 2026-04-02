@@ -1096,9 +1096,14 @@ export function AnalyseBranchesPage() {
                 gap: "clamp(8px, 2vw, 12px)",
               }}
             >
-              <StatTile label="Total Files" value={filesSummary.total} accent="#72ea1e" delay={180} />
+              <StatTile label="Total Findings" value={filesSummary.total} accent="#72ea1e" delay={180} />
               <StatTile label="Files w/ Issues" value={filesSummary.withIssues} accent="#ff6060" delay={320} />
-              <StatTile label="Vulnerabilities" value={filesSummary.totalVulnerabilities} accent="#ff9800" delay={460} />
+              <div style={{ background: isDark ? "#020c02" : "#f8f8f8", border: isDark ? "1px solid #142014" : "1px solid #d8d8d8", borderRadius: "4px", padding: "12px 14px" }}>
+                <FL color={isDark ? "#243a14" : "#666"}>SEVERITY BREAKDOWN</FL>
+                <p style={{ margin: 0, fontFamily: "'JetBrains Mono',monospace", fontSize: "20px", fontWeight: 800, color: "#72ea1e" }}>
+                  {(analyze.by_severity?.critical || 0)}C {(analyze.by_severity?.high || 0)}H
+                </p>
+              </div>
             </div>
           </PSection>
 
