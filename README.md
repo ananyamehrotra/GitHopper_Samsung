@@ -1,4 +1,4 @@
-# 🦘 GitHopper
+# 🦗 GitHopper
 
 **Your intelligent Git repository analysis and insights platform**
 

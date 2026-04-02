@@ -10,6 +10,15 @@
 
 import json
 import logging
+import sys
+import os
+
+# Add parent directory to path to import billing module
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+try:
+    import billing
+except ImportError:
+    billing = None
 
 logger = logging.getLogger(__name__)
 
@@ -45,9 +54,17 @@ def categorize_vulnerabilities(vulnerabilities: list) -> dict:
         "code_quality": {"critical": 0, "high": 0, "medium": 0, "low": 0, "findings": []}
     }
     
+    # Keywords that indicate code quality/debt issues
+    code_quality_keywords = [
+        "complexity", "debt", "duplication", "long_function", "function", "conditional",
+        "parameter", "import", "unused", "dead_code", "refactor", "maintainability",
+        "naming", "comment", "documentation", "smell", "code_smell"
+    ]
+    
     for vuln in vulnerabilities:
         file_type = vuln.get("file_type", "app")
         severity = vuln.get("severity", "MEDIUM").lower()
+        vuln_type_lower = vuln.get("type", "").lower()
         
         # Map file type to category
         if file_type == "iam":
@@ -56,7 +73,7 @@ def categorize_vulnerabilities(vulnerabilities: list) -> dict:
             category = "infrastructure"
         elif file_type == "deps":
             category = "dependencies"
-        elif "complexity" in vuln.get("type", "").lower() or "debt" in vuln.get("type", "").lower():
+        elif any(keyword in vuln_type_lower for keyword in code_quality_keywords):
             category = "code_quality"
         else:
             category = "security"
@@ -167,6 +184,11 @@ def aggregate_for_branch_analysis(categorized: dict, branch_name: str = "main") 
     dep_count = sum(1 for f in all_findings if f.get("file_type") == "deps")
     debt_count = sum(1 for f in all_findings if "complexity" in f.get("type", "").lower())
     
+    # Get billing info
+    billing_info = {}
+    if billing:
+        billing_info = billing.get_billing_summary()
+    
     return {
         "analysis_type": "BRANCH_ANALYSIS",
         "branch": branch_name,
@@ -186,7 +208,8 @@ def aggregate_for_branch_analysis(categorized: dict, branch_name: str = "main") 
             "high": sum(1 for f in all_findings if f.get("severity", "").upper() == "HIGH"),
             "medium": sum(1 for f in all_findings if f.get("severity", "").upper() == "MEDIUM"),
             "low": sum(1 for f in all_findings if f.get("severity", "").upper() == "LOW")
-        }
+        },
+        "billing": billing_info,  # Add billing to branch_analysis
     }
 
 
