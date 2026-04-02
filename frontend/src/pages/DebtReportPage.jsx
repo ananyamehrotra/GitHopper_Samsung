@@ -54,6 +54,131 @@ function CountUp({ to, delay=0 }) {
   return <>{v}</>;
 }
 
+function DistributionChart({ findings, isDark }) {
+  const severityCounts = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+  const severityOrder = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
+  
+  findings.forEach(f => {
+    const sev = f.severity || "LOW";
+    if (severityCounts.hasOwnProperty(sev)) {
+      severityCounts[sev]++;
+    }
+  });
+
+  const total = findings.length;
+  const chartColors = { CRITICAL: "#ff2a2a", HIGH: "#ff5050", MEDIUM: "#ff8c00", LOW: "#c8b400" };
+
+  // Calculate pie chart angles
+  const segments = [];
+  let currentAngle = -90;
+  
+  severityOrder.forEach(sev => {
+    const count = severityCounts[sev];
+    const sliceAngle = (count / total) * 360;
+    segments.push({
+      sev,
+      count,
+      sliceAngle,
+      startAngle: currentAngle,
+      endAngle: currentAngle + sliceAngle,
+      color: chartColors[sev],
+      pct: total > 0 ? Math.round((count / total) * 100) : 0
+    });
+    currentAngle += sliceAngle;
+  });
+
+  // SVG pie chart path calculation
+  const radius = 80;
+  const centerX = 120;
+  const centerY = 120;
+
+  const angleToPoint = (angle, r) => {
+    const rad = (angle * Math.PI) / 180;
+    return {
+      x: centerX + r * Math.cos(rad),
+      y: centerY + r * Math.sin(rad)
+    };
+  };
+
+  const arcPath = (startAngle, endAngle) => {
+    const start = angleToPoint(startAngle, radius);
+    const end = angleToPoint(endAngle, radius);
+    const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+    return `M ${centerX} ${centerY} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
+  };
+
+  return (
+    <div style={{ marginBottom: 48, padding: "24px 28px", background: isDark?"#020a02":"#fafafa",
+      border: isDark?"1px solid #142014":"1px solid #e0e0e0", borderRadius:6,
+      animation:"fadeUp 0.5s ease both" }}>
+      <p style={{ margin:"0 0 24px", fontFamily:"'JetBrains Mono',monospace", fontSize:10, fontWeight:800, 
+        letterSpacing:2, textTransform:"uppercase", color: isDark?"#b0d880":"#142014" }}>
+        <span style={{ color:"#ff8c00" }}>◉</span> Severity Distribution
+      </p>
+
+      <div style={{ display:"flex", gap:40, alignItems:"center", justifyContent:"center", flexWrap:"wrap" }}>
+        {/* Pie Chart */}
+        <div style={{ position:"relative", width:280, height:280 }}>
+          <svg width="280" height="280" style={{ filter: isDark ? "drop-shadow(0 0 20px rgba(255,140,0,0.15))" : "drop-shadow(0 0 15px rgba(0,0,0,0.1))" }}>
+            {segments.map((seg, idx) => (
+              seg.sliceAngle > 0 && (
+                <g key={seg.sev}>
+                  <path
+                    d={arcPath(seg.startAngle, seg.endAngle)}
+                    fill={seg.color}
+                    opacity="0.85"
+                    style={{ transition:"opacity 0.2s", cursor:"pointer" }}
+                  />
+                  <path
+                    d={arcPath(seg.startAngle, seg.endAngle)}
+                    fill="none"
+                    stroke={isDark ? "#0a140a" : "#fff"}
+                    strokeWidth="2"
+                  />
+                </g>
+              )
+            ))}
+          </svg>
+          <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%, -50%)", textAlign:"center" }}>
+            <p style={{ margin:0, fontFamily:"'JetBrains Mono',monospace", fontSize:32, fontWeight:900, color: isDark?"#fff":"#000" }}>
+              {total}
+            </p>
+            <p style={{ margin:"2px 0 0", fontFamily:"'JetBrains Mono',monospace", fontSize:9, color: isDark?"#888":"#999", letterSpacing:1, textTransform:"uppercase" }}>
+              Total Findings
+            </p>
+          </div>
+        </div>
+
+        {/* Legend and Stats */}
+        <div style={{ display:"flex", flexDirection:"column", gap:12, minWidth:200 }}>
+          {segments.map(seg => (
+            seg.sliceAngle > 0 && (
+              <div key={seg.sev} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 12px", 
+                borderRadius:4, background: isDark?"#0a140a":"#f5f5f5", transition:"all 0.2s",
+                border: `1px solid ${seg.color}40`, cursor:"pointer" }}
+                onMouseEnter={e=>{ e.currentTarget.style.borderColor = seg.color; e.currentTarget.style.boxShadow = `0 0 8px ${seg.color}30`; }}
+                onMouseLeave={e=>{ e.currentTarget.style.borderColor = `${seg.color}40`; e.currentTarget.style.boxShadow = "none"; }}>
+                <span style={{ width:12, height:12, borderRadius:"50%", background: seg.color, flexShrink:0, boxShadow: `0 0 6px ${seg.color}` }} />
+                <div style={{ flex:1 }}>
+                  <p style={{ margin:0, fontFamily:"'JetBrains Mono',monospace", fontSize:10, fontWeight:800, color: seg.color, letterSpacing:1, textTransform:"uppercase" }}>
+                    {seg.sev}
+                  </p>
+                  <p style={{ margin:"2px 0 0", fontFamily:"'JetBrains Mono',monospace", fontSize:9, color: isDark?"#888":"#999" }}>
+                    {seg.count} issues
+                  </p>
+                </div>
+                <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:13, fontWeight:900, color: isDark?"#fff":"#000", minWidth:30, textAlign:"right" }}>
+                  {seg.pct}%
+                </span>
+              </div>
+            )
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DebtItem({ d, idx }) {
   const { isDark } = useTheme();
   const c = SEV_COLOR[d.severity] || "#ff8c00";
@@ -202,7 +327,7 @@ export function DebtReportPage() {
         <p style={{ color:"#ff8c00", fontFamily:"'JetBrains Mono',monospace" }}>
           {error || "No technical debt data available."}
         </p>
-        <button onClick={()=>navigate("/dashboard")} style={BTN}>← back</button>
+        <button onClick={()=>navigate("/analyse-branches", { state: { scanResult: location.state?.scanResult, repoUrl: location.state?.repoUrl } })} style={BTN}>← back</button>
       </div>
     </>
   );
@@ -278,11 +403,13 @@ export function DebtReportPage() {
           }
         </div>
 
+        {findings.length > 0 && <DistributionChart findings={findings} isDark={isDark} />}
+
         <div>
-          <button onClick={()=>navigate("/dashboard")} style={BTN}
+          <button onClick={()=>navigate("/analyse-branches", { state: { scanResult: location.state?.scanResult, repoUrl: location.state?.repoUrl } })} style={BTN}
             onMouseEnter={e=>{ e.currentTarget.style.background="transparent"; e.currentTarget.style.color="#ff8c00"; }}
             onMouseLeave={e=>{ e.currentTarget.style.background="#ff8c00"; e.currentTarget.style.color="#000"; }}>
-            ← back to dashboard
+            ← back to analysis
           </button>
         </div>
       </div>

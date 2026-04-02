@@ -12,6 +12,8 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from aggregator import aggregate_all
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import billing
 
 # ---------------------------------------------------------------------------
 # File Classification
@@ -362,12 +364,18 @@ def invoke_bedrock(prompt: str, filename: str = "") -> dict:
         print(f"   Response preview: {text[:300]}")
 
         if 'usage' in raw:
-            cost_tracker["input_tokens"] += raw['usage'].get('input_tokens', 0)
-            cost_tracker["output_tokens"] += raw['usage'].get('output_tokens', 0)
-            print(f"   Tokens — in: {raw['usage'].get('input_tokens', 0)}, out: {raw['usage'].get('output_tokens', 0)}")
+            input_tokens = raw['usage'].get('input_tokens', 0)
+            output_tokens = raw['usage'].get('output_tokens', 0)
+            cost_tracker["input_tokens"] += input_tokens
+            cost_tracker["output_tokens"] += output_tokens
+            billing.track_bedrock_call(input_tokens, output_tokens)
+            print(f"   Tokens — in: {input_tokens}, out: {output_tokens}")
         else:
-            cost_tracker["input_tokens"] += len(prompt) // 4
-            cost_tracker["output_tokens"] += len(text) // 4
+            estimated_input = len(prompt) // 4
+            estimated_output = len(text) // 4
+            cost_tracker["input_tokens"] += estimated_input
+            cost_tracker["output_tokens"] += estimated_output
+            billing.track_bedrock_call(estimated_input, estimated_output)
             print("   No 'usage' key in response. Estimating tokens.")
 
         cost_tracker["estimated_cost"] = (

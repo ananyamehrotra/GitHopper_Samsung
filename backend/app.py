@@ -6,6 +6,7 @@ from pathlib import Path
 import json
 import hashlib
 from dotenv import load_dotenv
+import billing
 
 # Load environment variables from .env file
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
@@ -32,6 +33,9 @@ def build_aggregated_analysis(repo_url, branch_name="main", continuous=False, ge
     Run the requested analysis pipeline and normalize its output into the
     frontend-friendly aggregated shape used across the report pages.
     """
+    # Reset billing tracker for new analysis
+    billing.reset_billing()
+    
     github_token = os.environ.get('GITHUB_TOKEN')
 
     if continuous:
@@ -404,11 +408,17 @@ def analyze_repo():
         print(f"[ANALYZE] Branch: {branch_name}")
 
         _, agg = build_aggregated_analysis(repo_url, branch_name=branch_name, continuous=False)
+        
+        # Get final billing info
+        billing_summary = billing.get_billing_summary()
+        
         return jsonify({
             "security_audit": agg["security_audit"],
             "debt_report": agg["debt_report"],
             "health_score": agg["health_score"],
-            "branch_analysis": agg["branch_analysis"]
+            "branch_analysis": agg["branch_analysis"],
+            "billing": billing_summary,
+            "cost_tracker": billing.get_cost_tracker()
         }), 200
 
     except Exception as e:

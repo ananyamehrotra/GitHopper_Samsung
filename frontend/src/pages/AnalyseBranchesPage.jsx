@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { UserProfile } from "../components/UserProfile";
 import { Plasma } from "../components/Plasma";
@@ -119,6 +121,13 @@ const CSS = `
 
   button:hover, a:hover, [role="button"]:hover {
     transition: all 0.25s ease;
+  }
+
+  body.pdf-downloading * {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
   }
 
   ::-webkit-scrollbar { width: 4px; }
@@ -720,6 +729,110 @@ export function AnalyseBranchesPage() {
   const repoUrl = location.state?.repoUrl;
 
   const [expandedVulnerability, setExpandedVulnerability] = useState(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    setIsDownloading(true);
+
+    try {
+      const doc = new jsPDF();
+      let y = 20;
+
+      // Report Header
+      doc.setFontSize(22);
+      doc.setTextColor(34, 139, 34); // Green Theme
+      doc.text("GitHopper Security & Debt Report", 14, y);
+      
+      y += 10;
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      doc.text(`Repository: ${repoUrl || analyze.repo_url || "Unknown"}`, 14, y);
+      y += 6;
+      doc.text(`Branch: ${analyze.branch_name || "main"}`, 14, y);
+      y += 6;
+      doc.text(`Date Generated: ${new Date().toLocaleString()}`, 14, y);
+      
+      y += 14;
+
+      // Executive Summary
+      doc.setFontSize(16);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Executive Summary", 14, y);
+      y += 6;
+
+      autoTable(doc, {
+        startY: y,
+        head: [["Metric", "Value"]],
+        body: [
+          ["Total Files Analyzed", (filesSummary.total || 0).toString()],
+          ["Files with Issues", (filesSummary.withIssues || 0).toString()],
+          ["Total Vulnerabilities", (filesSummary.totalVulnerabilities || 0).toString()],
+        ],
+        theme: "grid",
+        headStyles: { fillColor: [40, 40, 40] },
+        styles: { fontSize: 11, cellPadding: 4 },
+      });
+
+      y = doc.lastAutoTable.finalY + 15;
+
+      // Detailed Findings
+      doc.setFontSize(16);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Detailed Analysis", 14, y);
+      y += 6;
+
+      if (vulnerabilities && vulnerabilities.length > 0) {
+        vulnerabilities.forEach((vuln, idx) => {
+          // Check if we need to add a new page before drawing
+          if (y > 250) {
+            doc.addPage();
+            y = 20;
+          }
+
+          // Determine header color based on severity
+          let headColor = [100, 100, 100];
+          if (vuln.severity === "CRITICAL") headColor = [220, 53, 69];
+          else if (vuln.severity === "HIGH") headColor = [253, 126, 20];
+          else if (vuln.severity === "MEDIUM") headColor = [255, 193, 7];
+          else if (vuln.severity === "LOW") headColor = [40, 167, 69];
+
+          const tableBody = [
+            ["Severity", vuln.severity || "N/A"],
+            ["File", vuln.file || "N/A"],
+          ];
+
+          if (vuln.explanation) tableBody.push(["Explanation", vuln.explanation]);
+          if (vuln.business_impact) tableBody.push(["Impact", vuln.business_impact]);
+          if (vuln.remediation) tableBody.push(["Remediation", vuln.remediation]);
+
+          autoTable(doc, {
+            startY: y,
+            head: [[`Finding #${idx + 1}: ${vuln.type}`, ""]],
+            body: tableBody,
+            theme: "grid",
+            headStyles: { fillColor: headColor, fontSize: 12 },
+            styles: { overflow: "linebreak", cellPadding: 4, fontSize: 10 },
+            columnStyles: {
+              0: { cellWidth: 35, fontStyle: "bold", textColor: [50, 50, 50] },
+              1: { cellWidth: "auto" }
+            }
+          });
+
+          y = doc.lastAutoTable.finalY + 10;
+        });
+      } else {
+        doc.setFontSize(11);
+        doc.setTextColor(40, 167, 69);
+        doc.text("No vulnerabilities detected! Codebase is secure.", 14, y);
+      }
+
+      doc.save(`GitHopper_Analysis_${analyze?.branch_name || "report"}.pdf`);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   /* refs for pipeline */
   const pipelineRoot = useRef(null);
@@ -777,10 +890,16 @@ export function AnalyseBranchesPage() {
   const vulnerableFiles = []; // Old fallback logic not easily portable, we use vulnerabilities below.
   const vulnerabilities = analyze.findings || analyze.vulnerabilities || [];
   const billing = analyze.billing || {};
+  
+  // Calculate unique files with issues from findings
+  const uniqueFilesWithIssues = new Set(
+    vulnerabilities.map(v => v.file).filter(f => f)
+  ).size;
+  
   const filesSummary = {
-    total: analyze.summary?.total_issues || analyze.total_vulnerabilities || 0,
-    withIssues: analyze.summary?.breakdown?.security_issues || 0, // Fallback visual
-    totalVulnerabilities: analyze.summary?.total_issues || analyze.total_vulnerabilities || 0,
+    total: vulnerabilities.length || analyze.summary?.total_issues || analyze.total_vulnerabilities || 0,
+    withIssues: uniqueFilesWithIssues,
+    totalVulnerabilities: vulnerabilities.length || analyze.summary?.total_issues || analyze.total_vulnerabilities || 0,
   };
 
   /* node index counter */
@@ -844,7 +963,8 @@ export function AnalyseBranchesPage() {
         </div>
 
         {/* ── NEW FEATURE BUTTONS ── */}
-        <div style={{ marginBottom: "40px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+        <div style={{ marginBottom: "40px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             {[{ id:"/security-audit", label:"SECURITY AUDIT", stateKey:"securityAudit", dataKey:"security_audit" },
               { id:"/debt-report", label:"DEBT REPORT", stateKey:"debtReport", dataKey:"debt_report" },
               { id:"/health-score", label:"HEALTH SCORE", stateKey:"healthScore", dataKey:"health_score" }].map(b => {
@@ -875,8 +995,32 @@ export function AnalyseBranchesPage() {
                 {b.label}
               </button>
             )})}
+          </div>
+
+          <button 
+            onClick={handleDownloadPdf}
+            disabled={isDownloading}
+            style={{
+              padding: "8px 20px",
+              borderRadius: "4px",
+              background: isDark ? "#020c02" : "#f8f8f8",
+              border: "1px dashed #72ea1e",
+              color: "#72ea1e",
+              fontSize: "12px",
+              fontWeight: "700",
+              fontFamily: "'JetBrains Mono',monospace",
+              cursor: isDownloading ? "wait" : "pointer",
+              transition: "all 0.2s",
+              opacity: isDownloading ? 0.7 : 1
+            }}
+            onMouseEnter={e=>{ if(!isDownloading) { e.currentTarget.style.background="#72ea1e"; e.currentTarget.style.color="#000"; } }}
+            onMouseLeave={e=>{ if(!isDownloading) { e.currentTarget.style.background=isDark?"#020c02":"#f8f8f8"; e.currentTarget.style.color="#72ea1e"; } }}
+          >
+            {isDownloading ? "GENERATING PDF..." : "⬇ DOWNLOAD REPORT"}
+          </button>
         </div>
 
+        <div id="report-content" style={{ position: "relative", paddingBottom: "20px", paddingTop: "10px", margin: "-10px 0 0" }}>
         {/* ── PIPELINE ROOT ── */}
         <div ref={pipelineRoot} style={{ position: "relative", paddingLeft: "clamp(20px, 5vw, 40px)" }}>
           <PipelineSVG containerRef={pipelineRoot} nodeRefs={nodeRefs} />
@@ -952,9 +1096,14 @@ export function AnalyseBranchesPage() {
                 gap: "clamp(8px, 2vw, 12px)",
               }}
             >
-              <StatTile label="Total Files" value={filesSummary.total} accent="#72ea1e" delay={180} />
+              <StatTile label="Total Findings" value={filesSummary.total} accent="#72ea1e" delay={180} />
               <StatTile label="Files w/ Issues" value={filesSummary.withIssues} accent="#ff6060" delay={320} />
-              <StatTile label="Vulnerabilities" value={filesSummary.totalVulnerabilities} accent="#ff9800" delay={460} />
+              <div style={{ background: isDark ? "#020c02" : "#f8f8f8", border: isDark ? "1px solid #142014" : "1px solid #d8d8d8", borderRadius: "4px", padding: "12px 14px" }}>
+                <FL color={isDark ? "#243a14" : "#666"}>SEVERITY BREAKDOWN</FL>
+                <p style={{ margin: 0, fontFamily: "'JetBrains Mono',monospace", fontSize: "20px", fontWeight: 800, color: "#72ea1e" }}>
+                  {(analyze.by_severity?.critical || 0)}C {(analyze.by_severity?.high || 0)}H
+                </p>
+              </div>
             </div>
           </PSection>
 
@@ -1079,8 +1228,8 @@ export function AnalyseBranchesPage() {
                     },
                     {
                       label: "free_remaining",
-                      raw: billing.free_calls_remaining < 0,
-                      val: billing.free_calls_remaining >= 0 ? billing.free_calls_remaining : "N/A",
+                      raw: true,  // Always render as raw text to avoid NaN
+                      val: billing.free_calls_remaining != null ? billing.free_calls_remaining : "N/A",
                     },
                   ].map(({ label, val, raw }, i) => (
                     <div
@@ -1177,6 +1326,7 @@ export function AnalyseBranchesPage() {
             </PSection>
           )}
         </div>
+        </div> {/* END #report-content */}
 
         {/* ── BACK ── */}
         <div style={{ marginTop: "60px", paddingLeft: "40px" }}>

@@ -10,6 +10,15 @@
 
 import json
 import logging
+import sys
+import os
+
+# Add parent directory to path to import billing module
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+try:
+    import billing
+except ImportError:
+    billing = None
 
 logger = logging.getLogger(__name__)
 
@@ -175,6 +184,11 @@ def aggregate_for_branch_analysis(categorized: dict, branch_name: str = "main") 
     dep_count = sum(1 for f in all_findings if f.get("file_type") == "deps")
     debt_count = sum(1 for f in all_findings if "complexity" in f.get("type", "").lower())
     
+    # Get billing info
+    billing_info = {}
+    if billing:
+        billing_info = billing.get_billing_summary()
+    
     return {
         "analysis_type": "BRANCH_ANALYSIS",
         "branch": branch_name,
@@ -194,7 +208,8 @@ def aggregate_for_branch_analysis(categorized: dict, branch_name: str = "main") 
             "high": sum(1 for f in all_findings if f.get("severity", "").upper() == "HIGH"),
             "medium": sum(1 for f in all_findings if f.get("severity", "").upper() == "MEDIUM"),
             "low": sum(1 for f in all_findings if f.get("severity", "").upper() == "LOW")
-        }
+        },
+        "billing": billing_info,  # Add billing to branch_analysis
     }
 
 
