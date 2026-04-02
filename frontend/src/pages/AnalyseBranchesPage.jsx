@@ -1228,8 +1228,8 @@ export function AnalyseBranchesPage() {
                     },
                     {
                       label: "free_remaining",
-                      raw: billing.free_calls_remaining < 0,
-                      val: billing.free_calls_remaining >= 0 ? billing.free_calls_remaining : "N/A",
+                      raw: true,  // Always render as raw text to avoid NaN
+                      val: billing.free_calls_remaining != null ? billing.free_calls_remaining : "N/A",
                     },
                   ].map(({ label, val, raw }, i) => (
                     <div
