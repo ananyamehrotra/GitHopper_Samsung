@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHopper - Full Report</title>
+    <link rel="stylesheet" href="report.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">GitHopper Report</h1>
+                <p id="repoName" class="repo-name">--</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Hero Section with Score -->
+            <section class="hero-section">
+                <div class="score-card">
+                    <h2>Health Score</h2>
+                    <div class="score-display">
+                        <div class="score-number" id="scoreNumber">--</div>
+                        <div class="score-label">out of 100</div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="quick-stats">
+                    <div class="stat-card critical">
+                        <div class="stat-icon">🚨</div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="criticalCount">0</div>
+                            <div class="stat-title">Critical</div>
+                        </div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-icon">⚠️</div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="mediumCount">0</div>
+                            <div class="stat-title">Medium</div>
+                        </div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon">✨</div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="quickWinsCount">0</div>
+                            <div class="stat-title">Quick Wins</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Issues by Severity -->
+            <section id="criticalSection" class="issues-section">
+                <h2>🚨 Critical Issues</h2>
+                <div id="criticalIssuesList" class="issues-list">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <section id="mediumSection" class="issues-section">
+                <h2>⚠️ Medium Issues</h2>
+                <div id="mediumIssuesList" class="issues-list">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <section id="quickWinsSection" class="issues-section">
+                <h2>✨ Quick Wins</h2>
+                <div id="quickWinsIssuesList" class="issues-list">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Action Timeline -->
+            <section class="timeline-section">
+                <h2>Action Timeline</h2>
+                <div id="actionTimeline" class="timeline">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <button id="closeBtn" class="button button-primary">Close Report</button>
+        </footer>
+    </div>
+
+    <script src="report.js"></script>
+</body>
+</html>

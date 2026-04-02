@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "GitHopper - Code Health Scanner",
+  "version": "1.0.0",
+  "description": "Scan GitHub repositories for security vulnerabilities, code debt, and health issues",
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "GitHopper - Analyze Repository"
+  }
+}
