@@ -327,7 +327,7 @@ export function DebtReportPage() {
         <p style={{ color:"#ff8c00", fontFamily:"'JetBrains Mono',monospace" }}>
           {error || "No technical debt data available."}
         </p>
-        <button onClick={()=>navigate("/dashboard")} style={BTN}>← back</button>
+        <button onClick={()=>navigate("/analyse-branches", { state: { scanResult: location.state?.scanResult, repoUrl: location.state?.repoUrl } })} style={BTN}>← back</button>
       </div>
     </>
   );
@@ -406,10 +406,10 @@ export function DebtReportPage() {
         {findings.length > 0 && <DistributionChart findings={findings} isDark={isDark} />}
 
         <div>
-          <button onClick={()=>navigate("/dashboard")} style={BTN}
+          <button onClick={()=>navigate("/analyse-branches", { state: { scanResult: location.state?.scanResult, repoUrl: location.state?.repoUrl } })} style={BTN}
             onMouseEnter={e=>{ e.currentTarget.style.background="transparent"; e.currentTarget.style.color="#ff8c00"; }}
             onMouseLeave={e=>{ e.currentTarget.style.background="#ff8c00"; e.currentTarget.style.color="#000"; }}>
-            ← back to dashboard
+            ← back to analysis
           </button>
         </div>
       </div>

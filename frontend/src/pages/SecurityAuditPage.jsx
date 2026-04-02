@@ -159,7 +159,7 @@ export function SecurityAuditPage() {
       <ThemeToggle /><UserProfile />
       <div style={{ padding:40, textAlign:"center" }}>
         <p style={{ color:"#ff6060", fontFamily:"'JetBrains Mono',monospace" }}>No security audit data available.</p>
-        <button onClick={()=>navigate("/dashboard")} style={BTN}>← back</button>
+        <button onClick={()=>navigate("/analyse-branches", { state: { scanResult: location.state?.scanResult, repoUrl: location.state?.repoUrl } })} style={BTN}>← back</button>
       </div>
     </>
   );
@@ -268,10 +268,10 @@ export function SecurityAuditPage() {
         </div>
 
         <div style={{ marginTop:48 }}>
-          <button onClick={()=>navigate("/dashboard")} style={BTN}
+          <button onClick={()=>navigate("/analyse-branches", { state: { scanResult: location.state?.scanResult, repoUrl: location.state?.repoUrl } })} style={BTN}
             onMouseEnter={e=>{ e.currentTarget.style.background="transparent"; e.currentTarget.style.color="#ff5050"; }}
             onMouseLeave={e=>{ e.currentTarget.style.background="#ff5050"; e.currentTarget.style.color="#000"; }}>
-            ← back to dashboard
+            ← back to analysis
           </button>
         </div>
       </div>

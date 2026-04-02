@@ -51,7 +51,7 @@ export function HealthScorePage() {
       <ThemeToggle /><UserProfile />
       <div style={{ padding:40, textAlign:"center" }}>
         <p style={{ color:"#72ea1e", fontFamily:"'JetBrains Mono',monospace" }}>No health score data available.</p>
-        <button onClick={()=>navigate("/dashboard")} style={BTN}>← back</button>
+        <button onClick={()=>navigate("/analyse-branches", { state: { scanResult: location.state?.scanResult, repoUrl: location.state?.repoUrl } })} style={BTN}>← back</button>
       </div>
     </>
   );
@@ -160,10 +160,10 @@ export function HealthScorePage() {
         </div>
 
         <div>
-          <button onClick={()=>navigate("/dashboard")} style={{ ...BTN, background:mainColor, borderColor:mainColor }}
+          <button onClick={()=>navigate("/analyse-branches", { state: { scanResult: location.state?.scanResult, repoUrl: location.state?.repoUrl } })} style={{ ...BTN, background:mainColor, borderColor:mainColor }}
             onMouseEnter={e=>{ e.currentTarget.style.background="transparent"; e.currentTarget.style.color=mainColor; }}
             onMouseLeave={e=>{ e.currentTarget.style.background=mainColor; e.currentTarget.style.color="#000"; }}>
-            ← back to dashboard
+            ← back to analysis
           </button>
         </div>
       </div>
