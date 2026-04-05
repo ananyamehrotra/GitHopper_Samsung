@@ -7,6 +7,13 @@
     "storage",
     "tabs"
   ],
+  "host_permissions": [
+    "http://localhost:5000/*",
+    "https://github.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_title": "GitHopper - Analyze Repository"

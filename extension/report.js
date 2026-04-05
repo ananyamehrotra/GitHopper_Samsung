@@ -18,6 +18,19 @@ const mediumIssuesList = document.getElementById('mediumIssuesList');
 const actionTimeline = document.getElementById('actionTimeline');
 const closeBtn = document.getElementById('closeBtn');
 
+// Load report data
+let reportData = null;
+document.addEventListener('DOMContentLoaded', () => {
+    const data = sessionStorage.getItem('reportData');
+    if (data) {
+        reportData = JSON.parse(data);
+        renderReport(reportData);
+    } else {
+        scoreNumber.textContent = '--';
+        repoName.textContent = 'No scan data available';
+    }
+});
+
 // Create issue card
 function createIssueCard(issue) {
     const card = document.createElement('div');

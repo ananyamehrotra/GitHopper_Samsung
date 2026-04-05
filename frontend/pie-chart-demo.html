@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debt Report - Severity Distribution Pie Chart Demo</title>
+  <style>
+    body {
+      background: #0a0e0a;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 40px;
+      margin: 0;
+    }
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #ff8c00;
+      font-size: 32px;
+      margin-bottom: 40px;
+    }
+    .chart-section {
+      margin-bottom: 48px;
+      padding: 24px 28px;
+      background: #020a02;
+      border: 1px solid #142014;
+      border-radius: 6px;
+      animation: fadeUp 0.5s ease both;
+    }
+    .chart-title {
+      margin: 0 0 24px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #b0d880;
+    }
+    .chart-title span {
+      color: #ff8c00;
+    }
+    .chart-container {
+      display: flex;
+      gap: 40px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .pie-chart {
+      position: relative;
+      width: 280px;
+      height: 280px;
+      filter: drop-shadow(0 0 20px rgba(255,140,0,0.15));
+    }
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+    .pie-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .pie-center-value {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 900;
+      color: #fff;
+    }
+    .pie-center-label {
+      margin: 2px 0 0;
+      font-size: 9px;
+      color: #888;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 200px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 4px;
+      background: #0a140a;
+      border: 1px solid rgba(0, 0, 0, 0.3);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .legend-item:hover {
+      border-color: currentColor;
+      box-shadow: 0 0 8px currentColor;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: 0 0 6px currentColor;
+    }
+    .legend-label {
+      flex: 1;
+    }
+    .legend-type {
+      margin: 0;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .legend-count {
+      margin: 2px 0 0;
+      font-size: 9px;
+      color: #888;
+    }
+    .legend-percentage {
+      font-size: 13px;
+      font-weight: 900;
+      color: #fff;
+      min-width: 30px;
+      text-align: right;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: #020a02;
+      border: 1px solid #142014;
+      border-radius: 6px;
+      padding: 22px;
+      animation: fadeUp 0.4s ease both;
+      border-left: 3px solid;
+    }
+    .stat-label {
+      margin: 0 0 8px;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .stat-value {
+      margin: 0;
+      font-size: 36px;
+      font-weight: 900;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>▌ TECHNICAL DEBT Report</h1>
+    
+    <div class="stats">
+      <div class="stat-card" style="border-left-color: #ff8c00;">
+        <div class="stat-label" style="color: #ff8c00;">Total Debt Effort</div>
+        <div class="stat-value">2h 20m</div>
+      </div>
+      <div class="stat-card" style="border-left-color: #ff5050;">
+        <div class="stat-label" style="color: #ff5050;">High Priority</div>
+        <div class="stat-value">57% ROI</div>
+      </div>
+      <div class="stat-card" style="border-left-color: #243a14;">
+        <div class="stat-label" style="color: #648a44;">Debt Categories</div>
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 12px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px;">
+            <span style="color: #88c460;">code_debt</span>
+            <span style="font-weight: 800;">8</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px;">
+            <span style="color: #88c460;">tech_debt</span>
+            <span style="font-weight: 800;">5</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-title">
+        <span>◉</span> Severity Distribution
+      </div>
+      <div class="chart-container">
+        <div class="pie-chart">
+          <svg viewBox="0 0 280 280">
+            <!-- CRITICAL segment -->
+            <path d="M 140 140 L 140 60 A 80 80 0 0 1 164.28 63.56 Z" fill="#ff2a2a" opacity="0.85"/>
+            <path d="M 140 140 L 140 60 A 80 80 0 0 1 164.28 63.56 Z" fill="none" stroke="#0a140a" stroke-width="2"/>
+            
+            <!-- HIGH segment -->
+            <path d="M 140 140 L 164.28 63.56 A 80 80 0 0 1 220 140 Z" fill="#ff5050" opacity="0.85"/>
+            <path d="M 140 140 L 164.28 63.56 A 80 80 0 0 1 220 140 Z" fill="none" stroke="#0a140a" stroke-width="2"/>
+            
+            <!-- MEDIUM segment -->
+            <path d="M 140 140 L 220 140 A 80 80 0 0 1 115.72 216.44 Z" fill="#ff8c00" opacity="0.85"/>
+            <path d="M 140 140 L 220 140 A 80 80 0 0 1 115.72 216.44 Z" fill="none" stroke="#0a140a" stroke-width="2"/>
+            
+            <!-- LOW segment -->
+            <path d="M 140 140 L 115.72 216.44 A 80 80 0 0 1 140 60 Z" fill="#c8b400" opacity="0.85"/>
+            <path d="M 140 140 L 115.72 216.44 A 80 80 0 0 1 140 60 Z" fill="none" stroke="#0a140a" stroke-width="2"/>
+          </svg>
+          <div class="pie-center">
+            <p class="pie-center-value">21</p>
+            <p class="pie-center-label">Total Findings</p>
+          </div>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item" style="border-color: rgba(255, 42, 42, 0.25); color: #ff2a2a;">
+            <span class="legend-dot"></span>
+            <div class="legend-label">
+              <p class="legend-type">CRITICAL</p>
+              <p class="legend-count">2 issues</p>
+            </div>
+            <span class="legend-percentage">10%</span>
+          </div>
+          
+          <div class="legend-item" style="border-color: rgba(255, 80, 80, 0.25); color: #ff5050;">
+            <span class="legend-dot"></span>
+            <div class="legend-label">
+              <p class="legend-type">HIGH</p>
+              <p class="legend-count">7 issues</p>
+            </div>
+            <span class="legend-percentage">33%</span>
+          </div>
+          
+          <div class="legend-item" style="border-color: rgba(255, 140, 0, 0.25); color: #ff8c00;">
+            <span class="legend-dot"></span>
+            <div class="legend-label">
+              <p class="legend-type">MEDIUM</p>
+              <p class="legend-count">6 issues</p>
+            </div>
+            <span class="legend-percentage">29%</span>
+          </div>
+          
+          <div class="legend-item" style="border-color: rgba(200, 180, 0, 0.25); color: #c8b400;">
+            <span class="legend-dot"></span>
+            <div class="legend-label">
+              <p class="legend-type">LOW</p>
+              <p class="legend-count">6 issues</p>
+            </div>
+            <span class="legend-percentage">29%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 20px; background: #0a140a; border: 1px solid #142014; border-radius: 6px; color: #888; font-size: 12px; line-height: 1.6;">
+      <p><strong>✓ Pie Chart Features:</strong></p>
+      <ul style="margin: 10px 0; padding-left: 20px;">
+        <li>Interactive SVG pie chart with each severity as a colored segment</li>
+        <li>Center displays total finding count with label</li>
+        <li>Legend shows detailed breakdown: severity type, count, and percentage</li>
+        <li>Hover effects on legend items for interactivity</li>
+        <li>Color-coded by severity: Red (CRITICAL), Orange (HIGH), Gold (MEDIUM), Yellow (LOW)</li>
+        <li>Responsive layout with flexbox for mobile adaptation</li>
+        <li>Smooth animations and shadow effects for visual polish</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

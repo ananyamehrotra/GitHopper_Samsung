@@ -1,0 +1,542 @@
+{
+  "status": "success",
+  "pipeline": "complete",
+  "execution_time_seconds": 3.34869,
+  "stages": {
+    "fetch": {
+      "repo_id": "04dc30e4",
+      "repo_url": "expressjs/expressana",
+      "total_files": 5,
+      "categories": {
+        "config": 1,
+        "dependencies": 1,
+        "source_code": 3
+      },
+      "chunks": [
+        {
+          "file": "config/db.py",
+          "code": "AWS_SECRET_KEY = \"AKIAIOSFODNN7EXAMPLE\"",
+          "language": "python",
+          "char_count": 45
+        },
+        {
+          "file": "src/app.py",
+          "code": "query = \"SELECT * FROM users WHERE id = \" + user_input",
+          "language": "python",
+          "char_count": 55
+        },
+        {
+          "file": "src/utils.js",
+          "code": "const SECRET_TOKEN = \"sk-abc123xyz\";",
+          "language": "javascript",
+          "char_count": 38
+        }
+      ],
+      "files": [
+        {
+          "path": "config/db.py",
+          "language": "python",
+          "content": "import os\nAWS_SECRET_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nDB_PASSWORD = \"admin123\"",
+          "size_bytes": 250,
+          "debt_signals": [
+            "hardcoded_secrets"
+          ],
+          "debt_signal_count": 1,
+          "debt_category_hint": "architecture",
+          "metrics": {
+            "total_lines": 50,
+            "code_lines": 40,
+            "blank_lines": 5,
+            "comment_lines": 5,
+            "comment_ratio": 0.1,
+            "max_indentation_depth": 2,
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "requirements.txt",
+          "language": "text",
+          "content": "flask==0.12.0\nrequests==2.18.0\ndjango==2.0.0",
+          "size_bytes": 50,
+          "debt_signals": [
+            "outdated_dependencies"
+          ],
+          "debt_signal_count": 1,
+          "debt_category_hint": "dependencies",
+          "metrics": {
+            "total_lines": 3,
+            "code_lines": 3,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "src/app.py",
+          "language": "python",
+          "content": "def process_data(user_input):\n    query = \"SELECT * FROM users WHERE id = \" + user_input\n    return eval(user_input)\n\ndef long_function():\n    # This function is over 50 lines\n    x = 1\n    y = 2\n    z = x + y\n    a = z * 2\n    b = a + x\n    return b",
+          "size_bytes": 350,
+          "debt_signals": [
+            "sql_injection",
+            "eval"
+          ],
+          "debt_signal_count": 2,
+          "debt_category_hint": "code_quality",
+          "metrics": {
+            "total_lines": 120,
+            "code_lines": 95,
+            "blank_lines": 15,
+            "comment_lines": 10,
+            "comment_ratio": 0.08,
+            "max_indentation_depth": 3,
+            "long_function_count": 1
+          }
+        },
+        {
+          "path": "src/utils.js",
+          "language": "javascript",
+          "content": "const SECRET_TOKEN = \"sk-abc123xyz\";\nfunction validateUser(id) { return id > 0; }",
+          "size_bytes": 120,
+          "debt_signals": [
+            "hardcoded_secrets"
+          ],
+          "debt_signal_count": 1,
+          "debt_category_hint": "code_quality",
+          "metrics": {
+            "total_lines": 40,
+            "code_lines": 30,
+            "blank_lines": 5,
+            "comment_lines": 5,
+            "comment_ratio": 0.125,
+            "max_indentation_depth": 2,
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "tests/test_app.py",
+          "language": "python",
+          "content": "import unittest\nclass TestApp(unittest.TestCase):\n    def test_process(self):\n        assert process_data(\"test\") is not None",
+          "size_bytes": 200,
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "debt_category_hint": "testing",
+          "metrics": {
+            "total_lines": 60,
+            "code_lines": 50,
+            "blank_lines": 5,
+            "comment_lines": 5,
+            "comment_ratio": 0.083,
+            "max_indentation_depth": 2,
+            "long_function_count": 0
+          }
+        }
+      ]
+    },
+    "analyze": {
+      "repo_id": "04dc30e4",
+      "repo_url": "expressjs/expressana",
+      "branch_name": "main",
+      "vulnerabilities": [
+        {
+          "type": "HIGH_CYCLOMATIC_COMPLEXITY",
+          "severity": "HIGH",
+          "file": "src/components/AppLayout.jsx",
+          "line_range": "45-120",
+          "explanation": "Function has cyclomatic complexity of 18, exceeds recommended max of 10. Multiple nested conditions and branches make code hard to test and maintain.",
+          "business_impact": "Increased bug risk, harder to maintain and test. Reduces team velocity on related features.",
+          "estimated_minutes_to_fix": 45,
+          "remediation": "Break into smaller functions, extract conditionals into helper functions, use strategy pattern for different code paths."
+        },
+        {
+          "type": "CODE_DUPLICATION",
+          "severity": "MEDIUM",
+          "file": "frontend/src/services/apiClient.js",
+          "line_range": "12-25, 45-58, 120-133",
+          "explanation": "Same fetch-with-retry logic is duplicated 3 times across the file. Should be extracted to reusable utility.",
+          "business_impact": "Bug fixes need to be applied in multiple places. Increases maintenance burden.",
+          "estimated_minutes_to_fix": 20,
+          "remediation": "Extract retry logic into a utility function: createRetryableFetch(). Use throughout codebase."
+        },
+        {
+          "type": "LONG_FUNCTION",
+          "severity": "MEDIUM",
+          "file": "backend/ai/aggregator.py",
+          "line_range": "240-350",
+          "explanation": "Function 'aggregate_all' is 110 lines long. Exceeds recommended max of 50 lines. Does too many things.",
+          "business_impact": "Hard to understand, test, and modify. Violates single responsibility principle.",
+          "estimated_minutes_to_fix": 60,
+          "remediation": "Split into: aggregate_by_severity(), aggregate_by_category(), aggregate_by_file(). Use composition to combine."
+        },
+        {
+          "type": "MISSING_ERROR_HANDLING",
+          "severity": "HIGH",
+          "file": "frontend/src/pages/DashboardPage.jsx",
+          "line_range": "77-92",
+          "explanation": "fetch() call has no catch block for network errors. Page will crash silently on failed API calls.",
+          "business_impact": "Poor user experience. Users won't know if scan failed. Hard to debug production issues.",
+          "estimated_minutes_to_fix": 15,
+          "remediation": "Add try-catch. Show error toast to user. Log to Sentry. Implement retry logic."
+        },
+        {
+          "type": "UNUSED_IMPORT",
+          "severity": "LOW",
+          "file": "backend/utils/file_classifier.py",
+          "line_range": "3",
+          "explanation": "Module 'os' is imported but never used in this file.",
+          "business_impact": "Adds to code bloat. Makes linting fail in strict mode.",
+          "estimated_minutes_to_fix": 2,
+          "remediation": "Remove: `import os`"
+        },
+        {
+          "type": "COMPLEX_CONDITIONAL",
+          "severity": "MEDIUM",
+          "file": "backend/mcp_server/analyzer.py",
+          "line_range": "156-162",
+          "explanation": "Nested if statement is hard to read: if a and (b or c) and not (d and e). Multiple boolean checks in single line.",
+          "business_impact": "Bug risk. Hard to understand intent. Difficult to unit test individual conditions.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Extract to named boolean: is_valid_analysis = check_all_conditions(a,b,c,d,e). Use guard clauses."
+        },
+        {
+          "type": "LARGE_PARAMETER_LIST",
+          "severity": "LOW",
+          "file": "backend/ai/synthesizer.py",
+          "line_range": "45",
+          "explanation": "Function 'synthesize_report' takes 8 parameters. Exceeds recommended max of 3.",
+          "business_impact": "Hard to call correctly. Easy to pass arguments in wrong order. Makes testing harder.",
+          "estimated_minutes_to_fix": 30,
+          "remediation": "Group parameters: create ReportConfig dataclass with fields: vulnerabilities, billing, branch_name, etc."
+        },
+        {
+          "type": "OUTDATED_DEPENDENCY",
+          "severity": "HIGH",
+          "file": "package.json",
+          "line_range": "15",
+          "explanation": "jsPDF v2.4.0 is 6 months old. Current stable is v2.5.1. Has bug fixes and performance improvements.",
+          "business_impact": "Missing security patches. Performance issues. PDF generation may fail in some edge cases.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Run: npm update jspdf@latest. Test PDF download. Verify no breaking changes."
+        }
+      ],
+      "vulnerable_files": [
+        {
+          "file": "[MOCK DATA] Multiple files",
+          "type": "mixed",
+          "count": 8
+        }
+      ],
+      "total_files_analyzed": 3,
+      "files_with_issues": 1,
+      "total_vulnerabilities": 8,
+      "cost_tracker": {
+        "api_calls": 1,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "estimated_cost": 0.0
+      },
+      "billing": {
+        "calls_made": 1,
+        "free_calls_remaining": 99,
+        "estimated_cost": 0.0,
+        "will_be_charged": false,
+        "alternatives": [
+          {
+            "name": "SonarQube Community",
+            "cost": "Free",
+            "url": "https://www.sonarqube.org/"
+          },
+          {
+            "name": "GitHub CodeQL",
+            "cost": "Free (open source)",
+            "url": "https://codeql.github.com/"
+          },
+          {
+            "name": "Snyk",
+            "cost": "$50+/month",
+            "url": "https://snyk.io/"
+          },
+          {
+            "name": "Checkmarx",
+            "cost": "Enterprise pricing",
+            "url": "https://checkmarx.com/"
+          }
+        ]
+      },
+      "chunks_scanned": 3,
+      "total_files": 5
+    },
+    "score": {
+      "repo_id": "04dc30e4",
+      "repo_url": "expressjs/expressana",
+      "health_score": 100,
+      "chunks_scanned": 3,
+      "total_files": 5,
+      "analysis": {
+        "total_security_issues": 0,
+        "total_debt_issues": 0,
+        "critical_issues": 0,
+        "quick_wins": 0
+      },
+      "findings": {
+        "security_findings": [],
+        "debt_findings": [],
+        "security_by_severity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "debt_by_severity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "quick_wins": [],
+        "critical_issues": []
+      },
+      "recommendations": [],
+      "scoring_metadata": {
+        "scoring_version": "1.0",
+        "scoring_algorithm": "weighted_penalty",
+        "max_score": 100,
+        "min_score": 0
+      }
+    }
+  },
+  "data": {
+    "total_files_fetched": 5,
+    "config_files": 1,
+    "dependency_files": 1,
+    "source_files": 3,
+    "total_chunks": 3,
+    "files_by_category": {
+      "config": [
+        {
+          "path": "config/db.py",
+          "language": "python",
+          "content": "import os\nAWS_SECRET_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nDB_PASSWORD = \"admin123\"",
+          "size_bytes": 250,
+          "debt_signals": [
+            "hardcoded_secrets"
+          ],
+          "debt_signal_count": 1,
+          "debt_category_hint": "architecture",
+          "metrics": {
+            "total_lines": 50,
+            "code_lines": 40,
+            "blank_lines": 5,
+            "comment_lines": 5,
+            "comment_ratio": 0.1,
+            "max_indentation_depth": 2,
+            "long_function_count": 0
+          }
+        }
+      ],
+      "dependencies": [
+        {
+          "path": "requirements.txt",
+          "language": "text",
+          "content": "flask==0.12.0\nrequests==2.18.0\ndjango==2.0.0",
+          "size_bytes": 50,
+          "debt_signals": [
+            "outdated_dependencies"
+          ],
+          "debt_signal_count": 1,
+          "debt_category_hint": "dependencies",
+          "metrics": {
+            "total_lines": 3,
+            "code_lines": 3,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_function_count": 0
+          }
+        }
+      ],
+      "source_code": [
+        {
+          "path": "src/app.py",
+          "language": "python",
+          "content": "def process_data(user_input):\n    query = \"SELECT * FROM users WHERE id = \" + user_input\n    return eval(user_input)\n\ndef long_function():\n    # This function is over 50 lines\n    x = 1\n    y = 2\n    z = x + y\n    a = z * 2\n    b = a + x\n    return b",
+          "size_bytes": 350,
+          "debt_signals": [
+            "sql_injection",
+            "eval"
+          ],
+          "debt_signal_count": 2,
+          "debt_category_hint": "code_quality",
+          "metrics": {
+            "total_lines": 120,
+            "code_lines": 95,
+            "blank_lines": 15,
+            "comment_lines": 10,
+            "comment_ratio": 0.08,
+            "max_indentation_depth": 3,
+            "long_function_count": 1
+          }
+        },
+        {
+          "path": "src/utils.js",
+          "language": "javascript",
+          "content": "const SECRET_TOKEN = \"sk-abc123xyz\";\nfunction validateUser(id) { return id > 0; }",
+          "size_bytes": 120,
+          "debt_signals": [
+            "hardcoded_secrets"
+          ],
+          "debt_signal_count": 1,
+          "debt_category_hint": "code_quality",
+          "metrics": {
+            "total_lines": 40,
+            "code_lines": 30,
+            "blank_lines": 5,
+            "comment_lines": 5,
+            "comment_ratio": 0.125,
+            "max_indentation_depth": 2,
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "tests/test_app.py",
+          "language": "python",
+          "content": "import unittest\nclass TestApp(unittest.TestCase):\n    def test_process(self):\n        assert process_data(\"test\") is not None",
+          "size_bytes": 200,
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "debt_category_hint": "testing",
+          "metrics": {
+            "total_lines": 60,
+            "code_lines": 50,
+            "blank_lines": 5,
+            "comment_lines": 5,
+            "comment_ratio": 0.083,
+            "max_indentation_depth": 2,
+            "long_function_count": 0
+          }
+        }
+      ]
+    },
+    "detailed_files": [
+      {
+        "path": "config/db.py",
+        "language": "python",
+        "content": "import os\nAWS_SECRET_KEY = \"AKIAIOSFODNN7EXAMPLE\"\nDB_PASSWORD = \"admin123\"",
+        "size_bytes": 250,
+        "debt_signals": [
+          "hardcoded_secrets"
+        ],
+        "debt_signal_count": 1,
+        "debt_category_hint": "architecture",
+        "metrics": {
+          "total_lines": 50,
+          "code_lines": 40,
+          "blank_lines": 5,
+          "comment_lines": 5,
+          "comment_ratio": 0.1,
+          "max_indentation_depth": 2,
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "requirements.txt",
+        "language": "text",
+        "content": "flask==0.12.0\nrequests==2.18.0\ndjango==2.0.0",
+        "size_bytes": 50,
+        "debt_signals": [
+          "outdated_dependencies"
+        ],
+        "debt_signal_count": 1,
+        "debt_category_hint": "dependencies",
+        "metrics": {
+          "total_lines": 3,
+          "code_lines": 3,
+          "blank_lines": 0,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 0,
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "src/app.py",
+        "language": "python",
+        "content": "def process_data(user_input):\n    query = \"SELECT * FROM users WHERE id = \" + user_input\n    return eval(user_input)\n\ndef long_function():\n    # This function is over 50 lines\n    x = 1\n    y = 2\n    z = x + y\n    a = z * 2\n    b = a + x\n    return b",
+        "size_bytes": 350,
+        "debt_signals": [
+          "sql_injection",
+          "eval"
+        ],
+        "debt_signal_count": 2,
+        "debt_category_hint": "code_quality",
+        "metrics": {
+          "total_lines": 120,
+          "code_lines": 95,
+          "blank_lines": 15,
+          "comment_lines": 10,
+          "comment_ratio": 0.08,
+          "max_indentation_depth": 3,
+          "long_function_count": 1
+        }
+      },
+      {
+        "path": "src/utils.js",
+        "language": "javascript",
+        "content": "const SECRET_TOKEN = \"sk-abc123xyz\";\nfunction validateUser(id) { return id > 0; }",
+        "size_bytes": 120,
+        "debt_signals": [
+          "hardcoded_secrets"
+        ],
+        "debt_signal_count": 1,
+        "debt_category_hint": "code_quality",
+        "metrics": {
+          "total_lines": 40,
+          "code_lines": 30,
+          "blank_lines": 5,
+          "comment_lines": 5,
+          "comment_ratio": 0.125,
+          "max_indentation_depth": 2,
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "tests/test_app.py",
+        "language": "python",
+        "content": "import unittest\nclass TestApp(unittest.TestCase):\n    def test_process(self):\n        assert process_data(\"test\") is not None",
+        "size_bytes": 200,
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "debt_category_hint": "testing",
+        "metrics": {
+          "total_lines": 60,
+          "code_lines": 50,
+          "blank_lines": 5,
+          "comment_lines": 5,
+          "comment_ratio": 0.083,
+          "max_indentation_depth": 2,
+          "long_function_count": 0
+        }
+      }
+    ],
+    "analysis_summary": {
+      "total_debt_signals": 5,
+      "files_with_debt_signals": 4,
+      "cost_estimate": {
+        "chunks_to_analyze": 3,
+        "total_code_chars": 138,
+        "approx_tokens": 34
+      }
+    }
+  },
+  "summary": {
+    "repo_url": "expressjs/expressana",
+    "repo_id": "04dc30e4",
+    "health_score": 100,
+    "total_security_issues": 0,
+    "total_debt_issues": 0,
+    "critical_issues": 0,
+    "quick_wins": 0
+  }
+}

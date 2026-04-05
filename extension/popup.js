@@ -1,20 +1,13 @@
-// Configuration
-const API_BASE_URL = 'http://localhost:5001';
+// Popup Script for GitHopper Extension
 
 // DOM Elements
-const inputSection = document.getElementById('inputSection');
-const loadingSection = document.getElementById('loading');
-const errorSection = document.getElementById('errorSection');
-const resultsSection = document.getElementById('resultsSection');
-
-const repoUrlInput = document.getElementById('repoUrl');
+const repoUrl = document.getElementById('repoUrl');
 const scanBtn = document.getElementById('scanBtn');
-const retryBtn = document.getElementById('retryBtn');
-const newScanBtn = document.getElementById('newScanBtn');
-const fullReportBtn = document.getElementById('fullReportBtn');
+const loading = document.getElementById('loading');
+const inputSection = document.getElementById('inputSection');
+const errorSection = document.getElementById('errorSection');
 const errorText = document.getElementById('errorText');
-
-// Statistics and Issues Elements
+const resultsSection = document.getElementById('resultsSection');
 const healthScore = document.getElementById('healthScore');
 const statsGrid = document.getElementById('statsGrid');
 const criticalSection = document.getElementById('criticalSection');
@@ -23,91 +16,128 @@ const quickWinsSection = document.getElementById('quickWinsSection');
 const quickWinsList = document.getElementById('quickWinsList');
 const mediumSection = document.getElementById('mediumSection');
 const mediumList = document.getElementById('mediumList');
+const fullReportBtn = document.getElementById('fullReportBtn');
+const newScanBtn = document.getElementById('newScanBtn');
+const retryBtn = document.getElementById('retryBtn');
 
-// Load saved repo URL on startup
-function loadSavedUrl() {
-    chrome.storage.local.get(['lastRepoUrl'], (result) => {
-        if (result.lastRepoUrl) {
-            repoUrlInput.value = result.lastRepoUrl;
-        }
-    });
-}
+let currentScanData = null;
 
-// Extract repo URL from GitHub page if on GitHub
-function extractGitHubUrl() {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const url = tabs[0].url;
-        if (url && url.includes('github.com/')) {
-            const match = url.match(/github\.com\/([^/]+)\/([^/]+)/);
-            if (match) {
-                repoUrlInput.value = `${match[1]}/${match[2]}`;
-            }
-        }
-    });
-}
+// Event Listeners
+scanBtn.addEventListener('click', handleScan);
+retryBtn.addEventListener('click', () => showSection('input'));
+newScanBtn.addEventListener('click', () => showSection('input'));
+fullReportBtn.addEventListener('click', openFullReport);
 
-// Show section
-function showSection(section) {
-    inputSection.classList.add('hidden');
-    loadingSection.classList.add('hidden');
-    errorSection.classList.add('hidden');
-    resultsSection.classList.add('hidden');
-    section.classList.remove('hidden');
-}
-
-// Format repository URL
-function formatRepoUrl(input) {
-    if (input.startsWith('https://github.com/')) {
-        return input;
-    }
-    if (input.startsWith('github.com/')) {
-        return 'https://' + input;
-    }
-    return `https://github.com/${input}`;
-}
-
-// Create issue item element
-function createIssueElement(issue) {
-    const div = document.createElement('div');
-    div.className = `issue-item ${issue.severity.toLowerCase()}`;
+// Handle repository scan
+async function handleScan() {
+    const repo = repoUrl.value.trim();
     
-    div.innerHTML = `
-        <div class="issue-type">${issue.type}</div>
-        <div class="issue-description">${issue.explanation}</div>
-        <div class="issue-time">⏱️ ~${issue.estimated_minutes} minutes to fix</div>
+    if (!repo) {
+        showError('Please enter a repository URL');
+        return;
+    }
+
+    // Validate repo format
+    if (!repo.includes('/')) {
+        showError('Please use format: username/repository');
+        return;
+    }
+
+    showSection('loading');
+    
+    try {
+        const fullUrl = `https://github.com/${repo}`;
+        const response = await fetch('http://localhost:5000/api/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                repo_url: fullUrl
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Map the response to our display format
+        const mappedData = mapAnalyzeResponse(data);
+        currentScanData = mappedData;
+        
+        displayResults(mappedData);
+        showSection('results');
+        
+        // Save to session storage for full report
+        sessionStorage.setItem('lastScanData', JSON.stringify(mappedData));
+        
+    } catch (error) {
+        console.error('Scan error:', error);
+        showError(error.message || 'Failed to analyze repository. Make sure the backend is running on http://localhost:5000');
+    }
+}
+
+// Map the backend response to our display format
+function mapAnalyzeResponse(data) {
+    // Extract health score
+    const overallHealth = data.health_score?.overall_health || 0;
+    
+    // Extract security findings
+    const securityFindings = data.security_audit?.findings || [];
+    
+    // Extract debt findings
+    const debtFindings = data.debt_report?.findings || [];
+    
+    // Extract quick wins
+    const quickWins = data.quick_wins || [];
+    
+    // Categorize all issues by severity
+    const allIssues = [...securityFindings, ...debtFindings];
+    
+    const criticalIssues = allIssues.filter(i => i.severity === 'CRITICAL' || i.severity === 'HIGH');
+    const mediumIssues = allIssues.filter(i => i.severity === 'MEDIUM');
+    const lowIssues = allIssues.filter(i => i.severity === 'LOW');
+    
+    return {
+        health_score: Math.round(overallHealth),
+        repo_url: data.repo_url || 'Unknown Repository',
+        critical_issues: criticalIssues,
+        medium_issues: mediumIssues,
+        low_issues: lowIssues,
+        quick_wins: quickWins,
+        raw_data: data
+    };
+}
+
+// Display scan results
+function displayResults(data) {
+    // Update health score
+    healthScore.textContent = data.health_score;
+    
+    // Update statistics grid
+    statsGrid.innerHTML = `
+        <div class="stat-item">
+            <span class="stat-label">Critical Issues</span>
+            <span class="stat-value critical">${data.critical_issues.length}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Medium Issues</span>
+            <span class="stat-value warning">${data.medium_issues.length}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Quick Wins</span>
+            <span class="stat-value success">${data.quick_wins.length}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Total Issues</span>
+            <span class="stat-value">${data.critical_issues.length + data.medium_issues.length}</span>
+        </div>
     `;
     
-    return div;
-}
-
-// Render results
-function renderResults(data) {
-    // Health Score
-    healthScore.textContent = Math.round(data.health_score);
-    
-    // Statistics
-    statsGrid.innerHTML = '';
-    const stats = data.statistics || {};
-    
-    const statItems = [
-        { label: 'Critical Issues', value: data.critical_issues?.length || 0 },
-        { label: 'Quick Wins', value: data.quick_wins?.length || 0 },
-        { label: 'Medium Issues', value: data.medium_issues?.length || 0 },
-        { label: 'Total Findings', value: (data.critical_issues?.length || 0) + (data.quick_wins?.length || 0) + (data.medium_issues?.length || 0) }
-    ];
-    
-    statItems.forEach(stat => {
-        const element = document.createElement('div');
-        element.className = 'stat';
-        element.innerHTML = `
-            <div class="stat-value">${stat.value}</div>
-            <div class="stat-label">${stat.label}</div>
-        `;
-        statsGrid.appendChild(element);
-    });
-    
-    // Critical Issues
-    if (data.critical_issues && data.critical_issues.length > 0) {
+    // Display critical issues
+    if (data.critical_issues.length > 0) {
         criticalList.innerHTML = '';
         data.critical_issues.forEach(issue => {
             criticalList.appendChild(createIssueElement(issue));
@@ -117,19 +147,19 @@ function renderResults(data) {
         criticalSection.classList.add('hidden');
     }
     
-    // Quick Wins
-    if (data.quick_wins && data.quick_wins.length > 0) {
+    // Display quick wins
+    if (data.quick_wins.length > 0) {
         quickWinsList.innerHTML = '';
-        data.quick_wins.forEach(issue => {
-            quickWinsList.appendChild(createIssueElement(issue));
+        data.quick_wins.forEach(win => {
+            quickWinsList.appendChild(createIssueElement(win));
         });
         quickWinsSection.classList.remove('hidden');
     } else {
         quickWinsSection.classList.add('hidden');
     }
     
-    // Medium Issues
-    if (data.medium_issues && data.medium_issues.length > 0) {
+    // Display medium issues
+    if (data.medium_issues.length > 0) {
         mediumList.innerHTML = '';
         data.medium_issues.forEach(issue => {
             mediumList.appendChild(createIssueElement(issue));
@@ -138,90 +168,80 @@ function renderResults(data) {
     } else {
         mediumSection.classList.add('hidden');
     }
+}
+
+// Create an issue element
+function createIssueElement(issue) {
+    const div = document.createElement('div');
+    div.className = 'issue-item';
     
-    showSection(resultsSection);
+    const severity = issue.severity || 'LOW';
+    const severityClass = severity.toLowerCase();
+    
+    div.innerHTML = `
+        <div class="issue-header">
+            <span class="issue-severity ${severityClass}">${severity}</span>
+            <span class="issue-type">${issue.type || 'Unknown Issue'}</span>
+        </div>
+        ${issue.file ? `<div class="issue-file">${issue.file}</div>` : ''}
+        ${issue.explanation ? `<div class="issue-explanation">${issue.explanation}</div>` : ''}
+    `;
+    
+    return div;
 }
 
-// Perform scan
-async function performScan(repoUrl) {
-    try {
-        showSection(loadingSection);
-        
-        const formattedUrl = formatRepoUrl(repoUrl);
-        
-        // Save the repo URL
-        chrome.storage.local.set({ lastRepoUrl: repoUrl });
-        
-        const response = await fetch(`${API_BASE_URL}/api/scan`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ repo_url: formattedUrl })
-        });
-        
-        if (!response.ok) {
-            throw new Error(`API returned status ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.error) {
-            throw new Error(data.error);
-        }
-        
-        // Store results for full report
-        chrome.storage.local.set({ lastScanData: data });
-        
-        renderResults(data);
-    } catch (error) {
-        console.error('Scan error:', error);
-        errorText.textContent = error.message || 'Failed to scan repository. Make sure the backend server is running on http://localhost:5001';
-        showSection(errorSection);
+// Open full report in new tab
+function openFullReport() {
+    if (!currentScanData) return;
+    
+    // Store data and open report page
+    sessionStorage.setItem('reportData', JSON.stringify(currentScanData));
+    chrome.tabs.create({ 
+        url: chrome.runtime.getURL('report.html')
+    });
+}
+
+// Show/hide sections
+function showSection(section) {
+    loading.classList.add('hidden');
+    inputSection.classList.add('hidden');
+    errorSection.classList.add('hidden');
+    resultsSection.classList.add('hidden');
+    
+    switch(section) {
+        case 'loading':
+            loading.classList.remove('hidden');
+            break;
+        case 'input':
+            inputSection.classList.remove('hidden');
+            repoUrl.value = '';
+            repoUrl.focus();
+            break;
+        case 'error':
+            errorSection.classList.remove('hidden');
+            break;
+        case 'results':
+            resultsSection.classList.remove('hidden');
+            break;
     }
 }
 
-// Event Listeners
-scanBtn.addEventListener('click', () => {
-    const url = repoUrlInput.value.trim();
-    if (url) {
-        performScan(url);
-    } else {
-        errorText.textContent = 'Please enter a valid GitHub repository URL (e.g., username/repository)';
-        showSection(errorSection);
-    }
-});
+// Show error message
+function showError(message) {
+    errorText.textContent = message;
+    showSection('error');
+}
 
-repoUrlInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        scanBtn.click();
-    }
-});
-
-retryBtn.addEventListener('click', () => {
-    showSection(inputSection);
-});
-
-newScanBtn.addEventListener('click', () => {
-    repoUrlInput.value = '';
-    showSection(inputSection);
-    repoUrlInput.focus();
-});
-
-fullReportBtn.addEventListener('click', () => {
-    chrome.storage.local.get(['lastScanData'], (result) => {
-        if (result.lastScanData) {
-            // Open a new window with the full report
-            chrome.windows.create({
-                url: `chrome-extension://${chrome.runtime.id}/report.html`,
-                type: 'popup',
-                width: 1200,
-                height: 800
-            });
+// Load saved repository on popup open
+document.addEventListener('DOMContentLoaded', () => {
+    chrome.storage.local.get('lastRepo', (result) => {
+        if (result.lastRepo) {
+            repoUrl.value = result.lastRepo;
         }
     });
 });
 
-// Initialize
-loadSavedUrl();
-extractGitHubUrl();
+// Save repository on input change
+repoUrl.addEventListener('change', () => {
+    chrome.storage.local.set({ lastRepo: repoUrl.value });
+});

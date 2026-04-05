@@ -13,6 +13,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 from pipeline import GitHopperPipeline
 from mcp_server import ContinuousIntelligencePipeline, ContinuousWatchManager, MCPMemoryStore
+from audit_engine import AuditEngine
 
 # Initialize Flask app
 app = Flask(__name__, 
@@ -508,6 +509,51 @@ def get_debt_report():
         error_msg = str(e)
         tb = traceback.format_exc()
         print(f"\n[ERROR] Exception in get_debt_report: {error_msg}")
+        print(f"[ERROR] Traceback:\n{tb}\n")
+        return jsonify({'error': error_msg, 'type': type(e).__name__}), 500
+
+
+@app.route('/api/audit', methods=['POST'])
+def get_audit_report():
+    """
+    Generate an internal audit report for the requested repository
+    Evaluates code against compliance controls (SOC 2, etc.)
+    """
+    try:
+        data = request.get_json() or {}
+        repo_url = data.get('repo_url')
+        branch_name = data.get('branch_name', 'main')
+        
+        if not repo_url:
+            return jsonify({'error': 'repo_url is required'}), 400
+
+        if not repo_url.startswith('http'):
+            repo_url = f"https://github.com/{repo_url}"
+
+        print(f"[AUDIT] Generating audit report for {repo_url} ({branch_name})")
+        
+        # Run the scan to get current repo state
+        _, agg = build_aggregated_analysis(
+            repo_url,
+            branch_name=branch_name,
+            continuous=False,
+            generate_fixes=False,
+        )
+        
+        # Run audit engine against scan results
+        audit_result = AuditEngine.audit_repository(agg)
+        
+        return jsonify({
+            "repo_url": repo_url,
+            "branch_name": branch_name,
+            "audit_report": audit_result
+        }), 200
+
+    except Exception as e:
+        import traceback
+        error_msg = str(e)
+        tb = traceback.format_exc()
+        print(f"\n[ERROR] Exception in get_audit_report: {error_msg}")
         print(f"[ERROR] Traceback:\n{tb}\n")
         return jsonify({'error': error_msg, 'type': type(e).__name__}), 500
 

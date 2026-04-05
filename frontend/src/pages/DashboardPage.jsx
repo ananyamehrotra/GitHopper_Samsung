@@ -168,6 +168,32 @@ export function DashboardPage() {
                 opacity={0.1}
                 mouseInteractive={true}
             />
+            <div style={{ position: "fixed", top: "16px", right: "150px", display: "flex", gap: "10px", zIndex: 50 }}>
+                <button
+                    onClick={() => navigate("/analytics")}
+                    style={{
+                        padding: "8px 16px",
+                        background: "rgba(114, 234, 30, 0.15)",
+                        border: "1px solid #72ea1e",
+                        color: "#72ea1e",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        transition: "all 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                        e.target.style.background = "rgba(114, 234, 30, 0.25)";
+                        e.target.style.transform = "translateY(-2px)";
+                    }}
+                    onMouseLeave={(e) => {
+                        e.target.style.background = "rgba(114, 234, 30, 0.15)";
+                        e.target.style.transform = "translateY(0)";
+                    }}
+                >
+                    📊 Analytics
+                </button>
+            </div>
             <ThemeToggle />
             <UserProfile />
             <div className="page-shell">

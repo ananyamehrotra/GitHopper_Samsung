@@ -9,6 +9,7 @@ import { AnalyseBranchesPage } from "./pages/AnalyseBranchesPage";
 import { SecurityAuditPage } from "./pages/SecurityAuditPage";
 import { DebtReportPage } from "./pages/DebtReportPage";
 import { HealthScorePage } from "./pages/HealthScorePage";
+import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { AppLayout } from "./components/AppLayout";
 import { ThemeProvider } from "./context/ThemeContext";
 import { UserProvider, useUser } from "./context/UserContext";
@@ -40,6 +41,7 @@ function App() {
                 <Route path="/security-audit" element={<SecurityAuditPage />} />
                 <Route path="/debt-report" element={<DebtReportPage />} />
                 <Route path="/health-score" element={<HealthScorePage />} />
+                <Route path="/analytics" element={<AnalyticsPage />} />
             </Routes>
         </AppLayout>
     );
