@@ -71,7 +71,8 @@ Return ONLY valid JSON with ALL findings:
       "vulnerable_code": "query = f'SELECT * FROM users WHERE username = {{username}}'",
       "fix": "Use parameterized queries: query = 'SELECT * FROM users WHERE username = ?'",
       "remediated_code": "cursor.execute('SELECT * FROM users WHERE username = ?', (username,))",
-      "estimated_minutes": 15
+      "estimated_minutes": 15,
+      "hot_insight": "🔥 CRITICAL BREACH RISK: Your database is naked! This exact SQL sink acts as a skeleton key for attackers to dump auth tables. Fix it before your app ends up on a dark web pastebin."
     }}
   ]
 }}
@@ -145,7 +146,8 @@ Return ONLY valid JSON with ALL findings, even if multiple:
       "vulnerable_code": "resource 'aws_s3_bucket' 'data' {{ acl = 'public-read' }}",
       "fix": "Set acl to 'private' and use bucket policies for specific access",
       "remediated_code": "resource 'aws_s3_bucket' 'data' {{ acl = 'private' }}\nresource 'aws_s3_bucket_public_access_block' 'data' {{ bucket = aws_s3_bucket.data.id; block_public_acls = true }}",
-      "estimated_minutes": 20
+      "estimated_minutes": 20,
+      "hot_insight": "🚨 DATA LEAK ALERT: This bucket is basically a massive unregulated torrent seed! Setting public-read will get your customer data scraped by bots within 5 minutes of deployment."
     }}
   ]
 }}
@@ -219,7 +221,8 @@ Return ONLY valid JSON with ANY findings detected:
       "vulnerable_code": "{{ 'Effect': 'Allow', 'Action': 'iam:*', 'Resource': '*' }}",
       "fix": "Specify only needed actions. Never use wildcard for iam:* actions",
       "remediated_code": "{{ 'Effect': 'Allow', 'Action': ['iam:GetUser', 'iam:ListAccessKeys'], 'Resource': 'arn:aws:iam::ACCOUNT:user/SPECIFIC_USER' }}",
-      "estimated_minutes": 45
+      "estimated_minutes": 45,
+      "hot_insight": "💥 GOD MODE UNLOCKED: You just handed out the master keys to the kingdom. An attacker assuming this role can escalate privileges permanently and wipe your entire AWS account."
     }}
   ]
 }}
@@ -294,7 +297,8 @@ Return ONLY valid JSON with all debt identified:
       "explanation": "Function is 75 lines with 6 nested levels and handles validation, processing, logging, and response formatting. Hard to test and maintain.",
       "fix": "Extract into separate functions: validate_user(), process_data(), format_response(), log_action()",
       "remediated_code": "def validate_user(user): ...\ndef process_data(data): ...\ndef format_response(result): ...\ndef process_user_data(user): validate_user(user); return format_response(process_data(user))",
-      "estimated_minutes": 60
+      "estimated_minutes": 60,
+      "hot_insight": "🍝 SPAGHETTI ALERT: This God Function is 75 lines of unmaintainable nightmare fuel holding 6 levels of nesting. It’s begging for a core dump. Modularize it before your next tech debt bankruptcy."
     }}
   ]
 }}
@@ -363,7 +367,8 @@ Return ONLY valid JSON with ALL findings:
       "safe_version": "2.3.0",
       "explanation": "Flask 1.0.0 is 5+ years old and has 12+ known security vulnerabilities including Werkzeug issues.",
       "fix": "Update to Flask 2.3.0: pip install --upgrade flask",
-      "estimated_minutes": 5
+      "estimated_minutes": 5,
+      "hot_insight": "☢️ RADIOACTIVE DEPENDENCY: Dinosaur version with 12+ CVEs. A ticking time bomb."
     }},
     {{
       "type": "UNPINNED_VERSION",
@@ -372,7 +377,8 @@ Return ONLY valid JSON with ALL findings:
       "package": "requests",
       "explanation": "requests version not pinned. Could auto-upgrade to breaking version.",
       "fix": "Pin to specific version: requests==2.31.0",
-      "estimated_minutes": 2
+      "estimated_minutes": 2,
+      "hot_insight": "🎲 ROULETTE MODE: Unpinned dependencies guarantee a broken prod build tomorrow."
     }}
   ]
 }}

@@ -94,12 +94,18 @@ def get_latest_commit_sha(url, github_token=None, branch_name=None):
     """
     owner, repo = parse_repo_url(url)
 
-    headers = {'Accept': 'application/vnd.github.v3+json'}
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+    }
     if github_token:
         headers['Authorization'] = f'token {github_token}'
 
     branch = branch_name or get_default_branch(owner, repo, headers)
-    commit_url = f"https://api.github.com/repos/{owner}/{repo}/commits/{branch}"
+    
+    import time
+    commit_url = f"https://api.github.com/repos/{owner}/{repo}/commits/{branch}?_ts={int(time.time())}"
 
     try:
         response = requests.get(commit_url, headers=headers, timeout=10)

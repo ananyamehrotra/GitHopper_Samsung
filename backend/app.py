@@ -98,6 +98,8 @@ def add_cors_headers(response):
 
 # ==================== API ROUTES ====================
 
+# Remove the custom OPTIONS handler as CORS(app) handles it natively.
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
@@ -594,6 +596,17 @@ def stop_continuous_watch(watch_id):
     result = watch_manager.stop(watch_id)
     status_code = 404 if result.get('error') else 200
     return jsonify(result), status_code
+
+
+@app.route('/api/continuous/force-scan/<watch_id>', methods=['POST'])
+def force_continuous_scan(watch_id):
+    """Immediately trigger a scan for an existing watch, bypassing the interval."""
+    result = watch_manager.force_scan(watch_id)
+    if result.get('error') == 'watch_not_found':
+        return jsonify(result), 404
+    if result.get('error') == 'scan_already_in_progress':
+        return jsonify(result), 409
+    return jsonify(result), 200
 
 
 @app.route('/api/mcp/context/<repo_id>', methods=['GET'])
