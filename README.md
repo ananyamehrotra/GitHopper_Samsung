@@ -2,6 +2,10 @@
 
 **Your intelligent Git repository analysis and insights platform**
 
+**[Presentation](https://docs.google.com/presentation/d/1CSmJBo3YKx8wUpJAQLEz3bmbu31Gqo0U/edit?usp=sharing&ouid=100394359056483753626&rtpof=true&sd=true)** 
+**[Video](https://drive.google.com/file/d/1duEMIEW_n8Vmok0jRB5xx1lBMr8fv_dT/view?usp=sharing)**
+**[AI Disclosure](https://docs.google.com/document/d/1vnD8E_E_yJUvQlfH6V-CP6yfm85Xg-7U/edit?usp=sharing&ouid=100394359056483753626&rtpof=true&sd=true)**
+
 GitHopper is a comprehensive full-stack application that provides deep analysis, code health scoring, and debt reporting for GitHub repositories. It combines advanced ML/AI capabilities with an intuitive, modern web interface to help you understand and improve your codebase.
 
 ## ✨ Key Features
@@ -371,25 +375,6 @@ Contributions are welcome! Here's how to get started:
 - Use environment variables for sensitive data
 - Validate all user inputs
 - Keep dependencies updated regularly
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 👥 Authors
-
-- **Ananya Mehrotra** - Original creator
-- **Contributors** - See GitHub contributors page
-
-## 🆘 Support
-
-For issues, questions, or suggestions:
-
-1. Check existing [GitHub Issues](https://github.com/ananyamehrotra/githoppermain/issues)
-2. Create a new issue with detailed information
-3. Join our community discussions
-
-## 🎉 Acknowledgments
 
 - OpenClaw-compatible LLM provider for AI capabilities
 - GitHub for repository access API
