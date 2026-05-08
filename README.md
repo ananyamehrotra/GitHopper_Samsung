@@ -6,52 +6,135 @@
 **[Video](https://drive.google.com/file/d/1duEMIEW_n8Vmok0jRB5xx1lBMr8fv_dT/view?usp=sharing)**
 **[AI Disclosure](https://docs.google.com/document/d/1vnD8E_E_yJUvQlfH6V-CP6yfm85Xg-7U/edit?usp=sharing&ouid=100394359056483753626&rtpof=true&sd=true)**
 
-GitHopper is a comprehensive full-stack application that provides deep analysis, code health scoring, and debt reporting for GitHub repositories. It combines advanced ML/AI capabilities with an intuitive, modern web interface to help you understand and improve your codebase.
+## 🚨 Problem Statement
 
-## ✨ Key Features
+*“I know technical debt is piling up, but where do I even start? I am already broke.”*  
+*“I don’t have hours to read massive audit report. I need to focus on my business.”*  
+*“I just joined and this repo is older than me. How do I even fix this?”*  
 
-- **Repository Scanning & Analysis**: Deep code analysis across branches and commits
-- **Health Score Calculation**: Get actionable metrics on code quality and health
-- **Technical Debt Reporting**: Identify and track technical debt in your repositories
-- **Branch Analysis**: Compare and analyze multiple branches
-- **Code Insights**: Historical trends, pattern detection, and recommendations
-- **Real-time Monitoring**: Continuous intelligence gathering via MCP (Model Context Protocol)
-- **AI-Powered Synthesis**: Leverage OpenClaw-compatible analysis (Groq or Ollama)
-- **Beautiful Dashboard**: Modern, responsive UI with theme support
+GitHopper solves a major problem in modern security tools: **they detect issues but rarely explain them clearly.** Most scanners overwhelm developers with technical warnings like *“B105 hardcoded password string, HIGH severity.”* 
+
+**GitHopper** takes the same finding and outputs: *"Your password is written directly in code. If this repo ever goes public, attackers have valid credentials instantly. Fix: move it to a .env file, load via python-dotenv, add .env to .gitignore. Takes ~15 minutes."*
+
+Same finding. Completely different outcome.
+
+---
+
+## 🌟 Our Theme
+
+- **On-Device:** When you're scanning for hardcoded secrets and exposed tokens, you cannot send that code to a cloud API — that is the vulnerability. Every scan runs locally via Ollama. Code never leaves the machine.
+- **Productivity:** A developer who gets 47 findings with CVE IDs and no context closes the tab and ships anyway. GitHopper turns scanner noise into a 5-minute prioritized fix list.
+
+---
+
+## ❌ Current Solutions & Gaps
+
+*What's missing?* None of these tools answer: **"I'm a junior developer with 3 hours this week — what do I fix, in what order, and how?"** Every existing tool is designed for security engineers to review findings. GitHopper is designed for developers to fix them. That difference shapes every decision from delivering alerts directly to developers’ devices, to generating plain-English fixes with estimated repair time, to continuous monitoring through OpenClaw automation instead of manually configured security pipelines.
+
+| Tool | Does | Fails At |
+|------|------|----------|
+| **Snyk** | Dependency CVE matching | Expensive ($98/month), zero explanation, no tech debt coverage |
+| **SonarQube** | Deep static analysis | Engineer-facing dashboards, painful to self-host, not beginner-friendly |
+| **Gitleaks** | Fast secret detection | Only secrets, no explanation, no remediation, no monitoring |
+| **Dependabot** | Auto PR for dependency updates | Only known CVEs, ignores everything else |
+| **Semgrep** | Fast pattern matching | Requires rule-writing, raw output with no contextual explanation |
+
+---
+
+## 💡 Our Solution
+
+GitHopper is a repo health monitoring skill built on **OpenClaw**. Connect your repo once — OpenClaw's agent runs persistently, rescanning automatically via HEARTBEAT scheduling. 
+
+### Key Features
+- **Parallel Dual Pipeline**: 
+  - **Security pipeline:** Custom scan for hardcoded secrets, exposed tokens, and insecure configs pattern-matched against real credential formats like AWS key prefixes and GitHub token structures.
+  - **Debt Analysis Pipeline:** Runs parallel to security scanning. Flags function bloat, cyclomatic complexity, outdated dependencies, and weak architecture patterns.
+- **Entirely On-Device AI Inference**: Each confirmed finding goes to Ollama with the finding type, code context, and developer experience level. Returns a plain-English explanation, severity, fix time estimate, and remediation steps. Code never leaves the machine.
+- **Continuous Monitoring & Zero Config**: Simply plug it in and it runs intelligently via MCP.
+- **Health Cards & Real-Time Delivery**: All findings are packaged into one Health Card and pushed simultaneously to Discord, Slack, and other platforms in real time — formatted natively for each platform.
+
+---
+
+## 🚀 Quick Start & Setup Instructions
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/ananyamehrotra/githoppermain.git
+cd githoppermain
+```
+
+### 2. Backend Setup
+```bash
+cd backend
+python -m venv venv
+
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+**Configure `backend/.env`:**
+```env
+GITHUB_TOKEN=your_github_token
+# Run entirely on-device via Ollama
+OPENCLAW_PROVIDER=ollama
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.1
+DISCORD_WEBHOOK_URL=your_discord_webhook_url
+DISCORD_REPORT_BASE_URL=https://drive.google.com/file/d/1zesrKhXqjfVjO_go-xRtm9Bm4flaX3ZS/view?usp=sharing
+```
+
+**Run the Backend:**
+```bash
+python app.py
+```
+*Backend runs on `http://localhost:5001`*
+
+### 3. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+*Frontend runs on `http://localhost:5173`*
+
+---
+
+## 🎮 How to Use (Product Walkthrough)
+
+### 1. The Web Server (Dashboard)
+- Navigate to `http://localhost:5173/dashboard` in your browser.
+- Enter your GitHub repository URL and branch name.
+- Click **"Analyse"** for a one-time scan or **"Watch Live"** to start Continuous Intelligence mode.
+- Dive into the **Security Audit**, **Debt Report**, or **Health Score** to see detailed, plain-English fixes prioritizing your time based on severity.
+- Generate and download PDF reports directly from the interface.
+
+### 2. The MCP Server (Continuous Intelligence)
+- In "Watch Live" mode, the MCP server tracks your repository in the background.
+- It detects incremental changes, ensuring that it only rescans modified files.
+- It automatically assesses code debt and generates **Health Cards** that are instantly pushed out to your connected webhooks (like Discord).
+
+---
 
 ## 🛠️ Tech Stack
 
-### Frontend
-- **React 18** - UI library
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **React Router** - Client-side routing
-- **Three.js** - 3D graphics
-- **Firebase** - Authentication and services
-- **GSAP & Lenis** - Animation libraries
-- **Motion** - Animation framework
+- **Frontend**: React 18, Vite, Three.js (Plasma UI), Firebase
+- **Backend**: Python 3.8+, Flask, Model Context Protocol (MCP) Runtime
+- **AI / LLM**: OpenClaw Framework, Ollama (Local AI Inference)
+- **Integrations**: GitHub API, Discord Webhooks
 
-### Backend
-- **Python 3.8+** - Core language
-- **Flask 2.3** - Web framework
-- **Flask-CORS** - Cross-origin resource sharing
-- **requests** - LLM provider integration (Groq/Ollama)
-- **MCP Runtime** - Model Context Protocol server
+---
 
-### Additional Tools
-- **Docker** - Containerization
-- **AWS Services** - Lambda, S3 (optional)
-- **GitHub API** - Repository access
+## 🤝 Team
+- **Ananya Mehrotra** & Team
+- Built for Samsung PRISM OpenClaw Hackathon
 
-## 📋 Prerequisites
+---
+**Happy Hopping! 🦘**
 
-Before you begin, ensure you have:
-
-- **Node.js 16+** and npm/yarn (for frontend)
-- **Python 3.8+** (for backend)
-- **Git** (for version control)
-- **Groq API key** or **Ollama** (for full AI features)
-- **GitHub Account** and personal access token (for repository access)
 
 ## 🚀 Quick Start
 
@@ -173,54 +256,6 @@ githoppermain/
 └── README.md                    # This file
 ```
 
-## 🔧 Configuration
-
-### Backend Environment Variables
-
-Create a `.env` file in the `backend` directory:
-
-```env
-# Flask Configuration
-FLASK_ENV=development
-FLASK_DEBUG=True
-
-# GitHub Configuration
-GITHUB_TOKEN=your_github_token_here
-GITHUB_USERNAME=your_username
-
-# OpenClaw Configuration
-OPENCLAW_PROVIDER=groq
-OPENCLAW_MODEL=llama-3.3-70b-versatile
-OPENCLAW_MAX_TOKENS=2048
-OPENCLAW_TEMPERATURE=0.2
-
-# Groq Configuration (if OPENCLAW_PROVIDER=groq)
-GROQ_API_KEY=your_groq_api_key
-
-# Ollama Configuration (if OPENCLAW_PROVIDER=ollama)
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.1
-
-# Discord Notifications
-DISCORD_MODE=mock
-# DISCORD_WEBHOOK_URL=your_discord_webhook_url
-# Auto-send after analysis (optional)
-# DISCORD_AUTO_SEND=true
-# DISCORD_REPORT_BASE_URL=http://localhost:5174/security-audit
-
-# Server Configuration
-HOST=0.0.0.0
-PORT=5000
-```
-
-### Frontend Environment Variables
-
-Create a `.env` file in the `frontend` directory:
-
-```env
-VITE_API_BASE_URL=http://localhost:5000
-VITE_FIREBASE_CONFIG={}
-```
 
 ## 📡 API Documentation
 
@@ -295,72 +330,6 @@ npm run build
 # Creates optimized build in dist/ directory
 ```
 
-## 🐳 Docker Support
-
-Build and run using Docker:
-
-```bash
-# Build image
-docker build -t githopper:latest .
-
-# Run container
-docker run -p 5000:5000 -p 5173:5173 githopper:latest
-```
-
-## 🧪 Testing
-
-### Backend Tests
-```bash
-cd backend
-pytest tests/
-```
-
-### Frontend Tests
-```bash
-cd frontend
-npm test
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how to get started:
-
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Make your changes** and commit
-   ```bash
-   git commit -m 'Add amazing feature'
-   ```
-4. **Push to the branch**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. **Open a Pull Request**
-
-## 📝 Branching Strategy
-
-- **main** - Production-ready code
-- **develop** - Development branch
-- **feature/*** - Feature branches
-- **bugfix/*** - Bug fix branches
-- **mukul** - Personal development branch
-
-## 🐛 Known Issues & Roadmap
-
-### Current Limitations
-- MCP integration is still in development
-- Some AI features require OpenClaw provider access (Groq or Ollama)
-- Real-time monitoring has latency considerations
-
-### Planned Features
-- Real-time WebSocket updates
-- Advanced code pattern detection
-- Team collaboration features
-- GitHub Actions integration
-- Metrics export and reporting
 
 ## 📚 Documentation
 
