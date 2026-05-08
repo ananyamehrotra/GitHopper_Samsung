@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
-Quick test to verify that bedrock is returning code quality/debt findings.
+Quick test to verify that OpenClaw is returning code quality/debt findings.
 """
 import sys
 import json
-from ai.bedrock_client import scan_chunk
+from ai.openclaw_client import scan_chunk
 
 # Sample Python code with code quality issues
 test_code = '''
@@ -45,7 +45,7 @@ test_chunk = {
     "filename": "test_complex.py"
 }
 
-print("Testing Bedrock code quality analysis...")
+print("Testing OpenClaw code quality analysis...")
 print(f"Scanning {test_chunk['file']}")
 print("=" * 60)
 
@@ -63,12 +63,12 @@ code_quality_findings = [v for v in vulns if "complexity" in v.get("type", "").l
 print(f"Code quality/debt findings: {len(code_quality_findings)}")
 
 if code_quality_findings:
-    print("\n✓ SUCCESS: Bedrock returned code quality findings!")
+    print("\n✓ SUCCESS: OpenClaw returned code quality findings!")
     for f in code_quality_findings:
         print(f"  - {f.get('type')}: {f.get('severity')} - {f.get('explanation', 'N/A')[:50]}")
 else:
     print("\n✗ ISSUE: No code quality findings detected.")
     print("This means either:")
-    print("  1. Bedrock isn't being invoked properly")
+    print("  1. OpenClaw isn't being invoked properly")
     print("  2. The prompt wasn't updated in the running process")
-    print("  3. Bedrock is returning an empty response")
+    print("  3. OpenClaw is returning an empty response")

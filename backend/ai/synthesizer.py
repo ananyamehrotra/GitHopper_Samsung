@@ -1,6 +1,6 @@
 # =============================================================================
 # synthesizer.py — Post-scan synthesis engine for GitHopper
-# Owner: Ananya (AI / Bedrock Eng)
+# Owner: Ananya (AI / OpenClaw Eng)
 #
 # What this does:
 #   1. Deduplicates findings across chunks
@@ -11,15 +11,13 @@
 
 import json
 import logging
-import boto3
 
 logger = logging.getLogger(__name__)
 
-MODEL_ID = "anthropic.claude-sonnet-4-20250514"
-REGION = "ap-south-2"  # Hyderabad
-MAX_TOKENS = 2048
-
-bedrock = boto3.client("bedrock-runtime", region_name=REGION)
+try:
+    from .openclaw_client import invoke_openclaw
+except ImportError:
+    from openclaw_client import invoke_openclaw
 
 # ---------------------------------------------------------------------------
 # Prompts
@@ -98,29 +96,11 @@ Severity breakdown: {severity_breakdown}
 # Helpers
 # ---------------------------------------------------------------------------
 
-def invoke_bedrock(prompt: str) -> dict:
+def invoke_openclaw_json(prompt: str) -> dict:
     try:
-        response = bedrock.invoke_model(
-            modelId=MODEL_ID,
-            body=json.dumps({
-                "anthropic_version": "bedrock-2023-05-31",
-                "max_tokens": MAX_TOKENS,
-                "messages": [{"role": "user", "content": prompt}]
-            })
-        )
-        raw = json.loads(response["body"].read())
-        text = raw["content"][0]["text"].strip()
-
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-            text = text.strip()
-
-        return json.loads(text)
-
+        return invoke_openclaw(prompt, "synthesizer")
     except Exception as e:
-        logger.error(f"Synthesizer Bedrock error: {e}")
+        logger.error(f"Synthesizer OpenClaw error: {e}")
         return {}
 
 
@@ -181,7 +161,7 @@ def synthesize(scan_results: dict) -> dict:
         }
 
     # Step 1 — dedup + top 5
-    dedup_result = invoke_bedrock(
+    dedup_result = invoke_openclaw_json(
         DEDUP_AND_PRIORITIZE_PROMPT.format(
             all_findings=json.dumps(all_findings, indent=2)
         )
@@ -191,7 +171,7 @@ def synthesize(scan_results: dict) -> dict:
     severity_breakdown = get_severity_breakdown(all_findings)
     finding_types = get_finding_types(all_findings)
 
-    archetype_result = invoke_bedrock(
+    archetype_result = invoke_openclaw_json(
         ARCHETYPE_PROMPT.format(
             security_count=len(security),
             debt_count=len(debt),

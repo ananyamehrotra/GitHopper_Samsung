@@ -77,7 +77,7 @@ def scan_debt_signals(content):
 def compute_file_metrics(content, language):
     """
     Lightweight static metrics computed for each file.
-    These give Bedrock hard numbers to ground its analysis.
+    These give OpenClaw hard numbers to ground its analysis.
     """
     lines = content.splitlines()
     total_lines = len(lines)
@@ -177,7 +177,7 @@ def find_logical_boundaries(lines):
 def _build_context_note(path, lang, chunk_idx, total_chunks,
                          start_line, end_line, signals, is_test, metrics):
     """
-    Generate a plain-English note that gets prepended to the Bedrock prompt
+    Generate a plain-English note that gets prepended to the OpenClaw prompt
     so the model has immediate context without parsing the JSON itself.
     """
     parts = [

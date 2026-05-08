@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from ai.bedrock_client import _debt_signal_to_vulnerability, classify_file, invoke_bedrock
+from ai.openclaw_client import _debt_signal_to_vulnerability, classify_file, invoke_openclaw
 
 from .prompting import build_contextual_prompt
 
@@ -16,7 +16,7 @@ def normalize_vulnerability(vulnerability: Dict[str, Any], chunk: Dict[str, Any]
 
 def scan_chunk_with_context(chunk: Dict[str, Any], repo_context: Dict[str, Any], branch_name: str = "main") -> Dict[str, Any]:
     prompt = build_contextual_prompt(chunk, repo_context, branch_name)
-    result = invoke_bedrock(prompt, chunk.get("file", "unknown"))
+    result = invoke_openclaw(prompt, chunk.get("file", "unknown"))
     vulnerabilities = [
         normalize_vulnerability(vulnerability, chunk)
         for vulnerability in result.get("vulnerabilities", [])

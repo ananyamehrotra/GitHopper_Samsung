@@ -232,6 +232,7 @@ function DebtItem({ d, idx }) {
 }
 
 export function DebtReportPage() {
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
   const location = useLocation();
   const navigate = useNavigate();
   const { isDark } = useTheme();
@@ -269,7 +270,7 @@ export function DebtReportPage() {
       setRepoUrl(savedRepoUrl);
 
       try {
-        const response = await fetch("http://localhost:5000/api/debt-report", {
+        const response = await fetch(`${API_BASE}/api/debt-report`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -1,6 +1,6 @@
 # =============================================================================
 # prompts.py — Branch-level code analysis for GitHopper
-# Owner: Ananya (AI / Bedrock Eng)
+# Owner: Ananya (AI / OpenClaw Eng)
 # Focus: Pure code analysis without scoring
 # =============================================================================
 

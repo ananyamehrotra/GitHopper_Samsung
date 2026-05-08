@@ -47,7 +47,7 @@ async function handleScan() {
     
     try {
         const fullUrl = `https://github.com/${repo}`;
-        const response = await fetch('http://localhost:5000/api/analyze', {
+        const response = await fetch('http://localhost:5001/api/analyze', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ async function handleScan() {
         
     } catch (error) {
         console.error('Scan error:', error);
-        showError(error.message || 'Failed to analyze repository. Make sure the backend is running on http://localhost:5000');
+        showError(error.message || 'Failed to analyze repository. Make sure the backend is running on http://localhost:5001');
     }
 }
 

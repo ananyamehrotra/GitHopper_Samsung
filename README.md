@@ -12,7 +12,7 @@ GitHopper is a comprehensive full-stack application that provides deep analysis,
 - **Branch Analysis**: Compare and analyze multiple branches
 - **Code Insights**: Historical trends, pattern detection, and recommendations
 - **Real-time Monitoring**: Continuous intelligence gathering via MCP (Model Context Protocol)
-- **AI-Powered Synthesis**: Leverage AWS Bedrock for intelligent code analysis
+- **AI-Powered Synthesis**: Leverage OpenClaw-compatible analysis (Groq or Ollama)
 - **Beautiful Dashboard**: Modern, responsive UI with theme support
 
 ## 🛠️ Tech Stack
@@ -31,12 +31,12 @@ GitHopper is a comprehensive full-stack application that provides deep analysis,
 - **Python 3.8+** - Core language
 - **Flask 2.3** - Web framework
 - **Flask-CORS** - Cross-origin resource sharing
-- **boto3** - AWS SDK (for Bedrock AI integration)
+- **requests** - LLM provider integration (Groq/Ollama)
 - **MCP Runtime** - Model Context Protocol server
 
 ### Additional Tools
 - **Docker** - Containerization
-- **AWS Services** - Bedrock, Lambda, S3
+- **AWS Services** - Lambda, S3 (optional)
 - **GitHub API** - Repository access
 
 ## 📋 Prerequisites
@@ -46,7 +46,7 @@ Before you begin, ensure you have:
 - **Node.js 16+** and npm/yarn (for frontend)
 - **Python 3.8+** (for backend)
 - **Git** (for version control)
-- **AWS Account** (optional, for full AI features)
+- **Groq API key** or **Ollama** (for full AI features)
 - **GitHub Account** and personal access token (for repository access)
 
 ## 🚀 Quick Start
@@ -113,7 +113,7 @@ githoppermain/
 │   ├── requirements.txt          # Python dependencies
 │   ├── requirements-mcp.txt     # MCP-specific dependencies
 │   ├── ai/                      # AI/ML modules
-│   │   ├── bedrock_client.py   # AWS Bedrock integration
+│   │   ├── openclaw_client.py # OpenClaw-compatible LLM integration
 │   │   ├── prompts.py          # AI prompts
 │   │   └── synthesizer.py      # Response synthesis
 │   ├── mcp_server/              # Model Context Protocol server
@@ -184,13 +184,25 @@ FLASK_DEBUG=True
 GITHUB_TOKEN=your_github_token_here
 GITHUB_USERNAME=your_username
 
-# AWS Configuration
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
+# OpenClaw Configuration
+OPENCLAW_PROVIDER=groq
+OPENCLAW_MODEL=llama-3.3-70b-versatile
+OPENCLAW_MAX_TOKENS=2048
+OPENCLAW_TEMPERATURE=0.2
 
-# Bedrock Configuration
-BEDROCK_MODEL_ID=anthropic.claude-3-sonnet-20240229-v1:0
+# Groq Configuration (if OPENCLAW_PROVIDER=groq)
+GROQ_API_KEY=your_groq_api_key
+
+# Ollama Configuration (if OPENCLAW_PROVIDER=ollama)
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.1
+
+# Discord Notifications
+DISCORD_MODE=mock
+# DISCORD_WEBHOOK_URL=your_discord_webhook_url
+# Auto-send after analysis (optional)
+# DISCORD_AUTO_SEND=true
+# DISCORD_REPORT_BASE_URL=http://localhost:5174/security-audit
 
 # Server Configuration
 HOST=0.0.0.0
@@ -336,7 +348,7 @@ Contributions are welcome! Here's how to get started:
 
 ### Current Limitations
 - MCP integration is still in development
-- Some AI features require AWS Bedrock access
+- Some AI features require OpenClaw provider access (Groq or Ollama)
 - Real-time monitoring has latency considerations
 
 ### Planned Features
@@ -379,7 +391,7 @@ For issues, questions, or suggestions:
 
 ## 🎉 Acknowledgments
 
-- AWS Bedrock for AI capabilities
+- OpenClaw-compatible LLM provider for AI capabilities
 - GitHub for repository access API
 - React, Vite, and Flask communities
 - All open-source contributors

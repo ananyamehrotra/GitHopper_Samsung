@@ -182,6 +182,7 @@ export function LiveChangesModal({ repoUrl, branchName, onClose }) {
     const [err,        setErr]        = useState("");
     const [log,        setLog]        = useState([]);
     const [pending,    setPending]    = useState(false); // new commit seen — scan in progress
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
 
     // ── refs (never stale in callbacks) ──
     const watchIdRef      = useRef(null);
@@ -206,7 +207,7 @@ export function LiveChangesModal({ repoUrl, branchName, onClose }) {
         const wid = watchIdRef.current;
         if (!wid || phaseRef.current === "stopped") return;
         try {
-            const r = await fetch(`http://localhost:5000/api/continuous/status/${wid}`);
+              const r = await fetch(`${API_BASE}/api/continuous/status/${wid}`);
             const d = await r.json();
             if (!r.ok) throw new Error(d.error || "Status fetch failed");
             setStatus(d);
@@ -250,7 +251,7 @@ export function LiveChangesModal({ repoUrl, branchName, onClose }) {
         const start = async () => {
             addLog(`🚀 Starting continuous watch for ${repoUrl} @ ${branchName || "main"}`);
             try {
-                const r = await fetch("http://localhost:5000/api/continuous/start", {
+                    const r = await fetch(`${API_BASE}/api/continuous/start`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -292,7 +293,7 @@ export function LiveChangesModal({ repoUrl, branchName, onClose }) {
         if (!wid) return;
         addLog("⚡ Forcing immediate scan…");
         try {
-            const r = await fetch(`http://localhost:5000/api/continuous/force-scan/${wid}`, { method: "POST" });
+              const r = await fetch(`${API_BASE}/api/continuous/force-scan/${wid}`, { method: "POST" });
             const d = await r.json();
             if (r.status === 409) { addLog("⚠️  Scan already in progress — please wait."); return; }
             if (!r.ok) throw new Error(d.error || "Force scan failed");
@@ -312,7 +313,7 @@ export function LiveChangesModal({ repoUrl, branchName, onClose }) {
         addLog("⏹ Stopping watch...");
         if (!watchIdRef.current) return;
         try {
-            await fetch(`http://localhost:5000/api/continuous/stop/${watchIdRef.current}`, { method: "POST" });
+                await fetch(`${API_BASE}/api/continuous/stop/${watchIdRef.current}`, { method: "POST" });
             addLog("✅ Watch stopped.");
         } catch (e) {
             addLog(`⚠️  Stop error: ${e.message}`);

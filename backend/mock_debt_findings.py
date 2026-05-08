@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-Mock debt findings generator for testing when Bedrock is unavailable.
-Used to populate debt_report and other aggregated data without Bedrock.
+Mock debt findings generator for testing when OpenClaw is unavailable.
+Used to populate debt_report and other aggregated data without OpenClaw.
 """
 import json
 

@@ -1,9 +1,9 @@
 # =============================================================================
-# aggregator.py — Organize Bedrock findings by category for specialized scorers
+# aggregator.py — Organize OpenClaw findings by category for specialized scorers
 # Owner: Ananya (Scoring & Reporting)
 # 
 # Purpose: 
-#   Takes raw vulnerabilities from bedrock_client and groups them by type
+#   Takes raw vulnerabilities from openclaw_client and groups them by type
 #   Each scorer (SecurityAudit, DebtReport, BranchAnalysis, HealthScore) 
 #   gets its specialized data
 # =============================================================================
@@ -35,7 +35,7 @@ def categorize_vulnerabilities(vulnerabilities: list) -> dict:
     """
     Organize vulnerabilities by security category.
     
-    Input: Raw vulnerabilities from bedrock_client.scan_all_chunks()
+    Input: Raw vulnerabilities from openclaw_client.scan_all_chunks()
     Output: {
         "security": {...},           # App code + auth vulnerabilities
         "infrastructure": {...},      # S3, security groups, unencrypted storage
@@ -289,7 +289,7 @@ def generate_health_recommendations(health_score: int, critical_count: int) -> l
 def aggregate_all(vulnerabilities: list, cost_tracker: dict = None, branch_name: str = "main") -> dict:
     """
     Master aggregation function.
-    Takes raw bedrock output and produces data for all 4 scorers.
+    Takes raw OpenClaw output and produces data for all 4 scorers.
     """
     
     print(f"\n{'='*60}")

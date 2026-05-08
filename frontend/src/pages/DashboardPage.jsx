@@ -10,6 +10,7 @@ import "./HomePage.css";
 import "./DashboardPage.css";
 
 export function DashboardPage() {
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
     const { isDark } = useTheme();
     const navigate = useNavigate();
     const [repoUrl, setRepoUrl] = useState("");
@@ -37,7 +38,7 @@ export function DashboardPage() {
 
         const loadStatus = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/continuous/status/${watchId}`);
+                const response = await fetch(`${API_BASE}/api/continuous/status/${watchId}`);
                 const data = await response.json();
                 if (!response.ok) {
                     throw new Error(data.error || "Failed to fetch watch status");
@@ -72,7 +73,7 @@ export function DashboardPage() {
         setError("");
 
         try {
-            const response = await fetch("http://localhost:5000/api/analyze", {
+            const response = await fetch(`${API_BASE}/api/analyze`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -117,7 +118,7 @@ export function DashboardPage() {
         }
 
         try {
-            const response = await fetch("http://localhost:5000/api/continuous/start", {
+            const response = await fetch(`${API_BASE}/api/continuous/start`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -148,7 +149,7 @@ export function DashboardPage() {
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/api/continuous/stop/${watchId}`, {
+            const response = await fetch(`${API_BASE}/api/continuous/stop/${watchId}`, {
                 method: "POST"
             });
             const data = await response.json();

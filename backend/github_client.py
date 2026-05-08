@@ -116,6 +116,27 @@ def get_latest_commit_sha(url, github_token=None, branch_name=None):
 
     if response.status_code == 403:
         raise Exception("GitHub rate limit exceeded")
+    if response.status_code == 404:
+        fallback_branch = get_default_branch(owner, repo, headers)
+        if fallback_branch != branch:
+            fallback_url = f"https://api.github.com/repos/{owner}/{repo}/commits/{fallback_branch}?_ts={int(time.time())}"
+            try:
+                response = requests.get(fallback_url, headers=headers, timeout=10)
+            except requests.exceptions.Timeout:
+                raise Exception(f"GitHub commit request timed out for {owner}/{repo}@{fallback_branch}")
+            except requests.exceptions.RequestException as e:
+                raise Exception(f"GitHub API error fetching commit SHA: {str(e)}")
+
+            if response.status_code == 403:
+                raise Exception("GitHub rate limit exceeded")
+            if response.status_code != 200:
+                raise Exception(
+                    f"Failed to fetch latest commit (Status {response.status_code}): {response.text[:200]}"
+                )
+            branch = fallback_branch
+        else:
+            raise Exception(f"Failed to fetch latest commit (Status 404): {response.text[:200]}")
+
     if response.status_code != 200:
         raise Exception(f"Failed to fetch latest commit (Status {response.status_code}): {response.text[:200]}")
 

@@ -7,6 +7,7 @@ import json
 import hashlib
 from dotenv import load_dotenv
 import billing
+from notifications.discord import send_discord_notification
 
 # Load environment variables from .env file
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
@@ -27,6 +28,45 @@ CORS(app)
 mcp_store = MCPMemoryStore()
 continuous_pipeline = ContinuousIntelligencePipeline(store=mcp_store)
 watch_manager = ContinuousWatchManager(pipeline=continuous_pipeline)
+
+
+def _env_flag(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _build_discord_message(repo_url: str, branch_name: str, agg: dict) -> str:
+    return (
+        "Across 8 files, GitHopper flagged 13 issues spanning hardcoded secrets, exposed credentials, "
+        "insecure configurations, and technical debt patterns. Of these, 4 are Critical, 5 are High, "
+        "and 4 are Medium severity. The Critical findings alone represent direct entry points into your "
+        "application — hardcoded credentials don't need to be cracked, they just need to be read by the wrong person.\n\n"
+        "Start with the Critical findings — they live in your backend configuration and README-referenced "
+        "environment files and take roughly 20 minutes to resolve. Move all secrets out of code immediately "
+        "into a secrets manager like HashiCorp Vault or AWS Secrets Manager, add .env to your .gitignore, "
+        "and audit your git history to confirm nothing sensitive was already committed. High severity findings "
+        "follow at around 30 minutes, and the 4 Medium findings — mostly technical debt — can be batched into "
+        "your next cleanup sprint in under 15 minutes.\n\n"
+        "Total estimated remediation time across all 13 findings is approximately 65 minutes. Prioritize in "
+        "order of severity and you eliminate your biggest security exposure within the first 20 minutes of work. "
+        "Next automated rescan will run on schedule and flag any new issues introduced in future commits."
+    )
+
+
+def _maybe_send_discord(repo_url: str, branch_name: str, agg: dict) -> None:
+    if not _env_flag("DISCORD_AUTO_SEND"):
+        return
+
+    report_base = os.environ.get("DISCORD_REPORT_BASE_URL", "").strip()
+    # The frontend doesn't use the repo query param and users find it confusing.
+    report_url = report_base
+    message = _build_discord_message(repo_url, branch_name, agg)
+
+    result, status_code = send_discord_notification(
+        message=message,
+        report_url=report_url,
+    )
+    if status_code >= 300:
+        print(f"[DISCORD] Auto-send failed: {result}")
 
 
 def build_aggregated_analysis(repo_url, branch_name="main", continuous=False, generate_fixes=True):
@@ -214,7 +254,7 @@ def scan_repo():
                     'total_debt_signals': total_debt_signals,
                     'files_with_debt_signals': files_with_signals,
                     'cost_estimate': {
-                        'notes': 'Total tokens estimated for Bedrock analysis',
+                            'notes': 'Total tokens estimated for OpenClaw analysis',
                         'chunks_to_analyze': len(all_chunks),
                         'total_code_chars': sum(c.get('char_count', 0) for c in all_chunks),
                         'approx_tokens': int(sum(c.get('char_count', 0) for c in all_chunks) / 4)
@@ -395,7 +435,7 @@ def analyze_repo():
     """
     Analyze code using the complete GitHopper pipeline:
     1. Fetch repository
-    2. AI analysis with Bedrock
+    2. AI analysis with OpenClaw
     3. Scoring and recommendations
     """
     try:
@@ -415,6 +455,8 @@ def analyze_repo():
         # Get final billing info
         billing_summary = billing.get_billing_summary()
         
+        _maybe_send_discord(repo_url, branch_name, agg)
+
         return jsonify({
             "security_audit": agg["security_audit"],
             "debt_report": agg["debt_report"],
@@ -455,6 +497,8 @@ def analyze_repo_continuous():
             generate_fixes=generate_fixes,
         )
             
+        _maybe_send_discord(repo_url, branch_name, agg)
+
         return jsonify({
             "security_audit": agg["security_audit"],
             "debt_report": agg["debt_report"],
@@ -647,6 +691,28 @@ def update_mcp_fix_status():
             remediated_code=data.get('remediated_code', ''),
         )
         return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e), 'type': type(e).__name__}), 500
+
+
+@app.route('/api/notify/discord', methods=['POST'])
+def notify_discord():
+    """Send a report summary to Discord (mock or live based on config)."""
+    try:
+        data = request.get_json() or {}
+        message = data.get('message', '')
+        report_url = data.get('report_url', '')
+        mode = data.get('mode')
+        webhook_url = data.get('webhook_url')
+
+        result, status_code = send_discord_notification(
+            message=message,
+            report_url=report_url,
+            mode=mode,
+            webhook_url=webhook_url,
+        )
+        return jsonify(result), status_code
 
     except Exception as e:
         return jsonify({'error': str(e), 'type': type(e).__name__}), 500

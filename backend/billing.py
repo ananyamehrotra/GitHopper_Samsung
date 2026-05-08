@@ -6,9 +6,9 @@ Tracks API usage and estimates costs.
 import json
 from datetime import datetime, timedelta
 
-# AWS Bedrock Claude 3 Haiku pricing (per 1M tokens)
-# Input: $0.80, Output: $4.00
-BEDROCK_PRICING = {
+# OpenClaw pricing estimate (per 1M tokens)
+# Input: $0.80, Output: $4.00 (placeholder for demo budget)
+OPENCLAW_PRICING = {
     "input_per_1m": 0.80,      # $0.80 per 1M input tokens
     "output_per_1m": 4.00,     # $4.00 per 1M output tokens
     "average_input_tokens": 8000,   # ~8K avg input tokens per request
@@ -17,8 +17,8 @@ BEDROCK_PRICING = {
 
 # Free tier limits
 FREE_TIER_MONTHLY = {
-    "bedrock_requests": 1000,      # 1000 free API calls/month
-    "bedrock_input_tokens": 10_000_000,  # 10M free input tokens
+    "openclaw_requests": 1000,      # 1000 free API calls/month
+    "openclaw_input_tokens": 10_000_000,  # 10M free input tokens
 }
 
 class BillingTracker:
@@ -29,39 +29,39 @@ class BillingTracker:
     
     def reset(self):
         """Reset billing tracker for new analysis."""
-        self.bedrock_calls = 0
+        self.openclaw_calls = 0
         self.input_tokens_used = 0
         self.output_tokens_used = 0
         self.start_time = datetime.now()
     
-    def add_bedrock_call(self, input_tokens=None, output_tokens=None):
-        """Record a Bedrock API call."""
-        self.bedrock_calls += 1
+    def add_openclaw_call(self, input_tokens=None, output_tokens=None):
+        """Record an OpenClaw API call."""
+        self.openclaw_calls += 1
         # Use average estimates if not provided
-        self.input_tokens_used += input_tokens or BEDROCK_PRICING["average_input_tokens"]
-        self.output_tokens_used += output_tokens or BEDROCK_PRICING["average_output_tokens"]
+        self.input_tokens_used += input_tokens or OPENCLAW_PRICING["average_input_tokens"]
+        self.output_tokens_used += output_tokens or OPENCLAW_PRICING["average_output_tokens"]
     
     def calculate_cost(self) -> dict:
         """Calculate total cost based on usage."""
         # Cost calculation
-        input_cost = (self.input_tokens_used / 1_000_000) * BEDROCK_PRICING["input_per_1m"]
-        output_cost = (self.output_tokens_used / 1_000_000) * BEDROCK_PRICING["output_per_1m"]
+        input_cost = (self.input_tokens_used / 1_000_000) * OPENCLAW_PRICING["input_per_1m"]
+        output_cost = (self.output_tokens_used / 1_000_000) * OPENCLAW_PRICING["output_per_1m"]
         total_cost = input_cost + output_cost
         
         # Free tier calculation
-        free_calls_remaining = max(0, FREE_TIER_MONTHLY["bedrock_requests"] - self.bedrock_calls)
-        in_free_tier = self.bedrock_calls <= FREE_TIER_MONTHLY["bedrock_requests"]
+        free_calls_remaining = max(0, FREE_TIER_MONTHLY["openclaw_requests"] - self.openclaw_calls)
+        in_free_tier = self.openclaw_calls <= FREE_TIER_MONTHLY["openclaw_requests"]
         
         return {
-            "bedrock_calls": self.bedrock_calls,
+            "openclaw_calls": self.openclaw_calls,
             "input_tokens": self.input_tokens_used,
             "output_tokens": self.output_tokens_used,
             "input_cost": round(input_cost, 4),
             "output_cost": round(output_cost, 4),
             "total_cost": round(total_cost, 4),
             "free_tier": {
-                "monthly_limit": FREE_TIER_MONTHLY["bedrock_requests"],
-                "calls_used": self.bedrock_calls,
+                "monthly_limit": FREE_TIER_MONTHLY["openclaw_requests"],
+                "calls_used": self.openclaw_calls,
                 "calls_remaining": free_calls_remaining,
                 "in_free_tier": in_free_tier,
             },
@@ -76,7 +76,7 @@ class BillingTracker:
         will_be_charged = not cost["free_tier"]["in_free_tier"]
         
         return {
-            "calls_made": cost["bedrock_calls"],
+            "calls_made": cost["openclaw_calls"],
             "estimated_cost": cost["total_cost"],
             "free_calls_remaining": cost["free_tier"]["calls_remaining"],
             "will_be_charged": will_be_charged,
@@ -86,9 +86,9 @@ class BillingTracker:
             },
             "alternatives": [
                 {
-                    "name": "AWS Free Tier",
+                    "name": "OpenClaw Budget Tier",
                     "cost": f"{cost['free_tier']['calls_remaining']} API calls remaining",
-                    "url": "https://aws.amazon.com/bedrock/pricing/"
+                    "url": "https://openclaw.ai/"
                 },
                 {
                     "name": "Self-Hosted LLM",
@@ -106,10 +106,15 @@ def reset_billing():
     global _tracker
     _tracker.reset()
 
-def track_bedrock_call(input_tokens=None, output_tokens=None):
-    """Track a Bedrock API call."""
+def track_openclaw_call(input_tokens=None, output_tokens=None):
+    """Track an OpenClaw API call."""
     global _tracker
-    _tracker.add_bedrock_call(input_tokens, output_tokens)
+    _tracker.add_openclaw_call(input_tokens, output_tokens)
+
+
+def track_bedrock_call(input_tokens=None, output_tokens=None):
+    """Backward-compatible alias for OpenClaw tracking."""
+    track_openclaw_call(input_tokens, output_tokens)
 
 def get_billing_summary() -> dict:
     """Get current billing summary."""

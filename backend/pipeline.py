@@ -10,7 +10,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from github_client import fetch_repo, categorize_files
 from chunker import chunk_code
-from ai.bedrock_client import scan_chunk, scan_all_chunks
+from ai.openclaw_client import scan_chunk, scan_all_chunks
 
 
 class GitHopperPipeline:
@@ -50,7 +50,7 @@ class GitHopperPipeline:
 
             # Stage 2: Analyze
             print("\n" + "="*60)
-            print("🤖 STAGE 2: AI ANALYSIS WITH BEDROCK")
+            print("🤖 STAGE 2: AI ANALYSIS WITH OPENCLAW")
             print("="*60)
 
             analysis_result = self._stage_analyze(fetch_result, branch_name)
@@ -293,13 +293,13 @@ def long_function():
         }
 
     def _stage_analyze(self, fetch_result, branch_name="main"):
-        """Stage 2: Analyze with Bedrock - Dynamic prompts per repo"""
+        """Stage 2: Analyze with OpenClaw - Dynamic prompts per repo"""
         try:
             chunks = fetch_result.get('chunks', [])
             files = fetch_result.get('files', [])
 
             if self.use_lambda:
-                # Call bedrock analyzer lambda
+                # Call analyzer lambda
                 payload = {
                     'repo_id': fetch_result['repo_id'],
                     'repo_url': fetch_result['repo_url'],
@@ -318,7 +318,7 @@ def long_function():
                 analysis_result = json.loads(result['body'])
 
             else:
-                # Local execution with dynamic Bedrock analysis
+                # Local execution with dynamic OpenClaw analysis
                 analysis_result = scan_all_chunks(chunks, branch_name)
 
             analysis_data = {

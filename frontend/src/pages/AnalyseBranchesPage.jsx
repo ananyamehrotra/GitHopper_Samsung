@@ -838,7 +838,7 @@ export function AnalyseBranchesPage() {
   };
 
   /* title typewriter */
-  const { displayed: titleOut, done: titleDone } = useTypewriter("BEDROCK & ANALYSIS", 58, 220);
+  const { displayed: titleOut, done: titleDone } = useTypewriter("OPENCLAW & ANALYSIS", 58, 220);
 
   /* ── THEME-AWARE STYLES ── */
   const THEME_CARD = {

@@ -1,6 +1,6 @@
 from typing import Dict
 
-from ai.bedrock_client import classify_file, generate_security_prompt
+from ai.openclaw_client import classify_file, generate_security_prompt
 
 from .context import render_context_block
 

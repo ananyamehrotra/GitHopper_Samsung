@@ -1,0 +1,2241 @@
+{
+  "status": "success",
+  "pipeline": "complete",
+  "execution_time_seconds": 49.440017,
+  "stages": {
+    "fetch": {
+      "repo_id": "dd59fe89",
+      "repo_url": "Sunidhishree/googlexramaiah",
+      "total_files": 17,
+      "categories": {
+        "config": 1,
+        "dependencies": 2,
+        "source_code": 14
+      },
+      "chunks": [
+        {
+          "chunk_id": "backend/requirements.txt::chunk_0",
+          "file": "backend/requirements.txt",
+          "language": "txt",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 11,
+          "code": "Flask>=2.0\npython-dotenv>=0.19\nfirebase-admin>=6.0\npymongo>=4.0\nflask-cors>=3.0\npytesseract\nPillow\nopencv-python-headless\nthefuzz\npython-Levenshtein\n\n",
+          "char_count": 150,
+          "debt_category_hint": "dependencies",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 11,
+            "code_lines": 10,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: backend/requirements.txt (txt) | Lines 1\u201311 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "frontend/package.json::chunk_0",
+          "file": "frontend/package.json",
+          "language": "json",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 21,
+          "code": "{\n    \"name\": \"frontend\",\n    \"version\": \"0.0.1\",\n    \"private\": true,\n    \"scripts\": {\n        \"dev\": \"vite\",\n        \"build\": \"vite build\",\n        \"preview\": \"vite preview\"\n    },\n    \"dependencies\": {\n        \"firebase\": \"^10.13.2\",\n        \"leaflet\": \"^1.9.4\",\n        \"razorpay\": \"^2.9.6\",\n        \"react\": \"^18.2.0\",\n        \"react-dom\": \"^18.2.0\"\n    },\n    \"devDependencies\": {\n        \"@vitejs/plugin-react\": \"^4.0.0\",\n        \"vite\": \"^5.0.0\"\n    }\n}\n",
+          "char_count": 462,
+          "debt_category_hint": "dependencies",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 21,
+            "code_lines": 21,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 2,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: frontend/package.json (json) | Lines 1\u201321 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "backend/README.md::chunk_0",
+          "file": "backend/README.md",
+          "language": "markdown",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 15,
+          "code": "Flask backend for the project\n\n- Copy your Firebase service account JSON to `firebase-credentials.json` (do NOT commit it).\n- Copy `.env.example` to `.env` and fill in real credentials (do NOT commit `.env`).\n\nInstall and run:\n\n```\npython -m venv venv\nvenv\\Scripts\\activate\npip install -r requirements.txt\nset FLASK_APP=app.py\nset FLASK_ENV=development\nflask run\n```\n",
+          "char_count": 367,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 15,
+            "code_lines": 12,
+            "blank_lines": 3,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: backend/README.md (markdown) | Lines 1\u201315 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "backend/app.py::chunk_0",
+          "file": "backend/app.py",
+          "language": "python",
+          "chunk_index": 0,
+          "total_chunks": 3,
+          "start_line": 1,
+          "end_line": 50,
+          "code": "import os\nimport re\nimport cv2\nimport pytesseract\nfrom PIL import Image\nfrom thefuzz import fuzz\nfrom flask import Flask, jsonify, request\nfrom flask_cors import CORS\nfrom werkzeug.utils import secure_filename\nfrom auth import verify_firebase_token\nfrom dotenv import load_dotenv\n\nload_dotenv()\n\n# Tesseract path from user request\npytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_CMD', r\"C:\\Program Files\\Tesseract-OCR\\tesseract.exe\")\n\napp = Flask(__name__)\nCORS(app, resources={r\"/api/*\": {\"origins\": \"*\"}}, supports_credentials=True)\n\nUPLOAD_FOLDER = 'uploads'\nif not os.path.exists(UPLOAD_FOLDER):\n    os.makedirs(UPLOAD_FOLDER)\n\napp.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER\n\n# ID Regex Patterns\nID_PATTERNS = {\n    'aadhaar': r'\\d{4}\\s?\\d{4}\\s?\\d{4}',\n    'pan': r'[A-Z]{5}[0-9]{4}[A-Z]',\n    'voter': r'[A-Z]{3}[0-9]{7}',\n    'dl': r'^[A-Z]{2}[0-9]{2}\\s?[0-9]{11}$'\n}\n\nGOVT_KEYWORDS = ['government', 'india', 'income tax', 'election commission', 'unique identification', 'aadhaar', 'permanent account number', 'driving license']\n\ndef extract_text(image_path):\n    # Basic image processing with OpenCV\n    img = cv2.imread(image_path)\n    if img is None:\n        return \"\"\n    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\n    # Applying thresholding for better OCR\n    thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]\n    \n    text = pytesseract.image_to_string(thresh)\n    return text.lower()\n\n@app.route('/api/verify-id', methods=['POST'])\n@verify_firebase_token\n",
+          "char_count": 1508,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 138,
+            "code_lines": 100,
+            "blank_lines": 28,
+            "comment_lines": 10,
+            "comment_ratio": 0.072,
+            "max_indentation_depth": 4,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: backend/app.py (python) | Lines 1\u201350 (chunk 1 of 3). | Max nesting depth: 4 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "backend/app.py::chunk_1",
+          "file": "backend/app.py",
+          "language": "python",
+          "chunk_index": 1,
+          "total_chunks": 3,
+          "start_line": 51,
+          "end_line": 130,
+          "code": "def verify_id():\n    if 'file' not in request.files:\n        return jsonify({'error': 'No file uploaded'}), 400\n    \n    file = request.files['file']\n    id_type = request.form.get('idType', '').lower()\n    user_name = request.form.get('name', '').lower()\n    user_dob = request.form.get('dob', '') # Expected YYYY-MM-DD\n    \n    # Convert YYYY-MM-DD to common ID formats for searching\n    dob_formats = []\n    if user_dob:\n        parts = user_dob.split('-')\n        if len(parts) == 3:\n            y, m, d = parts\n            dob_formats = [f\"{d}/{m}/{y}\", f\"{d}-{m}-{y}\", f\"{d} {m} {y}\", user_dob]\n\n    if file.filename == '':\n        return jsonify({'error': 'No file selected'}), 400\n\n    filename = \"id.png\" # Fixed name as requested\n    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)\n    file.save(filepath)\n\n    try:\n        extracted_text = extract_text(filepath)\n        \n        # 1. Check for Govt Keywords\n        has_govt_keyword = any(keyword in extracted_text for keyword in GOVT_KEYWORDS)\n        \n        # 2. Check Regex Pattern\n        pattern = ID_PATTERNS.get(id_type)\n        id_match = False\n        if pattern:\n            id_match = bool(re.search(pattern, extracted_text.upper()))\n        \n        # 3. Fuzzy match name\n        name_score = fuzz.token_set_ratio(user_name, extracted_text)\n\n        # 4. Check DOB\n        dob_match = any(fmt in extracted_text for fmt in dob_formats) if dob_formats else True # Default to true if not provided\n        \n        # Verification Logic\n        is_verified = False\n        reason = \"\"\n        \n        if not has_govt_keyword and not id_match:\n            reason = \"Document does not appear to be a valid government ID.\"\n        elif id_type in ID_PATTERNS and not id_match:\n            reason = f\"Could not find a valid {id_type.upper()} number format.\"\n        elif name_score < 70:\n            reason = f\"Name on ID does not match the entered name ({name_score}% match).\"\n        elif not dob_match:\n            reason = \"Date of Birth on ID does not match the entered date.\"\n        else:\n            is_verified = True\n            reason = \"Identity verified successfully via AI.\"\n\n        return jsonify({\n            'verified': is_verified,\n            'reason': reason,\n            'ocr_text': extracted_text[:200] + \"...\" if len(extracted_text) > 200 else extracted_text,\n            'debug': {\n                'has_govt_keyword': has_govt_keyword,\n                'id_match': id_match,\n                'name_score': name_score,\n                'dob_match': dob_match\n            }\n        })\n\n\n    except Exception as e:\n        return jsonify({'error': str(e)}), 500\n\n@app.route('/api')\ndef index():\n    return jsonify({'status': 'ok'})\n\n@app.route('/api/auth/sync', methods=['POST'])\n@verify_firebase_token\n",
+          "char_count": 2806,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 138,
+            "code_lines": 100,
+            "blank_lines": 28,
+            "comment_lines": 10,
+            "comment_ratio": 0.072,
+            "max_indentation_depth": 4,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": false,
+          "contains_tests": false,
+          "context_note": "File: backend/app.py (python) | Lines 51\u2013130 (chunk 2 of 3). | Max nesting depth: 4 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "backend/app.py::chunk_2",
+          "file": "backend/app.py",
+          "language": "python",
+          "chunk_index": 2,
+          "total_chunks": 3,
+          "start_line": 131,
+          "end_line": 138,
+          "code": "def sync_user():\n    user = getattr(request, 'user', None)\n    return jsonify({'status': 'synced', 'user': user})\n\nif __name__ == '__main__':\n    port = int(os.getenv('PORT', 5000))\n    app.run(host='0.0.0.0', port=port, debug=os.getenv('FLASK_DEBUG', 'False') == 'True')\n\n",
+          "char_count": 273,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 138,
+            "code_lines": 100,
+            "blank_lines": 28,
+            "comment_lines": 10,
+            "comment_ratio": 0.072,
+            "max_indentation_depth": 4,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": false,
+          "contains_tests": false,
+          "context_note": "File: backend/app.py (python) | Lines 131\u2013138 (chunk 3 of 3). | Max nesting depth: 4 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "backend/auth.py::chunk_0",
+          "file": "backend/auth.py",
+          "language": "python",
+          "chunk_index": 0,
+          "total_chunks": 2,
+          "start_line": 1,
+          "end_line": 47,
+          "code": "import os\nfrom functools import wraps\nfrom flask import jsonify, request\nimport firebase_admin\nfrom firebase_admin import auth, credentials\nfrom datetime import datetime\ntry:\n    from pymongo import MongoClient\nexcept Exception:\n    MongoClient = None\n\n# Initialize Firebase Admin SDK\ncred_path = os.getenv(\"FIREBASE_CREDENTIALS_PATH\") or os.path.join(os.path.dirname(__file__), 'firebase-credentials.json')\nif not firebase_admin._apps:\n    try:\n        if os.path.exists(cred_path) and os.path.getsize(cred_path) > 0:\n            cred = credentials.Certificate(cred_path)\n            firebase_admin.initialize_app(cred)\n        else:\n            print(f\"[Firebase] Warning: {cred_path} is missing or empty. Using default credentials.\")\n            firebase_admin.initialize_app()\n    except Exception as e:\n        print(f\"[Firebase] Error initializing Firebase Admin SDK: {e}\")\n        # Initialize without credentials to let the app start (will fail on auth calls, but not on startup)\n        try:\n            firebase_admin.initialize_app()\n        except:\n            pass\n\n# Initialize MongoDB Client once\nmongo_client = None\nmongo_uri = os.getenv('MONGODB_URI')\nif mongo_uri:\n    try:\n        from pymongo import MongoClient\n        mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)\n        # Test connection\n        mongo_client.admin.command('ping')\n        print(\"[MongoDB] Connected successfully\")\n    except Exception as e:\n        print(f\"[MongoDB] Initial connection failed: {e}\")\n        mongo_client = None\n\n\ndef verify_firebase_token(f):\n    \"\"\"Verify a Firebase ID token using the Firebase Admin SDK.\"\"\"\n    @wraps(f)\n",
+          "char_count": 1655,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "print\\(",
+              "line_number": 20,
+              "line_snippet": "print(f\"[Firebase] Warning: {cred_path} is missing or empty. Using default credentials.\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 23,
+              "line_snippet": "print(f\"[Firebase] Error initializing Firebase Admin SDK: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 39,
+              "line_snippet": "print(\"[MongoDB] Connected successfully\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 41,
+              "line_snippet": "print(f\"[MongoDB] Initial connection failed: {e}\")"
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 112,
+            "code_lines": 91,
+            "blank_lines": 14,
+            "comment_lines": 7,
+            "comment_ratio": 0.062,
+            "max_indentation_depth": 7,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: backend/auth.py (python) | Lines 1\u201347 (chunk 1 of 2). | Debt signals in this chunk: line 20: print(f\"[Firebase] Warning: {cred_path} is missing or empty.; line 23: print(f\"[Firebase] Error initializing Firebase Admin SDK: {e; line 39: print(\"[MongoDB] Connected successfully\"); line 41: print(f\"[MongoDB] Initial connection failed: {e}\") | Max nesting depth: 7 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "backend/auth.py::chunk_1",
+          "file": "backend/auth.py",
+          "language": "python",
+          "chunk_index": 1,
+          "total_chunks": 2,
+          "start_line": 48,
+          "end_line": 112,
+          "code": "    def decorated_function(*args, **kwargs):\n        # Development bypass: when set, skip token verification and inject a dev user.\n        try:\n            bypass_env = os.getenv(\"CHATBOT_BYPASS_AUTH\", \"false\").lower() in (\"1\", \"true\", \"yes\")\n            flask_env = os.getenv(\"FLASK_ENV\", \"\").lower()\n            if bypass_env or flask_env == \"development\":\n                print(\"[Auth] Bypass enabled (CHATBOT_BYPASS_AUTH or FLASK_ENV=development) \u2014 skipping token verification (dev only)\")\n                request.user = {\"uid\": \"dev_bypass_user\", \"email\": \"dev@local\"}\n                return f(*args, **kwargs)\n        except Exception:\n            pass\n\n        auth_header = request.headers.get(\"Authorization\")\n\n        if not auth_header:\n            return jsonify({\"error\": \"Missing authorization header\"}), 401\n\n        try:\n            parts = auth_header.split(\" \")\n            if len(parts) != 2 or parts[0].lower() != \"bearer\":\n                return jsonify({\"error\": \"Invalid authorization header format\"}), 401\n\n            id_token = parts[1]\n\n            try:\n                decoded_token = auth.verify_id_token(id_token)\n            except Exception as primary_err:\n                print(f\"[Auth Warning] Primary verification failed: {primary_err}\")\n                return jsonify({\"error\": \"Invalid token\", \"details\": str(primary_err)}), 401\n\n            if \"uid\" not in decoded_token:\n                decoded_token[\"uid\"] = decoded_token.get(\"user_id\") or decoded_token.get(\"sub\")\n\n            request.user = decoded_token\n\n            # Persist or update user record in MongoDB if available\n            try:\n                if mongo_client:\n                    db_name = os.getenv('MONGODB_DB', 'ummeed')\n                    db = mongo_client[db_name]\n                    users = db.get_collection('users')\n                    \n                    print(f\"[Auth DB] Syncing user {decoded_token['uid']} to collection 'users' in db '{db.name}'\")\n                    result = users.update_one(\n                        {\"uid\": decoded_token[\"uid\"]},\n                        {\"$set\": {\n                            \"email\": decoded_token.get('email'),\n                            \"name\": decoded_token.get('name') or decoded_token.get('display_name'),\n                            \"provider\": decoded_token.get('firebase', {}).get('sign_in_provider') if isinstance(decoded_token.get('firebase'), dict) else None,\n                            \"last_seen\": datetime.utcnow()\n                        }},\n                        upsert=True\n                    )\n                    print(f\"[Auth DB] Upsert successful: {result.upserted_id or 'Updated existing'}\")\n                else:\n                    print(\"[Auth DB] MongoDB client not initialized, skipping sync\")\n            except Exception as e:\n                # Don't fail the request if DB write fails; log for diagnostics\n                print(f\"[Auth DB] Failed to upsert user: {e}\")\n            return f(*args, **kwargs)\n        except Exception as e:\n            print(f\"[Token Error] {str(e)}\")\n            return jsonify({\"error\": \"Invalid token\", \"details\": str(e)}), 401\n\n    return decorated_function\n",
+          "char_count": 3189,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "print\\(",
+              "line_number": 54,
+              "line_snippet": "print(\"[Auth] Bypass enabled (CHATBOT_BYPASS_AUTH or FLASK_ENV=development) \u2014 skipping token verification (dev only)\")"
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 70,
+              "line_snippet": "id_token = parts[1]"
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 73,
+              "line_snippet": "decoded_token = auth.verify_id_token(id_token)"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 75,
+              "line_snippet": "print(f\"[Auth Warning] Primary verification failed: {primary_err}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 90,
+              "line_snippet": "print(f\"[Auth DB] Syncing user {decoded_token['uid']} to collection 'users' in db '{db.name}'\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 101,
+              "line_snippet": "print(f\"[Auth DB] Upsert successful: {result.upserted_id or 'Updated existing'}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 103,
+              "line_snippet": "print(\"[Auth DB] MongoDB client not initialized, skipping sync\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 106,
+              "line_snippet": "print(f\"[Auth DB] Failed to upsert user: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 109,
+              "line_snippet": "print(f\"[Token Error] {str(e)}\")"
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 112,
+            "code_lines": 91,
+            "blank_lines": 14,
+            "comment_lines": 7,
+            "comment_ratio": 0.062,
+            "max_indentation_depth": 7,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": false,
+          "contains_tests": false,
+          "context_note": "File: backend/auth.py (python) | Lines 48\u2013112 (chunk 2 of 2). | Debt signals in this chunk: line 54: print(\"[Auth] Bypass enabled (CHATBOT_BYPASS_AUTH or FLASK_E; line 70: id_token = parts[1]; line 73: decoded_token = auth.verify_id_token(id_token); line 75: print(f\"[Auth Warning] Primary verification failed: {primary; line 90: print(f\"[Auth DB] Syncing user {decoded_token['uid']} to col | Max nesting depth: 7 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "frontend/README.md::chunk_0",
+          "file": "frontend/README.md",
+          "language": "markdown",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 16,
+          "code": "Frontend (React + Vite)\n\nInstall and run:\n\n```\ncd frontend\nnpm install\nnpm run dev\n```\n\nPages:\n- Landing: `/` (src/pages/Landing.jsx)\n- Login: `/login` (stub)\n- Signup: `/signup` (stub)\n\nFirebase client config is in `src/firebase.js`.\n",
+          "char_count": 235,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 16,
+            "code_lines": 12,
+            "blank_lines": 4,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: frontend/README.md (markdown) | Lines 1\u201316 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "frontend/index.html::chunk_0",
+          "file": "frontend/index.html",
+          "language": "html",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 15,
+          "code": "<!doctype html>\n<html>\n\n<head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Ummeed</title>\n</head>\n\n<body>\n    <div id=\"root\"></div>\n    <script type=\"module\" src=\"/src/main.jsx\"></script>\n</body>\n\n</html>",
+          "char_count": 277,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 15,
+            "code_lines": 12,
+            "blank_lines": 3,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 1,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: frontend/index.html (html) | Lines 1\u201315 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "frontend/src/App.jsx::chunk_0",
+          "file": "frontend/src/App.jsx",
+          "language": "jsx",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 48,
+          "code": "import React from 'react'\nimport Landing from './pages/Landing'\nimport Login from './pages/Login'\nimport Signup from './pages/Signup'\nimport Home from './pages/Home'\nimport HowItWorks from './pages/HowItWorks'\nimport Programs from './pages/Programs'\nimport Stories from './pages/Stories'\nimport Donate from './pages/Donate'\nimport VolunteerForm from './pages/VolunteerForm'\n\nexport default function App() {\n    const path = window.location.pathname\n\n    if (path === '/home') {\n        return <Home />\n    }\n\n    if (path === '/how-it-works') {\n        return <HowItWorks />\n    }\n\n    if (path === '/programs') {\n        return <Programs />\n    }\n\n    if (path === '/stories') {\n        return <Stories />\n    }\n\n    if (path === '/donate') {\n        return <Donate />\n    }\n\n    if (path === '/volunteer') {\n        return <VolunteerForm />\n    }\n\n    if (path === '/login') {\n        return <Login />\n    }\n\n    if (path === '/signup') {\n        return <Signup />\n    }\n\n    return <Landing />\n}\n",
+          "char_count": 999,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 48,
+            "code_lines": 38,
+            "blank_lines": 10,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 2,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: frontend/src/App.jsx (jsx) | Lines 1\u201348 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "frontend/src/firebase.js::chunk_0",
+          "file": "frontend/src/firebase.js",
+          "language": "javascript",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 23,
+          "code": "// Firebase client config\nimport { initializeApp } from \"firebase/app\";\nimport { getAuth, GoogleAuthProvider, signInWithPopup } from \"firebase/auth\";\n\nconst firebaseConfig = {\n    apiKey: \"AIzaSyDLV6-DJTOqlxNv6Lc79LrM-kpwpLUGEpw\",\n    authDomain: \"ritconnect-f4c31.firebaseapp.com\",\n    projectId: \"ritconnect-f4c31\",\n    storageBucket: \"ritconnect-f4c31.firebasestorage.app\",\n    messagingSenderId: \"440809006695\",\n    appId: \"1:440809006695:web:a6565823de9a4eb35716c2\",\n    measurementId: \"G-K22HEHMNVK\"\n};\n\nconst app = initializeApp(firebaseConfig);\nexport const auth = getAuth(app);\nexport const googleProvider = new GoogleAuthProvider();\n\nexport async function signInWithGoogle() {\n    return signInWithPopup(auth, googleProvider);\n}\n\nexport default app;\n",
+          "char_count": 760,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 23,
+            "code_lines": 18,
+            "blank_lines": 4,
+            "comment_lines": 1,
+            "comment_ratio": 0.043,
+            "max_indentation_depth": 1,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: frontend/src/firebase.js (javascript) | Lines 1\u201323 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "frontend/src/main.jsx::chunk_0",
+          "file": "frontend/src/main.jsx",
+          "language": "jsx",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 6,
+          "code": "import React from 'react'\nimport { createRoot } from 'react-dom/client'\nimport App from './App'\nimport './styles.css'\n\ncreateRoot(document.getElementById('root')).render(<App />)\n",
+          "char_count": 179,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 6,
+            "code_lines": 5,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: frontend/src/main.jsx (jsx) | Lines 1\u20136 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "frontend/src/pages/Landing.jsx::chunk_0",
+          "file": "frontend/src/pages/Landing.jsx",
+          "language": "jsx",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 30,
+          "code": "import React from 'react'\n\nconst heroHtml = `\n<nav>\n    <div class=\"logo\">Ummeed<span>.</span></div>\n    <ul>\n        <li><a href=\"#how\">How It Works</a></li>\n        <li><a href=\"#programs\">Programs</a></li>\n        <li><a href=\"#stories\">Stories</a></li>\n        <li><a href=\"#volunteer\">Volunteer</a></li>\n        <li><a href=\"/login\" class=\"nav-cta\">Login</a></li>\n    </ul>\n</nav>\n<section class=\"hero\">\n    <div class=\"hero-bg\"></div>\n    <div class=\"hero-content\">\n        <div class=\"hero-tag\">\ud83c\udf3f Welfare &amp; Community Care</div>\n        <h1>Spreading <em>hope</em> to those who need it most</h1>\n        <p>Ummeed connects welfare centers, volunteers, and communities \u2014 bringing food, shelter, education, and healing to vulnerable hearts across India.</p>\n        <div class=\"hero-btns\">\n            <a href=\"/signup\" class=\"btn-primary\">Get Started</a>\n            <a href=\"#programs\" class=\"btn-secondary\">Explore Programs</a>\n        </div>\n    </div>\n</section>\n`\n\nexport default function Landing() {\n    return <div dangerouslySetInnerHTML={{ __html: heroHtml }} />\n}\n",
+          "char_count": 1083,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 30,
+            "code_lines": 28,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: frontend/src/pages/Landing.jsx (jsx) | Lines 1\u201330 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "frontend/src/pages/Login.jsx::chunk_0",
+          "file": "frontend/src/pages/Login.jsx",
+          "language": "jsx",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 50,
+          "code": "import React, { useState } from 'react'\nimport { signInWithGoogle } from '../firebase'\n\nexport default function Login() {\n    const [error, setError] = useState('')\n\n    const handleGoogleLogin = async () => {\n        try {\n            setError('')\n            const result = await signInWithGoogle()\n            const user = result.user\n            const token = await user.getIdToken()\n\n            // Sync with backend\n            const response = await fetch('http://localhost:5000/api/auth/sync', {\n                method: 'POST',\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                }\n            })\n\n            if (!response.ok) {\n                throw new Error('Failed to sync with backend')\n            }\n\n            window.location.href = '/home'\n        } catch (err) {\n            setError(err?.message || 'Google sign-in failed')\n        }\n    }\n\n    return (\n        <div className=\"auth-page\">\n            <form className=\"auth-form\" onSubmit={(event) => event.preventDefault()}>\n                <h2>Login</h2>\n                <button type=\"button\" className=\"button google-button\" onClick={handleGoogleLogin}>\n                    Continue with Google\n                </button>\n                {error ? <p className=\"auth-error\">{error}</p> : null}\n                <label>Email</label>\n                <input type=\"email\" />\n                <label>Password</label>\n                <input type=\"password\" />\n                <button type=\"submit\" className=\"button\" onClick={() => (window.location.href = '/home')}>\n                    Login\n                </button>\n            </form>\n        </div>\n    )\n}\n",
+          "char_count": 1672,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "token\\s*=",
+              "line_number": 12,
+              "line_snippet": "const token = await user.getIdToken()"
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 50,
+            "code_lines": 43,
+            "blank_lines": 6,
+            "comment_lines": 1,
+            "comment_ratio": 0.02,
+            "max_indentation_depth": 5,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: frontend/src/pages/Login.jsx (jsx) | Lines 1\u201350 (chunk 1 of 1). | Debt signals in this chunk: line 12: const token = await user.getIdToken() | Max nesting depth: 5 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "frontend/src/pages/Programs.jsx::chunk_0",
+          "file": "frontend/src/pages/Programs.jsx",
+          "language": "jsx",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 11,
+          "code": "import React from 'react'\n\nexport default function Programs() {\n    return (\n        <div style={{ padding: '4rem', textAlign: 'center', fontFamily: 'Inter, sans-serif' }}>\n            <h1 style={{ color: '#204155' }}>Our Programs</h1>\n            <p style={{ color: '#5a4a38', marginTop: '1rem' }}>This page is coming soon. We are building something impactful for you.</p>\n            <a href=\"/home\" style={{ display: 'inline-block', marginTop: '2rem', padding: '0.8rem 1.5rem', background: '#c4714a', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 600 }}>Go Back to Home</a>\n        </div>\n    )\n}\n",
+          "char_count": 627,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 11,
+            "code_lines": 10,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: frontend/src/pages/Programs.jsx (jsx) | Lines 1\u201311 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "frontend/src/pages/Signup.jsx::chunk_0",
+          "file": "frontend/src/pages/Signup.jsx",
+          "language": "jsx",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 54,
+          "code": "import React, { useState } from 'react'\nimport { signInWithGoogle } from '../firebase'\n\nexport default function Signup() {\n    const [error, setError] = useState('')\n\n    const handleGoogleSignup = async () => {\n        try {\n            setError('')\n            const result = await signInWithGoogle()\n            const user = result.user\n            const token = await user.getIdToken()\n\n            // Sync with backend\n            const response = await fetch('http://localhost:5000/api/auth/sync', {\n                method: 'POST',\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                }\n            })\n\n            if (!response.ok) {\n                throw new Error('Failed to sync with backend')\n            }\n\n            window.location.href = '/home'\n        } catch (err) {\n            setError(err?.message || 'Google sign-up failed')\n        }\n    }\n\n    return (\n        <div className=\"auth-page\">\n            <form className=\"auth-form auth-form--signup\" onSubmit={(event) => event.preventDefault()}>\n                <p className=\"auth-kicker\">Ummeed</p>\n                <h2>Create your account</h2>\n                <p className=\"auth-subcopy\">Join volunteers, donors, and welfare centers working together for NGOs, orphanages, animal welfare, and elder care.</p>\n                <button type=\"button\" className=\"button google-button\" onClick={handleGoogleSignup}>\n                    Sign up with Google\n                </button>\n                {error ? <p className=\"auth-error\">{error}</p> : null}\n                <label>Name</label>\n                <input placeholder=\"Your name\" />\n                <label>Email</label>\n                <input type=\"email\" placeholder=\"you@example.com\" />\n                <label>Password</label>\n                <input type=\"password\" placeholder=\"Create a password\" />\n                <button type=\"submit\" className=\"button\" onClick={() => (window.location.href = '/home')}>\n                    Create account\n                </button>\n            </form>\n        </div>\n    )\n}\n",
+          "char_count": 2081,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "token\\s*=",
+              "line_number": 12,
+              "line_snippet": "const token = await user.getIdToken()"
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 54,
+            "code_lines": 47,
+            "blank_lines": 6,
+            "comment_lines": 1,
+            "comment_ratio": 0.019,
+            "max_indentation_depth": 5,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: frontend/src/pages/Signup.jsx (jsx) | Lines 1\u201354 (chunk 1 of 1). | Debt signals in this chunk: line 12: const token = await user.getIdToken() | Max nesting depth: 5 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "frontend/src/pages/Stories.jsx::chunk_0",
+          "file": "frontend/src/pages/Stories.jsx",
+          "language": "jsx",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 11,
+          "code": "import React from 'react'\n\nexport default function Stories() {\n    return (\n        <div style={{ padding: '4rem', textAlign: 'center', fontFamily: 'Inter, sans-serif' }}>\n            <h1 style={{ color: '#204155' }}>Stories of Hope</h1>\n            <p style={{ color: '#5a4a38', marginTop: '1rem' }}>This page is coming soon. Real stories from real people are being gathered.</p>\n            <a href=\"/home\" style={{ display: 'inline-block', marginTop: '2rem', padding: '0.8rem 1.5rem', background: '#c4714a', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 600 }}>Go Back to Home</a>\n        </div>\n    )\n}\n",
+          "char_count": 634,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 11,
+            "code_lines": 10,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: frontend/src/pages/Stories.jsx (jsx) | Lines 1\u201311 (chunk 1 of 1)."
+        },
+        {
+          "chunk_id": "frontend/src/pages/VolunteerForm.jsx::chunk_0",
+          "file": "frontend/src/pages/VolunteerForm.jsx",
+          "language": "jsx",
+          "chunk_index": 0,
+          "total_chunks": 2,
+          "start_line": 1,
+          "end_line": 43,
+          "code": "import React, { useState } from 'react'\nimport { auth } from '../firebase'\n\nconst STATES = [\n    \"Andhra Pradesh\", \"Arunachal Pradesh\", \"Assam\", \"Bihar\", \"Chhattisgarh\", \"Goa\", \"Gujarat\", \"Haryana\", \n    \"Himachal Pradesh\", \"Jharkhand\", \"Karnataka\", \"Kerala\", \"Madhya Pradesh\", \"Maharashtra\", \"Manipur\", \n    \"Meghalaya\", \"Mizoram\", \"Nagaland\", \"Odisha\", \"Punjab\", \"Rajasthan\", \"Sikkim\", \"Tamil Nadu\", \"Telangana\", \n    \"Tripura\", \"Uttar Pradesh\", \"Uttarakhand\", \"West Bengal\", \"Andaman and Nicobar Islands\", \"Chandigarh\", \n    \"Dadra and Nagar Haveli and Daman and Diu\", \"Delhi\", \"Jammu and Kashmir\", \"Ladakh\", \"Lakshadweep\", \"Puducherry\"\n]\n\nconst ID_TYPES = [\n    { value: 'aadhaar', label: 'Aadhaar Card' },\n    { value: 'pan', label: 'PAN Card' },\n    { value: 'voter', label: 'Voter ID' },\n    { value: 'dl', label: 'Driving License' }\n]\n\nexport default function VolunteerForm() {\n    const [formData, setFormData] = useState({\n        name: '',\n        dob: '',\n        phone: '',\n        address1: '',\n        address2: '',\n        pin: '',\n        city: '',\n        state: 'Karnataka',\n        idType: 'aadhaar'\n    })\n    const [file, setFile] = useState(null)\n    const [loading, setLoading] = useState(false)\n    const [result, setResult] = useState(null)\n    const [error, setError] = useState('')\n\n    const handleChange = (e) => {\n        setFormData({ ...formData, [e.target.name]: e.target.value })\n    }\n\n    const handleFileChange = (e) => {\n        setFile(e.target.files[0])\n    }\n\n",
+          "char_count": 1502,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 176,
+            "code_lines": 159,
+            "blank_lines": 17,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 11,
+            "long_functions_detected": [
+              {
+                "approximate_start_line": 44,
+                "approximate_length_lines": 133,
+                "first_line": "const handleSubmit = async (e) => {"
+              }
+            ],
+            "long_function_count": 1
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: frontend/src/pages/VolunteerForm.jsx (jsx) | Lines 1\u201343 (chunk 1 of 2). | Whole-file note: 1 oversized function(s) detected. | Max nesting depth: 11 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "frontend/src/pages/VolunteerForm.jsx::chunk_1",
+          "file": "frontend/src/pages/VolunteerForm.jsx",
+          "language": "jsx",
+          "chunk_index": 1,
+          "total_chunks": 2,
+          "start_line": 44,
+          "end_line": 176,
+          "code": "    const handleSubmit = async (e) => {\n        e.preventDefault()\n        if (!file) {\n            setError('Please upload your Government ID.')\n            return\n        }\n        setLoading(true)\n        setError('')\n        setResult(null)\n\n        try {\n            const user = auth.currentUser\n            if (!user) throw new Error('You must be logged in to volunteer.')\n            const token = await user.getIdToken()\n\n            const data = new FormData()\n            data.append('file', file)\n            data.append('name', formData.name)\n            data.append('dob', formData.dob)\n            data.append('idType', formData.idType)\n            data.append('details', JSON.stringify(formData))\n\n            const response = await fetch('http://localhost:5000/api/verify-id', {\n                method: 'POST',\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                },\n                body: data\n            })\n\n            const resData = await response.json()\n            if (!response.ok) throw new Error(resData.error || 'Verification failed.')\n\n            setResult(resData)\n        } catch (err) {\n            setError(err.message)\n        } finally {\n            setLoading(false)\n        }\n    }\n\n    return (\n        <div className=\"seva-page\">\n            <nav>\n                <a href=\"/home\" className=\"logo\">Ummeed<span>.</span></a>\n                <ul>\n                    <li><a href=\"/home\" className=\"nav-cta\">Go Back to Home</a></li>\n                </ul>\n            </nav>\n\n            <section className=\"volunteer-section\">\n                <div className=\"volunteer-container\">\n                    <div className=\"volunteer-header\">\n                        <div className=\"section-tag\">Join the Movement</div>\n                        <h1>Become a <em>Volunteer</em></h1>\n                        <p>Fill in your details and upload a valid government ID for AI verification. This helps us maintain a safe community.</p>\n                    </div>\n\n                    <div className=\"volunteer-form-card\">\n                        <form onSubmit={handleSubmit}>\n                            <div className=\"form-grid\">\n                                <div className=\"form-group\">\n                                    <label>Full Name (as on ID)</label>\n                                    <input type=\"text\" name=\"name\" required value={formData.name} onChange={handleChange} placeholder=\"John Doe\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>Date of Birth (as on ID)</label>\n                                    <input type=\"date\" name=\"dob\" required value={formData.dob} onChange={handleChange} />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>Phone Number</label>\n                                    <input type=\"tel\" name=\"phone\" required value={formData.phone} onChange={handleChange} placeholder=\"+91 98765 43210\" />\n                                </div>\n                                <div className=\"form-group full-width\">\n                                    <label>Address Line 1</label>\n                                    <input type=\"text\" name=\"address1\" required value={formData.address1} onChange={handleChange} placeholder=\"House No, Building Name\" />\n                                </div>\n                                <div className=\"form-group full-width\">\n                                    <label>Address Line 2</label>\n                                    <input type=\"text\" name=\"address2\" value={formData.address2} onChange={handleChange} placeholder=\"Street, Area\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>PIN Code</label>\n                                    <input type=\"text\" name=\"pin\" required value={formData.pin} onChange={handleChange} placeholder=\"560001\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>City</label>\n                                    <input type=\"text\" name=\"city\" required value={formData.city} onChange={handleChange} placeholder=\"Bengaluru\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>State</label>\n                                    <select name=\"state\" value={formData.state} onChange={handleChange}>\n                                        {STATES.map(s => <option key={s} value={s}>{s}</option>)}\n                                    </select>\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>ID Type</label>\n                                    <select name=\"idType\" value={formData.idType} onChange={handleChange}>\n                                        {ID_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}\n                                    </select>\n                                </div>\n                                <div className=\"form-group full-width\">\n                                    <label>Upload Government ID (Image)</label>\n                                    <div className=\"file-upload-area\">\n                                        <input type=\"file\" accept=\"image/*\" onChange={handleFileChange} id=\"id-upload\" hidden />\n                                        <label htmlFor=\"id-upload\" className=\"file-label\">\n                                            {file ? file.name : 'Click to upload ID Card (Aadhaar, PAN, etc.)'}\n                                        </label>\n                                    </div>\n                                </div>\n                            </div>\n\n                            {error && <div className=\"form-error\">{error}</div>}\n\n                            <button type=\"submit\" className=\"volunteer-submit-btn\" disabled={loading}>\n                                {loading ? 'Verifying with AI...' : 'Submit & Verify Identity'}\n                            </button>\n                        </form>\n\n                        {result && (\n                            <div className={`verification-result ${result.verified ? 'success' : 'failure'}`}>\n                                <h3>{result.verified ? '\u2713 Verification Successful' : '\u26a0 Verification Failed'}</h3>\n                                <p>{result.reason}</p>\n                                {result.verified && <p className=\"success-sub\">You are now registered as a volunteer. Welcome to the family!</p>}\n                                {!result.verified && <p className=\"failure-sub\">Please ensure the image is clear and details match your input.</p>}\n                            </div>\n                        )}\n                    </div>\n                </div>\n            </section>\n        </div>\n    )\n}\n",
+          "char_count": 7102,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "token\\s*=",
+              "line_number": 57,
+              "line_snippet": "const token = await user.getIdToken()"
+            }
+          ],
+          "file_metrics": {
+            "total_lines": 176,
+            "code_lines": 159,
+            "blank_lines": 17,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 11,
+            "long_functions_detected": [
+              {
+                "approximate_start_line": 44,
+                "approximate_length_lines": 133,
+                "first_line": "const handleSubmit = async (e) => {"
+              }
+            ],
+            "long_function_count": 1
+          },
+          "is_entry_point": false,
+          "contains_tests": false,
+          "context_note": "File: frontend/src/pages/VolunteerForm.jsx (jsx) | Lines 44\u2013176 (chunk 2 of 2). | Debt signals in this chunk: line 57: const token = await user.getIdToken() | Whole-file note: 1 oversized function(s) detected. | Max nesting depth: 11 levels (complexity risk)."
+        },
+        {
+          "chunk_id": "frontend/vite.config.js::chunk_0",
+          "file": "frontend/vite.config.js",
+          "language": "javascript",
+          "chunk_index": 0,
+          "total_chunks": 1,
+          "start_line": 1,
+          "end_line": 11,
+          "code": "import { defineConfig } from 'vite'\nimport react from '@vitejs/plugin-react'\n\nexport default defineConfig({\n    plugins: [react()],\n    server: {\n        headers: {\n            'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',\n        },\n    },\n})\n",
+          "char_count": 256,
+          "debt_category_hint": "architecture",
+          "debt_signals": [],
+          "file_metrics": {
+            "total_lines": 11,
+            "code_lines": 10,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          },
+          "is_entry_point": true,
+          "contains_tests": false,
+          "context_note": "File: frontend/vite.config.js (javascript) | Lines 1\u201311 (chunk 1 of 1)."
+        }
+      ],
+      "files": [
+        {
+          "path": "backend/requirements.txt",
+          "language": "txt",
+          "content": "Flask>=2.0\npython-dotenv>=0.19\nfirebase-admin>=6.0\npymongo>=4.0\nflask-cors>=3.0\npytesseract\nPillow\nopencv-python-headless\nthefuzz\npython-Levenshtein\n\n",
+          "size_bytes": 150,
+          "debt_category_hint": "dependencies",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 11,
+            "code_lines": 10,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/package.json",
+          "language": "json",
+          "content": "{\n    \"name\": \"frontend\",\n    \"version\": \"0.0.1\",\n    \"private\": true,\n    \"scripts\": {\n        \"dev\": \"vite\",\n        \"build\": \"vite build\",\n        \"preview\": \"vite preview\"\n    },\n    \"dependencies\": {\n        \"firebase\": \"^10.13.2\",\n        \"leaflet\": \"^1.9.4\",\n        \"razorpay\": \"^2.9.6\",\n        \"react\": \"^18.2.0\",\n        \"react-dom\": \"^18.2.0\"\n    },\n    \"devDependencies\": {\n        \"@vitejs/plugin-react\": \"^4.0.0\",\n        \"vite\": \"^5.0.0\"\n    }\n}\n",
+          "size_bytes": 462,
+          "debt_category_hint": "dependencies",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 21,
+            "code_lines": 21,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 2,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "backend/README.md",
+          "language": "markdown",
+          "content": "Flask backend for the project\n\n- Copy your Firebase service account JSON to `firebase-credentials.json` (do NOT commit it).\n- Copy `.env.example` to `.env` and fill in real credentials (do NOT commit `.env`).\n\nInstall and run:\n\n```\npython -m venv venv\nvenv\\Scripts\\activate\npip install -r requirements.txt\nset FLASK_APP=app.py\nset FLASK_ENV=development\nflask run\n```\n",
+          "size_bytes": 367,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 15,
+            "code_lines": 12,
+            "blank_lines": 3,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "backend/app.py",
+          "language": "python",
+          "content": "import os\nimport re\nimport cv2\nimport pytesseract\nfrom PIL import Image\nfrom thefuzz import fuzz\nfrom flask import Flask, jsonify, request\nfrom flask_cors import CORS\nfrom werkzeug.utils import secure_filename\nfrom auth import verify_firebase_token\nfrom dotenv import load_dotenv\n\nload_dotenv()\n\n# Tesseract path from user request\npytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_CMD', r\"C:\\Program Files\\Tesseract-OCR\\tesseract.exe\")\n\napp = Flask(__name__)\nCORS(app, resources={r\"/api/*\": {\"origins\": \"*\"}}, supports_credentials=True)\n\nUPLOAD_FOLDER = 'uploads'\nif not os.path.exists(UPLOAD_FOLDER):\n    os.makedirs(UPLOAD_FOLDER)\n\napp.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER\n\n# ID Regex Patterns\nID_PATTERNS = {\n    'aadhaar': r'\\d{4}\\s?\\d{4}\\s?\\d{4}',\n    'pan': r'[A-Z]{5}[0-9]{4}[A-Z]',\n    'voter': r'[A-Z]{3}[0-9]{7}',\n    'dl': r'^[A-Z]{2}[0-9]{2}\\s?[0-9]{11}$'\n}\n\nGOVT_KEYWORDS = ['government', 'india', 'income tax', 'election commission', 'unique identification', 'aadhaar', 'permanent account number', 'driving license']\n\ndef extract_text(image_path):\n    # Basic image processing with OpenCV\n    img = cv2.imread(image_path)\n    if img is None:\n        return \"\"\n    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\n    # Applying thresholding for better OCR\n    thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]\n    \n    text = pytesseract.image_to_string(thresh)\n    return text.lower()\n\n@app.route('/api/verify-id', methods=['POST'])\n@verify_firebase_token\ndef verify_id():\n    if 'file' not in request.files:\n        return jsonify({'error': 'No file uploaded'}), 400\n    \n    file = request.files['file']\n    id_type = request.form.get('idType', '').lower()\n    user_name = request.form.get('name', '').lower()\n    user_dob = request.form.get('dob', '') # Expected YYYY-MM-DD\n    \n    # Convert YYYY-MM-DD to common ID formats for searching\n    dob_formats = []\n    if user_dob:\n        parts = user_dob.split('-')\n        if len(parts) == 3:\n            y, m, d = parts\n            dob_formats = [f\"{d}/{m}/{y}\", f\"{d}-{m}-{y}\", f\"{d} {m} {y}\", user_dob]\n\n    if file.filename == '':\n        return jsonify({'error': 'No file selected'}), 400\n\n    filename = \"id.png\" # Fixed name as requested\n    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)\n    file.save(filepath)\n\n    try:\n        extracted_text = extract_text(filepath)\n        \n        # 1. Check for Govt Keywords\n        has_govt_keyword = any(keyword in extracted_text for keyword in GOVT_KEYWORDS)\n        \n        # 2. Check Regex Pattern\n        pattern = ID_PATTERNS.get(id_type)\n        id_match = False\n        if pattern:\n            id_match = bool(re.search(pattern, extracted_text.upper()))\n        \n        # 3. Fuzzy match name\n        name_score = fuzz.token_set_ratio(user_name, extracted_text)\n\n        # 4. Check DOB\n        dob_match = any(fmt in extracted_text for fmt in dob_formats) if dob_formats else True # Default to true if not provided\n        \n        # Verification Logic\n        is_verified = False\n        reason = \"\"\n        \n        if not has_govt_keyword and not id_match:\n            reason = \"Document does not appear to be a valid government ID.\"\n        elif id_type in ID_PATTERNS and not id_match:\n            reason = f\"Could not find a valid {id_type.upper()} number format.\"\n        elif name_score < 70:\n            reason = f\"Name on ID does not match the entered name ({name_score}% match).\"\n        elif not dob_match:\n            reason = \"Date of Birth on ID does not match the entered date.\"\n        else:\n            is_verified = True\n            reason = \"Identity verified successfully via AI.\"\n\n        return jsonify({\n            'verified': is_verified,\n            'reason': reason,\n            'ocr_text': extracted_text[:200] + \"...\" if len(extracted_text) > 200 else extracted_text,\n            'debug': {\n                'has_govt_keyword': has_govt_keyword,\n                'id_match': id_match,\n                'name_score': name_score,\n                'dob_match': dob_match\n            }\n        })\n\n\n    except Exception as e:\n        return jsonify({'error': str(e)}), 500\n\n@app.route('/api')\ndef index():\n    return jsonify({'status': 'ok'})\n\n@app.route('/api/auth/sync', methods=['POST'])\n@verify_firebase_token\ndef sync_user():\n    user = getattr(request, 'user', None)\n    return jsonify({'status': 'synced', 'user': user})\n\nif __name__ == '__main__':\n    port = int(os.getenv('PORT', 5000))\n    app.run(host='0.0.0.0', port=port, debug=os.getenv('FLASK_DEBUG', 'False') == 'True')\n\n",
+          "size_bytes": 4587,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 138,
+            "code_lines": 100,
+            "blank_lines": 28,
+            "comment_lines": 10,
+            "comment_ratio": 0.072,
+            "max_indentation_depth": 4,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "backend/auth.py",
+          "language": "python",
+          "content": "import os\nfrom functools import wraps\nfrom flask import jsonify, request\nimport firebase_admin\nfrom firebase_admin import auth, credentials\nfrom datetime import datetime\ntry:\n    from pymongo import MongoClient\nexcept Exception:\n    MongoClient = None\n\n# Initialize Firebase Admin SDK\ncred_path = os.getenv(\"FIREBASE_CREDENTIALS_PATH\") or os.path.join(os.path.dirname(__file__), 'firebase-credentials.json')\nif not firebase_admin._apps:\n    try:\n        if os.path.exists(cred_path) and os.path.getsize(cred_path) > 0:\n            cred = credentials.Certificate(cred_path)\n            firebase_admin.initialize_app(cred)\n        else:\n            print(f\"[Firebase] Warning: {cred_path} is missing or empty. Using default credentials.\")\n            firebase_admin.initialize_app()\n    except Exception as e:\n        print(f\"[Firebase] Error initializing Firebase Admin SDK: {e}\")\n        # Initialize without credentials to let the app start (will fail on auth calls, but not on startup)\n        try:\n            firebase_admin.initialize_app()\n        except:\n            pass\n\n# Initialize MongoDB Client once\nmongo_client = None\nmongo_uri = os.getenv('MONGODB_URI')\nif mongo_uri:\n    try:\n        from pymongo import MongoClient\n        mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)\n        # Test connection\n        mongo_client.admin.command('ping')\n        print(\"[MongoDB] Connected successfully\")\n    except Exception as e:\n        print(f\"[MongoDB] Initial connection failed: {e}\")\n        mongo_client = None\n\n\ndef verify_firebase_token(f):\n    \"\"\"Verify a Firebase ID token using the Firebase Admin SDK.\"\"\"\n    @wraps(f)\n    def decorated_function(*args, **kwargs):\n        # Development bypass: when set, skip token verification and inject a dev user.\n        try:\n            bypass_env = os.getenv(\"CHATBOT_BYPASS_AUTH\", \"false\").lower() in (\"1\", \"true\", \"yes\")\n            flask_env = os.getenv(\"FLASK_ENV\", \"\").lower()\n            if bypass_env or flask_env == \"development\":\n                print(\"[Auth] Bypass enabled (CHATBOT_BYPASS_AUTH or FLASK_ENV=development) \u2014 skipping token verification (dev only)\")\n                request.user = {\"uid\": \"dev_bypass_user\", \"email\": \"dev@local\"}\n                return f(*args, **kwargs)\n        except Exception:\n            pass\n\n        auth_header = request.headers.get(\"Authorization\")\n\n        if not auth_header:\n            return jsonify({\"error\": \"Missing authorization header\"}), 401\n\n        try:\n            parts = auth_header.split(\" \")\n            if len(parts) != 2 or parts[0].lower() != \"bearer\":\n                return jsonify({\"error\": \"Invalid authorization header format\"}), 401\n\n            id_token = parts[1]\n\n            try:\n                decoded_token = auth.verify_id_token(id_token)\n            except Exception as primary_err:\n                print(f\"[Auth Warning] Primary verification failed: {primary_err}\")\n                return jsonify({\"error\": \"Invalid token\", \"details\": str(primary_err)}), 401\n\n            if \"uid\" not in decoded_token:\n                decoded_token[\"uid\"] = decoded_token.get(\"user_id\") or decoded_token.get(\"sub\")\n\n            request.user = decoded_token\n\n            # Persist or update user record in MongoDB if available\n            try:\n                if mongo_client:\n                    db_name = os.getenv('MONGODB_DB', 'ummeed')\n                    db = mongo_client[db_name]\n                    users = db.get_collection('users')\n                    \n                    print(f\"[Auth DB] Syncing user {decoded_token['uid']} to collection 'users' in db '{db.name}'\")\n                    result = users.update_one(\n                        {\"uid\": decoded_token[\"uid\"]},\n                        {\"$set\": {\n                            \"email\": decoded_token.get('email'),\n                            \"name\": decoded_token.get('name') or decoded_token.get('display_name'),\n                            \"provider\": decoded_token.get('firebase', {}).get('sign_in_provider') if isinstance(decoded_token.get('firebase'), dict) else None,\n                            \"last_seen\": datetime.utcnow()\n                        }},\n                        upsert=True\n                    )\n                    print(f\"[Auth DB] Upsert successful: {result.upserted_id or 'Updated existing'}\")\n                else:\n                    print(\"[Auth DB] MongoDB client not initialized, skipping sync\")\n            except Exception as e:\n                # Don't fail the request if DB write fails; log for diagnostics\n                print(f\"[Auth DB] Failed to upsert user: {e}\")\n            return f(*args, **kwargs)\n        except Exception as e:\n            print(f\"[Token Error] {str(e)}\")\n            return jsonify({\"error\": \"Invalid token\", \"details\": str(e)}), 401\n\n    return decorated_function\n",
+          "size_bytes": 4846,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "print\\(",
+              "line_number": 20,
+              "line_snippet": "print(f\"[Firebase] Warning: {cred_path} is missing or empty. Using default credentials.\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 23,
+              "line_snippet": "print(f\"[Firebase] Error initializing Firebase Admin SDK: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 39,
+              "line_snippet": "print(\"[MongoDB] Connected successfully\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 41,
+              "line_snippet": "print(f\"[MongoDB] Initial connection failed: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 54,
+              "line_snippet": "print(\"[Auth] Bypass enabled (CHATBOT_BYPASS_AUTH or FLASK_ENV=development) \u2014 skipping token verification (dev only)\")"
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 70,
+              "line_snippet": "id_token = parts[1]"
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 73,
+              "line_snippet": "decoded_token = auth.verify_id_token(id_token)"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 75,
+              "line_snippet": "print(f\"[Auth Warning] Primary verification failed: {primary_err}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 90,
+              "line_snippet": "print(f\"[Auth DB] Syncing user {decoded_token['uid']} to collection 'users' in db '{db.name}'\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 101,
+              "line_snippet": "print(f\"[Auth DB] Upsert successful: {result.upserted_id or 'Updated existing'}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 103,
+              "line_snippet": "print(\"[Auth DB] MongoDB client not initialized, skipping sync\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 106,
+              "line_snippet": "print(f\"[Auth DB] Failed to upsert user: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 109,
+              "line_snippet": "print(f\"[Token Error] {str(e)}\")"
+            }
+          ],
+          "debt_signal_count": 13,
+          "metrics": {
+            "total_lines": 112,
+            "code_lines": 91,
+            "blank_lines": 14,
+            "comment_lines": 7,
+            "comment_ratio": 0.062,
+            "max_indentation_depth": 7,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/README.md",
+          "language": "markdown",
+          "content": "Frontend (React + Vite)\n\nInstall and run:\n\n```\ncd frontend\nnpm install\nnpm run dev\n```\n\nPages:\n- Landing: `/` (src/pages/Landing.jsx)\n- Login: `/login` (stub)\n- Signup: `/signup` (stub)\n\nFirebase client config is in `src/firebase.js`.\n",
+          "size_bytes": 235,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 16,
+            "code_lines": 12,
+            "blank_lines": 4,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/index.html",
+          "language": "html",
+          "content": "<!doctype html>\n<html>\n\n<head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Ummeed</title>\n</head>\n\n<body>\n    <div id=\"root\"></div>\n    <script type=\"module\" src=\"/src/main.jsx\"></script>\n</body>\n\n</html>",
+          "size_bytes": 277,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 15,
+            "code_lines": 12,
+            "blank_lines": 3,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 1,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/App.jsx",
+          "language": "jsx",
+          "content": "import React from 'react'\nimport Landing from './pages/Landing'\nimport Login from './pages/Login'\nimport Signup from './pages/Signup'\nimport Home from './pages/Home'\nimport HowItWorks from './pages/HowItWorks'\nimport Programs from './pages/Programs'\nimport Stories from './pages/Stories'\nimport Donate from './pages/Donate'\nimport VolunteerForm from './pages/VolunteerForm'\n\nexport default function App() {\n    const path = window.location.pathname\n\n    if (path === '/home') {\n        return <Home />\n    }\n\n    if (path === '/how-it-works') {\n        return <HowItWorks />\n    }\n\n    if (path === '/programs') {\n        return <Programs />\n    }\n\n    if (path === '/stories') {\n        return <Stories />\n    }\n\n    if (path === '/donate') {\n        return <Donate />\n    }\n\n    if (path === '/volunteer') {\n        return <VolunteerForm />\n    }\n\n    if (path === '/login') {\n        return <Login />\n    }\n\n    if (path === '/signup') {\n        return <Signup />\n    }\n\n    return <Landing />\n}\n",
+          "size_bytes": 999,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 48,
+            "code_lines": 38,
+            "blank_lines": 10,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 2,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/firebase.js",
+          "language": "javascript",
+          "content": "// Firebase client config\nimport { initializeApp } from \"firebase/app\";\nimport { getAuth, GoogleAuthProvider, signInWithPopup } from \"firebase/auth\";\n\nconst firebaseConfig = {\n    apiKey: \"AIzaSyDLV6-DJTOqlxNv6Lc79LrM-kpwpLUGEpw\",\n    authDomain: \"ritconnect-f4c31.firebaseapp.com\",\n    projectId: \"ritconnect-f4c31\",\n    storageBucket: \"ritconnect-f4c31.firebasestorage.app\",\n    messagingSenderId: \"440809006695\",\n    appId: \"1:440809006695:web:a6565823de9a4eb35716c2\",\n    measurementId: \"G-K22HEHMNVK\"\n};\n\nconst app = initializeApp(firebaseConfig);\nexport const auth = getAuth(app);\nexport const googleProvider = new GoogleAuthProvider();\n\nexport async function signInWithGoogle() {\n    return signInWithPopup(auth, googleProvider);\n}\n\nexport default app;\n",
+          "size_bytes": 760,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 23,
+            "code_lines": 18,
+            "blank_lines": 4,
+            "comment_lines": 1,
+            "comment_ratio": 0.043,
+            "max_indentation_depth": 1,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/main.jsx",
+          "language": "jsx",
+          "content": "import React from 'react'\nimport { createRoot } from 'react-dom/client'\nimport App from './App'\nimport './styles.css'\n\ncreateRoot(document.getElementById('root')).render(<App />)\n",
+          "size_bytes": 179,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 6,
+            "code_lines": 5,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/pages/Landing.jsx",
+          "language": "jsx",
+          "content": "import React from 'react'\n\nconst heroHtml = `\n<nav>\n    <div class=\"logo\">Ummeed<span>.</span></div>\n    <ul>\n        <li><a href=\"#how\">How It Works</a></li>\n        <li><a href=\"#programs\">Programs</a></li>\n        <li><a href=\"#stories\">Stories</a></li>\n        <li><a href=\"#volunteer\">Volunteer</a></li>\n        <li><a href=\"/login\" class=\"nav-cta\">Login</a></li>\n    </ul>\n</nav>\n<section class=\"hero\">\n    <div class=\"hero-bg\"></div>\n    <div class=\"hero-content\">\n        <div class=\"hero-tag\">\ud83c\udf3f Welfare &amp; Community Care</div>\n        <h1>Spreading <em>hope</em> to those who need it most</h1>\n        <p>Ummeed connects welfare centers, volunteers, and communities \u2014 bringing food, shelter, education, and healing to vulnerable hearts across India.</p>\n        <div class=\"hero-btns\">\n            <a href=\"/signup\" class=\"btn-primary\">Get Started</a>\n            <a href=\"#programs\" class=\"btn-secondary\">Explore Programs</a>\n        </div>\n    </div>\n</section>\n`\n\nexport default function Landing() {\n    return <div dangerouslySetInnerHTML={{ __html: heroHtml }} />\n}\n",
+          "size_bytes": 1088,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 30,
+            "code_lines": 28,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/pages/Login.jsx",
+          "language": "jsx",
+          "content": "import React, { useState } from 'react'\nimport { signInWithGoogle } from '../firebase'\n\nexport default function Login() {\n    const [error, setError] = useState('')\n\n    const handleGoogleLogin = async () => {\n        try {\n            setError('')\n            const result = await signInWithGoogle()\n            const user = result.user\n            const token = await user.getIdToken()\n\n            // Sync with backend\n            const response = await fetch('http://localhost:5000/api/auth/sync', {\n                method: 'POST',\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                }\n            })\n\n            if (!response.ok) {\n                throw new Error('Failed to sync with backend')\n            }\n\n            window.location.href = '/home'\n        } catch (err) {\n            setError(err?.message || 'Google sign-in failed')\n        }\n    }\n\n    return (\n        <div className=\"auth-page\">\n            <form className=\"auth-form\" onSubmit={(event) => event.preventDefault()}>\n                <h2>Login</h2>\n                <button type=\"button\" className=\"button google-button\" onClick={handleGoogleLogin}>\n                    Continue with Google\n                </button>\n                {error ? <p className=\"auth-error\">{error}</p> : null}\n                <label>Email</label>\n                <input type=\"email\" />\n                <label>Password</label>\n                <input type=\"password\" />\n                <button type=\"submit\" className=\"button\" onClick={() => (window.location.href = '/home')}>\n                    Login\n                </button>\n            </form>\n        </div>\n    )\n}\n",
+          "size_bytes": 1672,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "token\\s*=",
+              "line_number": 12,
+              "line_snippet": "const token = await user.getIdToken()"
+            }
+          ],
+          "debt_signal_count": 1,
+          "metrics": {
+            "total_lines": 50,
+            "code_lines": 43,
+            "blank_lines": 6,
+            "comment_lines": 1,
+            "comment_ratio": 0.02,
+            "max_indentation_depth": 5,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/pages/Programs.jsx",
+          "language": "jsx",
+          "content": "import React from 'react'\n\nexport default function Programs() {\n    return (\n        <div style={{ padding: '4rem', textAlign: 'center', fontFamily: 'Inter, sans-serif' }}>\n            <h1 style={{ color: '#204155' }}>Our Programs</h1>\n            <p style={{ color: '#5a4a38', marginTop: '1rem' }}>This page is coming soon. We are building something impactful for you.</p>\n            <a href=\"/home\" style={{ display: 'inline-block', marginTop: '2rem', padding: '0.8rem 1.5rem', background: '#c4714a', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 600 }}>Go Back to Home</a>\n        </div>\n    )\n}\n",
+          "size_bytes": 627,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 11,
+            "code_lines": 10,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/pages/Signup.jsx",
+          "language": "jsx",
+          "content": "import React, { useState } from 'react'\nimport { signInWithGoogle } from '../firebase'\n\nexport default function Signup() {\n    const [error, setError] = useState('')\n\n    const handleGoogleSignup = async () => {\n        try {\n            setError('')\n            const result = await signInWithGoogle()\n            const user = result.user\n            const token = await user.getIdToken()\n\n            // Sync with backend\n            const response = await fetch('http://localhost:5000/api/auth/sync', {\n                method: 'POST',\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                }\n            })\n\n            if (!response.ok) {\n                throw new Error('Failed to sync with backend')\n            }\n\n            window.location.href = '/home'\n        } catch (err) {\n            setError(err?.message || 'Google sign-up failed')\n        }\n    }\n\n    return (\n        <div className=\"auth-page\">\n            <form className=\"auth-form auth-form--signup\" onSubmit={(event) => event.preventDefault()}>\n                <p className=\"auth-kicker\">Ummeed</p>\n                <h2>Create your account</h2>\n                <p className=\"auth-subcopy\">Join volunteers, donors, and welfare centers working together for NGOs, orphanages, animal welfare, and elder care.</p>\n                <button type=\"button\" className=\"button google-button\" onClick={handleGoogleSignup}>\n                    Sign up with Google\n                </button>\n                {error ? <p className=\"auth-error\">{error}</p> : null}\n                <label>Name</label>\n                <input placeholder=\"Your name\" />\n                <label>Email</label>\n                <input type=\"email\" placeholder=\"you@example.com\" />\n                <label>Password</label>\n                <input type=\"password\" placeholder=\"Create a password\" />\n                <button type=\"submit\" className=\"button\" onClick={() => (window.location.href = '/home')}>\n                    Create account\n                </button>\n            </form>\n        </div>\n    )\n}\n",
+          "size_bytes": 2081,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "token\\s*=",
+              "line_number": 12,
+              "line_snippet": "const token = await user.getIdToken()"
+            }
+          ],
+          "debt_signal_count": 1,
+          "metrics": {
+            "total_lines": 54,
+            "code_lines": 47,
+            "blank_lines": 6,
+            "comment_lines": 1,
+            "comment_ratio": 0.019,
+            "max_indentation_depth": 5,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/pages/Stories.jsx",
+          "language": "jsx",
+          "content": "import React from 'react'\n\nexport default function Stories() {\n    return (\n        <div style={{ padding: '4rem', textAlign: 'center', fontFamily: 'Inter, sans-serif' }}>\n            <h1 style={{ color: '#204155' }}>Stories of Hope</h1>\n            <p style={{ color: '#5a4a38', marginTop: '1rem' }}>This page is coming soon. Real stories from real people are being gathered.</p>\n            <a href=\"/home\" style={{ display: 'inline-block', marginTop: '2rem', padding: '0.8rem 1.5rem', background: '#c4714a', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 600 }}>Go Back to Home</a>\n        </div>\n    )\n}\n",
+          "size_bytes": 634,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 11,
+            "code_lines": 10,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/pages/VolunteerForm.jsx",
+          "language": "jsx",
+          "content": "import React, { useState } from 'react'\nimport { auth } from '../firebase'\n\nconst STATES = [\n    \"Andhra Pradesh\", \"Arunachal Pradesh\", \"Assam\", \"Bihar\", \"Chhattisgarh\", \"Goa\", \"Gujarat\", \"Haryana\", \n    \"Himachal Pradesh\", \"Jharkhand\", \"Karnataka\", \"Kerala\", \"Madhya Pradesh\", \"Maharashtra\", \"Manipur\", \n    \"Meghalaya\", \"Mizoram\", \"Nagaland\", \"Odisha\", \"Punjab\", \"Rajasthan\", \"Sikkim\", \"Tamil Nadu\", \"Telangana\", \n    \"Tripura\", \"Uttar Pradesh\", \"Uttarakhand\", \"West Bengal\", \"Andaman and Nicobar Islands\", \"Chandigarh\", \n    \"Dadra and Nagar Haveli and Daman and Diu\", \"Delhi\", \"Jammu and Kashmir\", \"Ladakh\", \"Lakshadweep\", \"Puducherry\"\n]\n\nconst ID_TYPES = [\n    { value: 'aadhaar', label: 'Aadhaar Card' },\n    { value: 'pan', label: 'PAN Card' },\n    { value: 'voter', label: 'Voter ID' },\n    { value: 'dl', label: 'Driving License' }\n]\n\nexport default function VolunteerForm() {\n    const [formData, setFormData] = useState({\n        name: '',\n        dob: '',\n        phone: '',\n        address1: '',\n        address2: '',\n        pin: '',\n        city: '',\n        state: 'Karnataka',\n        idType: 'aadhaar'\n    })\n    const [file, setFile] = useState(null)\n    const [loading, setLoading] = useState(false)\n    const [result, setResult] = useState(null)\n    const [error, setError] = useState('')\n\n    const handleChange = (e) => {\n        setFormData({ ...formData, [e.target.name]: e.target.value })\n    }\n\n    const handleFileChange = (e) => {\n        setFile(e.target.files[0])\n    }\n\n    const handleSubmit = async (e) => {\n        e.preventDefault()\n        if (!file) {\n            setError('Please upload your Government ID.')\n            return\n        }\n        setLoading(true)\n        setError('')\n        setResult(null)\n\n        try {\n            const user = auth.currentUser\n            if (!user) throw new Error('You must be logged in to volunteer.')\n            const token = await user.getIdToken()\n\n            const data = new FormData()\n            data.append('file', file)\n            data.append('name', formData.name)\n            data.append('dob', formData.dob)\n            data.append('idType', formData.idType)\n            data.append('details', JSON.stringify(formData))\n\n            const response = await fetch('http://localhost:5000/api/verify-id', {\n                method: 'POST',\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                },\n                body: data\n            })\n\n            const resData = await response.json()\n            if (!response.ok) throw new Error(resData.error || 'Verification failed.')\n\n            setResult(resData)\n        } catch (err) {\n            setError(err.message)\n        } finally {\n            setLoading(false)\n        }\n    }\n\n    return (\n        <div className=\"seva-page\">\n            <nav>\n                <a href=\"/home\" className=\"logo\">Ummeed<span>.</span></a>\n                <ul>\n                    <li><a href=\"/home\" className=\"nav-cta\">Go Back to Home</a></li>\n                </ul>\n            </nav>\n\n            <section className=\"volunteer-section\">\n                <div className=\"volunteer-container\">\n                    <div className=\"volunteer-header\">\n                        <div className=\"section-tag\">Join the Movement</div>\n                        <h1>Become a <em>Volunteer</em></h1>\n                        <p>Fill in your details and upload a valid government ID for AI verification. This helps us maintain a safe community.</p>\n                    </div>\n\n                    <div className=\"volunteer-form-card\">\n                        <form onSubmit={handleSubmit}>\n                            <div className=\"form-grid\">\n                                <div className=\"form-group\">\n                                    <label>Full Name (as on ID)</label>\n                                    <input type=\"text\" name=\"name\" required value={formData.name} onChange={handleChange} placeholder=\"John Doe\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>Date of Birth (as on ID)</label>\n                                    <input type=\"date\" name=\"dob\" required value={formData.dob} onChange={handleChange} />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>Phone Number</label>\n                                    <input type=\"tel\" name=\"phone\" required value={formData.phone} onChange={handleChange} placeholder=\"+91 98765 43210\" />\n                                </div>\n                                <div className=\"form-group full-width\">\n                                    <label>Address Line 1</label>\n                                    <input type=\"text\" name=\"address1\" required value={formData.address1} onChange={handleChange} placeholder=\"House No, Building Name\" />\n                                </div>\n                                <div className=\"form-group full-width\">\n                                    <label>Address Line 2</label>\n                                    <input type=\"text\" name=\"address2\" value={formData.address2} onChange={handleChange} placeholder=\"Street, Area\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>PIN Code</label>\n                                    <input type=\"text\" name=\"pin\" required value={formData.pin} onChange={handleChange} placeholder=\"560001\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>City</label>\n                                    <input type=\"text\" name=\"city\" required value={formData.city} onChange={handleChange} placeholder=\"Bengaluru\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>State</label>\n                                    <select name=\"state\" value={formData.state} onChange={handleChange}>\n                                        {STATES.map(s => <option key={s} value={s}>{s}</option>)}\n                                    </select>\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>ID Type</label>\n                                    <select name=\"idType\" value={formData.idType} onChange={handleChange}>\n                                        {ID_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}\n                                    </select>\n                                </div>\n                                <div className=\"form-group full-width\">\n                                    <label>Upload Government ID (Image)</label>\n                                    <div className=\"file-upload-area\">\n                                        <input type=\"file\" accept=\"image/*\" onChange={handleFileChange} id=\"id-upload\" hidden />\n                                        <label htmlFor=\"id-upload\" className=\"file-label\">\n                                            {file ? file.name : 'Click to upload ID Card (Aadhaar, PAN, etc.)'}\n                                        </label>\n                                    </div>\n                                </div>\n                            </div>\n\n                            {error && <div className=\"form-error\">{error}</div>}\n\n                            <button type=\"submit\" className=\"volunteer-submit-btn\" disabled={loading}>\n                                {loading ? 'Verifying with AI...' : 'Submit & Verify Identity'}\n                            </button>\n                        </form>\n\n                        {result && (\n                            <div className={`verification-result ${result.verified ? 'success' : 'failure'}`}>\n                                <h3>{result.verified ? '\u2713 Verification Successful' : '\u26a0 Verification Failed'}</h3>\n                                <p>{result.reason}</p>\n                                {result.verified && <p className=\"success-sub\">You are now registered as a volunteer. Welcome to the family!</p>}\n                                {!result.verified && <p className=\"failure-sub\">Please ensure the image is clear and details match your input.</p>}\n                            </div>\n                        )}\n                    </div>\n                </div>\n            </section>\n        </div>\n    )\n}\n",
+          "size_bytes": 8608,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "token\\s*=",
+              "line_number": 57,
+              "line_snippet": "const token = await user.getIdToken()"
+            }
+          ],
+          "debt_signal_count": 1,
+          "metrics": {
+            "total_lines": 176,
+            "code_lines": 159,
+            "blank_lines": 17,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 11,
+            "long_functions_detected": [
+              {
+                "approximate_start_line": 44,
+                "approximate_length_lines": 133,
+                "first_line": "const handleSubmit = async (e) => {"
+              }
+            ],
+            "long_function_count": 1
+          }
+        },
+        {
+          "path": "frontend/vite.config.js",
+          "language": "javascript",
+          "content": "import { defineConfig } from 'vite'\nimport react from '@vitejs/plugin-react'\n\nexport default defineConfig({\n    plugins: [react()],\n    server: {\n        headers: {\n            'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',\n        },\n    },\n})\n",
+          "size_bytes": 256,
+          "debt_category_hint": "architecture",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 11,
+            "code_lines": 10,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        }
+      ]
+    },
+    "analyze": {
+      "repo_id": "dd59fe89",
+      "repo_url": "Sunidhishree/googlexramaiah",
+      "branch_name": "main",
+      "vulnerabilities": [
+        {
+          "type": "DEBUG_LOGGING",
+          "severity": "LOW",
+          "file": "backend/auth.py",
+          "line_range": "20",
+          "code_snippet": "print(f\"[Firebase] Warning: {cred_path} is missing or empty. Using default credentials.\")",
+          "explanation": "Debug print statements in production code.",
+          "business_impact": "May leak sensitive data to logs; indicates lack of structured logging.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Replace print() with a structured logger (logging module).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "DEBUG_LOGGING",
+          "severity": "LOW",
+          "file": "backend/auth.py",
+          "line_range": "23",
+          "code_snippet": "print(f\"[Firebase] Error initializing Firebase Admin SDK: {e}\")",
+          "explanation": "Debug print statements in production code.",
+          "business_impact": "May leak sensitive data to logs; indicates lack of structured logging.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Replace print() with a structured logger (logging module).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "DEBUG_LOGGING",
+          "severity": "LOW",
+          "file": "backend/auth.py",
+          "line_range": "39",
+          "code_snippet": "print(\"[MongoDB] Connected successfully\")",
+          "explanation": "Debug print statements in production code.",
+          "business_impact": "May leak sensitive data to logs; indicates lack of structured logging.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Replace print() with a structured logger (logging module).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "DEBUG_LOGGING",
+          "severity": "LOW",
+          "file": "backend/auth.py",
+          "line_range": "41",
+          "code_snippet": "print(f\"[MongoDB] Initial connection failed: {e}\")",
+          "explanation": "Debug print statements in production code.",
+          "business_impact": "May leak sensitive data to logs; indicates lack of structured logging.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Replace print() with a structured logger (logging module).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "DEBUG_LOGGING",
+          "severity": "LOW",
+          "file": "backend/auth.py",
+          "line_range": "54",
+          "code_snippet": "print(\"[Auth] Bypass enabled (CHATBOT_BYPASS_AUTH or FLASK_ENV=development) \u2014 skipping token verification (dev only)\")",
+          "explanation": "Debug print statements in production code.",
+          "business_impact": "May leak sensitive data to logs; indicates lack of structured logging.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Replace print() with a structured logger (logging module).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "backend/auth.py",
+          "line_range": "70",
+          "code_snippet": "id_token = parts[1]",
+          "explanation": "Hardcoded token detected.",
+          "business_impact": "Token exposure \u2014 may allow unauthorized access to third-party services.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Move token to .env file, add .env to .gitignore.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "backend/auth.py",
+          "line_range": "73",
+          "code_snippet": "decoded_token = auth.verify_id_token(id_token)",
+          "explanation": "Hardcoded token detected.",
+          "business_impact": "Token exposure \u2014 may allow unauthorized access to third-party services.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Move token to .env file, add .env to .gitignore.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "DEBUG_LOGGING",
+          "severity": "LOW",
+          "file": "backend/auth.py",
+          "line_range": "75",
+          "code_snippet": "print(f\"[Auth Warning] Primary verification failed: {primary_err}\")",
+          "explanation": "Debug print statements in production code.",
+          "business_impact": "May leak sensitive data to logs; indicates lack of structured logging.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Replace print() with a structured logger (logging module).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "DEBUG_LOGGING",
+          "severity": "LOW",
+          "file": "backend/auth.py",
+          "line_range": "90",
+          "code_snippet": "print(f\"[Auth DB] Syncing user {decoded_token['uid']} to collection 'users' in db '{db.name}'\")",
+          "explanation": "Debug print statements in production code.",
+          "business_impact": "May leak sensitive data to logs; indicates lack of structured logging.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Replace print() with a structured logger (logging module).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "DEBUG_LOGGING",
+          "severity": "LOW",
+          "file": "backend/auth.py",
+          "line_range": "101",
+          "code_snippet": "print(f\"[Auth DB] Upsert successful: {result.upserted_id or 'Updated existing'}\")",
+          "explanation": "Debug print statements in production code.",
+          "business_impact": "May leak sensitive data to logs; indicates lack of structured logging.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Replace print() with a structured logger (logging module).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "DEBUG_LOGGING",
+          "severity": "LOW",
+          "file": "backend/auth.py",
+          "line_range": "103",
+          "code_snippet": "print(\"[Auth DB] MongoDB client not initialized, skipping sync\")",
+          "explanation": "Debug print statements in production code.",
+          "business_impact": "May leak sensitive data to logs; indicates lack of structured logging.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Replace print() with a structured logger (logging module).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "DEBUG_LOGGING",
+          "severity": "LOW",
+          "file": "backend/auth.py",
+          "line_range": "106",
+          "code_snippet": "print(f\"[Auth DB] Failed to upsert user: {e}\")",
+          "explanation": "Debug print statements in production code.",
+          "business_impact": "May leak sensitive data to logs; indicates lack of structured logging.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Replace print() with a structured logger (logging module).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "DEBUG_LOGGING",
+          "severity": "LOW",
+          "file": "backend/auth.py",
+          "line_range": "109",
+          "code_snippet": "print(f\"[Token Error] {str(e)}\")",
+          "explanation": "Debug print statements in production code.",
+          "business_impact": "May leak sensitive data to logs; indicates lack of structured logging.",
+          "estimated_minutes_to_fix": 5,
+          "remediation": "Replace print() with a structured logger (logging module).",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "frontend/src/pages/Login.jsx",
+          "line_range": "12",
+          "code_snippet": "const token = await user.getIdToken()",
+          "explanation": "Hardcoded token detected.",
+          "business_impact": "Token exposure \u2014 may allow unauthorized access to third-party services.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Move token to .env file, add .env to .gitignore.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "frontend/src/pages/Signup.jsx",
+          "line_range": "12",
+          "code_snippet": "const token = await user.getIdToken()",
+          "explanation": "Hardcoded token detected.",
+          "business_impact": "Token exposure \u2014 may allow unauthorized access to third-party services.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Move token to .env file, add .env to .gitignore.",
+          "source": "static_analysis"
+        },
+        {
+          "type": "HARDCODED_SECRET",
+          "severity": "HIGH",
+          "file": "frontend/src/pages/VolunteerForm.jsx",
+          "line_range": "57",
+          "code_snippet": "const token = await user.getIdToken()",
+          "explanation": "Hardcoded token detected.",
+          "business_impact": "Token exposure \u2014 may allow unauthorized access to third-party services.",
+          "estimated_minutes_to_fix": 10,
+          "remediation": "Move token to .env file, add .env to .gitignore.",
+          "source": "static_analysis"
+        }
+      ],
+      "vulnerable_files": [
+        {
+          "file": "backend/auth.py",
+          "type": "app",
+          "count": 4
+        },
+        {
+          "file": "backend/auth.py",
+          "type": "app",
+          "count": 9
+        },
+        {
+          "file": "frontend/src/pages/Login.jsx",
+          "type": "app",
+          "count": 1
+        },
+        {
+          "file": "frontend/src/pages/Signup.jsx",
+          "type": "app",
+          "count": 1
+        },
+        {
+          "file": "frontend/src/pages/VolunteerForm.jsx",
+          "type": "app",
+          "count": 1
+        }
+      ],
+      "total_files_analyzed": 21,
+      "files_with_issues": 5,
+      "total_vulnerabilities": 16,
+      "cost_tracker": {
+        "api_calls": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "estimated_cost": 0.0
+      },
+      "billing": {
+        "calls_made": 0,
+        "free_calls_remaining": 100,
+        "estimated_cost": 0.0,
+        "will_be_charged": false,
+        "alternatives": [
+          {
+            "name": "SonarQube Community",
+            "cost": "Free",
+            "url": "https://www.sonarqube.org/"
+          },
+          {
+            "name": "GitHub CodeQL",
+            "cost": "Free (open source)",
+            "url": "https://codeql.github.com/"
+          },
+          {
+            "name": "Snyk",
+            "cost": "$50+/month",
+            "url": "https://snyk.io/"
+          },
+          {
+            "name": "Checkmarx",
+            "cost": "Enterprise pricing",
+            "url": "https://checkmarx.com/"
+          }
+        ]
+      },
+      "chunks_scanned": 21,
+      "total_files": 17
+    },
+    "score": {
+      "repo_id": "dd59fe89",
+      "repo_url": "Sunidhishree/googlexramaiah",
+      "health_score": 100,
+      "chunks_scanned": 21,
+      "total_files": 17,
+      "analysis": {
+        "total_security_issues": 0,
+        "total_debt_issues": 0,
+        "critical_issues": 0,
+        "quick_wins": 0
+      },
+      "findings": {
+        "security_findings": [],
+        "debt_findings": [],
+        "security_by_severity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "debt_by_severity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "quick_wins": [],
+        "critical_issues": []
+      },
+      "recommendations": [],
+      "scoring_metadata": {
+        "scoring_version": "1.0",
+        "scoring_algorithm": "weighted_penalty",
+        "max_score": 100,
+        "min_score": 0
+      }
+    }
+  },
+  "data": {
+    "total_files_fetched": 17,
+    "config_files": 1,
+    "dependency_files": 2,
+    "source_files": 14,
+    "total_chunks": 21,
+    "files_by_category": {
+      "config": [
+        {
+          "path": "frontend/vite.config.js",
+          "language": "javascript",
+          "content": "import { defineConfig } from 'vite'\nimport react from '@vitejs/plugin-react'\n\nexport default defineConfig({\n    plugins: [react()],\n    server: {\n        headers: {\n            'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',\n        },\n    },\n})\n",
+          "size_bytes": 256,
+          "debt_category_hint": "architecture",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 11,
+            "code_lines": 10,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        }
+      ],
+      "dependencies": [
+        {
+          "path": "backend/requirements.txt",
+          "language": "txt",
+          "content": "Flask>=2.0\npython-dotenv>=0.19\nfirebase-admin>=6.0\npymongo>=4.0\nflask-cors>=3.0\npytesseract\nPillow\nopencv-python-headless\nthefuzz\npython-Levenshtein\n\n",
+          "size_bytes": 150,
+          "debt_category_hint": "dependencies",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 11,
+            "code_lines": 10,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/package.json",
+          "language": "json",
+          "content": "{\n    \"name\": \"frontend\",\n    \"version\": \"0.0.1\",\n    \"private\": true,\n    \"scripts\": {\n        \"dev\": \"vite\",\n        \"build\": \"vite build\",\n        \"preview\": \"vite preview\"\n    },\n    \"dependencies\": {\n        \"firebase\": \"^10.13.2\",\n        \"leaflet\": \"^1.9.4\",\n        \"razorpay\": \"^2.9.6\",\n        \"react\": \"^18.2.0\",\n        \"react-dom\": \"^18.2.0\"\n    },\n    \"devDependencies\": {\n        \"@vitejs/plugin-react\": \"^4.0.0\",\n        \"vite\": \"^5.0.0\"\n    }\n}\n",
+          "size_bytes": 462,
+          "debt_category_hint": "dependencies",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 21,
+            "code_lines": 21,
+            "blank_lines": 0,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 2,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        }
+      ],
+      "source_code": [
+        {
+          "path": "backend/README.md",
+          "language": "markdown",
+          "content": "Flask backend for the project\n\n- Copy your Firebase service account JSON to `firebase-credentials.json` (do NOT commit it).\n- Copy `.env.example` to `.env` and fill in real credentials (do NOT commit `.env`).\n\nInstall and run:\n\n```\npython -m venv venv\nvenv\\Scripts\\activate\npip install -r requirements.txt\nset FLASK_APP=app.py\nset FLASK_ENV=development\nflask run\n```\n",
+          "size_bytes": 367,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 15,
+            "code_lines": 12,
+            "blank_lines": 3,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "backend/app.py",
+          "language": "python",
+          "content": "import os\nimport re\nimport cv2\nimport pytesseract\nfrom PIL import Image\nfrom thefuzz import fuzz\nfrom flask import Flask, jsonify, request\nfrom flask_cors import CORS\nfrom werkzeug.utils import secure_filename\nfrom auth import verify_firebase_token\nfrom dotenv import load_dotenv\n\nload_dotenv()\n\n# Tesseract path from user request\npytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_CMD', r\"C:\\Program Files\\Tesseract-OCR\\tesseract.exe\")\n\napp = Flask(__name__)\nCORS(app, resources={r\"/api/*\": {\"origins\": \"*\"}}, supports_credentials=True)\n\nUPLOAD_FOLDER = 'uploads'\nif not os.path.exists(UPLOAD_FOLDER):\n    os.makedirs(UPLOAD_FOLDER)\n\napp.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER\n\n# ID Regex Patterns\nID_PATTERNS = {\n    'aadhaar': r'\\d{4}\\s?\\d{4}\\s?\\d{4}',\n    'pan': r'[A-Z]{5}[0-9]{4}[A-Z]',\n    'voter': r'[A-Z]{3}[0-9]{7}',\n    'dl': r'^[A-Z]{2}[0-9]{2}\\s?[0-9]{11}$'\n}\n\nGOVT_KEYWORDS = ['government', 'india', 'income tax', 'election commission', 'unique identification', 'aadhaar', 'permanent account number', 'driving license']\n\ndef extract_text(image_path):\n    # Basic image processing with OpenCV\n    img = cv2.imread(image_path)\n    if img is None:\n        return \"\"\n    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\n    # Applying thresholding for better OCR\n    thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]\n    \n    text = pytesseract.image_to_string(thresh)\n    return text.lower()\n\n@app.route('/api/verify-id', methods=['POST'])\n@verify_firebase_token\ndef verify_id():\n    if 'file' not in request.files:\n        return jsonify({'error': 'No file uploaded'}), 400\n    \n    file = request.files['file']\n    id_type = request.form.get('idType', '').lower()\n    user_name = request.form.get('name', '').lower()\n    user_dob = request.form.get('dob', '') # Expected YYYY-MM-DD\n    \n    # Convert YYYY-MM-DD to common ID formats for searching\n    dob_formats = []\n    if user_dob:\n        parts = user_dob.split('-')\n        if len(parts) == 3:\n            y, m, d = parts\n            dob_formats = [f\"{d}/{m}/{y}\", f\"{d}-{m}-{y}\", f\"{d} {m} {y}\", user_dob]\n\n    if file.filename == '':\n        return jsonify({'error': 'No file selected'}), 400\n\n    filename = \"id.png\" # Fixed name as requested\n    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)\n    file.save(filepath)\n\n    try:\n        extracted_text = extract_text(filepath)\n        \n        # 1. Check for Govt Keywords\n        has_govt_keyword = any(keyword in extracted_text for keyword in GOVT_KEYWORDS)\n        \n        # 2. Check Regex Pattern\n        pattern = ID_PATTERNS.get(id_type)\n        id_match = False\n        if pattern:\n            id_match = bool(re.search(pattern, extracted_text.upper()))\n        \n        # 3. Fuzzy match name\n        name_score = fuzz.token_set_ratio(user_name, extracted_text)\n\n        # 4. Check DOB\n        dob_match = any(fmt in extracted_text for fmt in dob_formats) if dob_formats else True # Default to true if not provided\n        \n        # Verification Logic\n        is_verified = False\n        reason = \"\"\n        \n        if not has_govt_keyword and not id_match:\n            reason = \"Document does not appear to be a valid government ID.\"\n        elif id_type in ID_PATTERNS and not id_match:\n            reason = f\"Could not find a valid {id_type.upper()} number format.\"\n        elif name_score < 70:\n            reason = f\"Name on ID does not match the entered name ({name_score}% match).\"\n        elif not dob_match:\n            reason = \"Date of Birth on ID does not match the entered date.\"\n        else:\n            is_verified = True\n            reason = \"Identity verified successfully via AI.\"\n\n        return jsonify({\n            'verified': is_verified,\n            'reason': reason,\n            'ocr_text': extracted_text[:200] + \"...\" if len(extracted_text) > 200 else extracted_text,\n            'debug': {\n                'has_govt_keyword': has_govt_keyword,\n                'id_match': id_match,\n                'name_score': name_score,\n                'dob_match': dob_match\n            }\n        })\n\n\n    except Exception as e:\n        return jsonify({'error': str(e)}), 500\n\n@app.route('/api')\ndef index():\n    return jsonify({'status': 'ok'})\n\n@app.route('/api/auth/sync', methods=['POST'])\n@verify_firebase_token\ndef sync_user():\n    user = getattr(request, 'user', None)\n    return jsonify({'status': 'synced', 'user': user})\n\nif __name__ == '__main__':\n    port = int(os.getenv('PORT', 5000))\n    app.run(host='0.0.0.0', port=port, debug=os.getenv('FLASK_DEBUG', 'False') == 'True')\n\n",
+          "size_bytes": 4587,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 138,
+            "code_lines": 100,
+            "blank_lines": 28,
+            "comment_lines": 10,
+            "comment_ratio": 0.072,
+            "max_indentation_depth": 4,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "backend/auth.py",
+          "language": "python",
+          "content": "import os\nfrom functools import wraps\nfrom flask import jsonify, request\nimport firebase_admin\nfrom firebase_admin import auth, credentials\nfrom datetime import datetime\ntry:\n    from pymongo import MongoClient\nexcept Exception:\n    MongoClient = None\n\n# Initialize Firebase Admin SDK\ncred_path = os.getenv(\"FIREBASE_CREDENTIALS_PATH\") or os.path.join(os.path.dirname(__file__), 'firebase-credentials.json')\nif not firebase_admin._apps:\n    try:\n        if os.path.exists(cred_path) and os.path.getsize(cred_path) > 0:\n            cred = credentials.Certificate(cred_path)\n            firebase_admin.initialize_app(cred)\n        else:\n            print(f\"[Firebase] Warning: {cred_path} is missing or empty. Using default credentials.\")\n            firebase_admin.initialize_app()\n    except Exception as e:\n        print(f\"[Firebase] Error initializing Firebase Admin SDK: {e}\")\n        # Initialize without credentials to let the app start (will fail on auth calls, but not on startup)\n        try:\n            firebase_admin.initialize_app()\n        except:\n            pass\n\n# Initialize MongoDB Client once\nmongo_client = None\nmongo_uri = os.getenv('MONGODB_URI')\nif mongo_uri:\n    try:\n        from pymongo import MongoClient\n        mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)\n        # Test connection\n        mongo_client.admin.command('ping')\n        print(\"[MongoDB] Connected successfully\")\n    except Exception as e:\n        print(f\"[MongoDB] Initial connection failed: {e}\")\n        mongo_client = None\n\n\ndef verify_firebase_token(f):\n    \"\"\"Verify a Firebase ID token using the Firebase Admin SDK.\"\"\"\n    @wraps(f)\n    def decorated_function(*args, **kwargs):\n        # Development bypass: when set, skip token verification and inject a dev user.\n        try:\n            bypass_env = os.getenv(\"CHATBOT_BYPASS_AUTH\", \"false\").lower() in (\"1\", \"true\", \"yes\")\n            flask_env = os.getenv(\"FLASK_ENV\", \"\").lower()\n            if bypass_env or flask_env == \"development\":\n                print(\"[Auth] Bypass enabled (CHATBOT_BYPASS_AUTH or FLASK_ENV=development) \u2014 skipping token verification (dev only)\")\n                request.user = {\"uid\": \"dev_bypass_user\", \"email\": \"dev@local\"}\n                return f(*args, **kwargs)\n        except Exception:\n            pass\n\n        auth_header = request.headers.get(\"Authorization\")\n\n        if not auth_header:\n            return jsonify({\"error\": \"Missing authorization header\"}), 401\n\n        try:\n            parts = auth_header.split(\" \")\n            if len(parts) != 2 or parts[0].lower() != \"bearer\":\n                return jsonify({\"error\": \"Invalid authorization header format\"}), 401\n\n            id_token = parts[1]\n\n            try:\n                decoded_token = auth.verify_id_token(id_token)\n            except Exception as primary_err:\n                print(f\"[Auth Warning] Primary verification failed: {primary_err}\")\n                return jsonify({\"error\": \"Invalid token\", \"details\": str(primary_err)}), 401\n\n            if \"uid\" not in decoded_token:\n                decoded_token[\"uid\"] = decoded_token.get(\"user_id\") or decoded_token.get(\"sub\")\n\n            request.user = decoded_token\n\n            # Persist or update user record in MongoDB if available\n            try:\n                if mongo_client:\n                    db_name = os.getenv('MONGODB_DB', 'ummeed')\n                    db = mongo_client[db_name]\n                    users = db.get_collection('users')\n                    \n                    print(f\"[Auth DB] Syncing user {decoded_token['uid']} to collection 'users' in db '{db.name}'\")\n                    result = users.update_one(\n                        {\"uid\": decoded_token[\"uid\"]},\n                        {\"$set\": {\n                            \"email\": decoded_token.get('email'),\n                            \"name\": decoded_token.get('name') or decoded_token.get('display_name'),\n                            \"provider\": decoded_token.get('firebase', {}).get('sign_in_provider') if isinstance(decoded_token.get('firebase'), dict) else None,\n                            \"last_seen\": datetime.utcnow()\n                        }},\n                        upsert=True\n                    )\n                    print(f\"[Auth DB] Upsert successful: {result.upserted_id or 'Updated existing'}\")\n                else:\n                    print(\"[Auth DB] MongoDB client not initialized, skipping sync\")\n            except Exception as e:\n                # Don't fail the request if DB write fails; log for diagnostics\n                print(f\"[Auth DB] Failed to upsert user: {e}\")\n            return f(*args, **kwargs)\n        except Exception as e:\n            print(f\"[Token Error] {str(e)}\")\n            return jsonify({\"error\": \"Invalid token\", \"details\": str(e)}), 401\n\n    return decorated_function\n",
+          "size_bytes": 4846,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "print\\(",
+              "line_number": 20,
+              "line_snippet": "print(f\"[Firebase] Warning: {cred_path} is missing or empty. Using default credentials.\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 23,
+              "line_snippet": "print(f\"[Firebase] Error initializing Firebase Admin SDK: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 39,
+              "line_snippet": "print(\"[MongoDB] Connected successfully\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 41,
+              "line_snippet": "print(f\"[MongoDB] Initial connection failed: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 54,
+              "line_snippet": "print(\"[Auth] Bypass enabled (CHATBOT_BYPASS_AUTH or FLASK_ENV=development) \u2014 skipping token verification (dev only)\")"
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 70,
+              "line_snippet": "id_token = parts[1]"
+            },
+            {
+              "pattern": "token\\s*=",
+              "line_number": 73,
+              "line_snippet": "decoded_token = auth.verify_id_token(id_token)"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 75,
+              "line_snippet": "print(f\"[Auth Warning] Primary verification failed: {primary_err}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 90,
+              "line_snippet": "print(f\"[Auth DB] Syncing user {decoded_token['uid']} to collection 'users' in db '{db.name}'\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 101,
+              "line_snippet": "print(f\"[Auth DB] Upsert successful: {result.upserted_id or 'Updated existing'}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 103,
+              "line_snippet": "print(\"[Auth DB] MongoDB client not initialized, skipping sync\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 106,
+              "line_snippet": "print(f\"[Auth DB] Failed to upsert user: {e}\")"
+            },
+            {
+              "pattern": "print\\(",
+              "line_number": 109,
+              "line_snippet": "print(f\"[Token Error] {str(e)}\")"
+            }
+          ],
+          "debt_signal_count": 13,
+          "metrics": {
+            "total_lines": 112,
+            "code_lines": 91,
+            "blank_lines": 14,
+            "comment_lines": 7,
+            "comment_ratio": 0.062,
+            "max_indentation_depth": 7,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/README.md",
+          "language": "markdown",
+          "content": "Frontend (React + Vite)\n\nInstall and run:\n\n```\ncd frontend\nnpm install\nnpm run dev\n```\n\nPages:\n- Landing: `/` (src/pages/Landing.jsx)\n- Login: `/login` (stub)\n- Signup: `/signup` (stub)\n\nFirebase client config is in `src/firebase.js`.\n",
+          "size_bytes": 235,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 16,
+            "code_lines": 12,
+            "blank_lines": 4,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/index.html",
+          "language": "html",
+          "content": "<!doctype html>\n<html>\n\n<head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Ummeed</title>\n</head>\n\n<body>\n    <div id=\"root\"></div>\n    <script type=\"module\" src=\"/src/main.jsx\"></script>\n</body>\n\n</html>",
+          "size_bytes": 277,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 15,
+            "code_lines": 12,
+            "blank_lines": 3,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 1,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/App.jsx",
+          "language": "jsx",
+          "content": "import React from 'react'\nimport Landing from './pages/Landing'\nimport Login from './pages/Login'\nimport Signup from './pages/Signup'\nimport Home from './pages/Home'\nimport HowItWorks from './pages/HowItWorks'\nimport Programs from './pages/Programs'\nimport Stories from './pages/Stories'\nimport Donate from './pages/Donate'\nimport VolunteerForm from './pages/VolunteerForm'\n\nexport default function App() {\n    const path = window.location.pathname\n\n    if (path === '/home') {\n        return <Home />\n    }\n\n    if (path === '/how-it-works') {\n        return <HowItWorks />\n    }\n\n    if (path === '/programs') {\n        return <Programs />\n    }\n\n    if (path === '/stories') {\n        return <Stories />\n    }\n\n    if (path === '/donate') {\n        return <Donate />\n    }\n\n    if (path === '/volunteer') {\n        return <VolunteerForm />\n    }\n\n    if (path === '/login') {\n        return <Login />\n    }\n\n    if (path === '/signup') {\n        return <Signup />\n    }\n\n    return <Landing />\n}\n",
+          "size_bytes": 999,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 48,
+            "code_lines": 38,
+            "blank_lines": 10,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 2,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/firebase.js",
+          "language": "javascript",
+          "content": "// Firebase client config\nimport { initializeApp } from \"firebase/app\";\nimport { getAuth, GoogleAuthProvider, signInWithPopup } from \"firebase/auth\";\n\nconst firebaseConfig = {\n    apiKey: \"AIzaSyDLV6-DJTOqlxNv6Lc79LrM-kpwpLUGEpw\",\n    authDomain: \"ritconnect-f4c31.firebaseapp.com\",\n    projectId: \"ritconnect-f4c31\",\n    storageBucket: \"ritconnect-f4c31.firebasestorage.app\",\n    messagingSenderId: \"440809006695\",\n    appId: \"1:440809006695:web:a6565823de9a4eb35716c2\",\n    measurementId: \"G-K22HEHMNVK\"\n};\n\nconst app = initializeApp(firebaseConfig);\nexport const auth = getAuth(app);\nexport const googleProvider = new GoogleAuthProvider();\n\nexport async function signInWithGoogle() {\n    return signInWithPopup(auth, googleProvider);\n}\n\nexport default app;\n",
+          "size_bytes": 760,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 23,
+            "code_lines": 18,
+            "blank_lines": 4,
+            "comment_lines": 1,
+            "comment_ratio": 0.043,
+            "max_indentation_depth": 1,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/main.jsx",
+          "language": "jsx",
+          "content": "import React from 'react'\nimport { createRoot } from 'react-dom/client'\nimport App from './App'\nimport './styles.css'\n\ncreateRoot(document.getElementById('root')).render(<App />)\n",
+          "size_bytes": 179,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 6,
+            "code_lines": 5,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 0,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/pages/Landing.jsx",
+          "language": "jsx",
+          "content": "import React from 'react'\n\nconst heroHtml = `\n<nav>\n    <div class=\"logo\">Ummeed<span>.</span></div>\n    <ul>\n        <li><a href=\"#how\">How It Works</a></li>\n        <li><a href=\"#programs\">Programs</a></li>\n        <li><a href=\"#stories\">Stories</a></li>\n        <li><a href=\"#volunteer\">Volunteer</a></li>\n        <li><a href=\"/login\" class=\"nav-cta\">Login</a></li>\n    </ul>\n</nav>\n<section class=\"hero\">\n    <div class=\"hero-bg\"></div>\n    <div class=\"hero-content\">\n        <div class=\"hero-tag\">\ud83c\udf3f Welfare &amp; Community Care</div>\n        <h1>Spreading <em>hope</em> to those who need it most</h1>\n        <p>Ummeed connects welfare centers, volunteers, and communities \u2014 bringing food, shelter, education, and healing to vulnerable hearts across India.</p>\n        <div class=\"hero-btns\">\n            <a href=\"/signup\" class=\"btn-primary\">Get Started</a>\n            <a href=\"#programs\" class=\"btn-secondary\">Explore Programs</a>\n        </div>\n    </div>\n</section>\n`\n\nexport default function Landing() {\n    return <div dangerouslySetInnerHTML={{ __html: heroHtml }} />\n}\n",
+          "size_bytes": 1088,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 30,
+            "code_lines": 28,
+            "blank_lines": 2,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/pages/Login.jsx",
+          "language": "jsx",
+          "content": "import React, { useState } from 'react'\nimport { signInWithGoogle } from '../firebase'\n\nexport default function Login() {\n    const [error, setError] = useState('')\n\n    const handleGoogleLogin = async () => {\n        try {\n            setError('')\n            const result = await signInWithGoogle()\n            const user = result.user\n            const token = await user.getIdToken()\n\n            // Sync with backend\n            const response = await fetch('http://localhost:5000/api/auth/sync', {\n                method: 'POST',\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                }\n            })\n\n            if (!response.ok) {\n                throw new Error('Failed to sync with backend')\n            }\n\n            window.location.href = '/home'\n        } catch (err) {\n            setError(err?.message || 'Google sign-in failed')\n        }\n    }\n\n    return (\n        <div className=\"auth-page\">\n            <form className=\"auth-form\" onSubmit={(event) => event.preventDefault()}>\n                <h2>Login</h2>\n                <button type=\"button\" className=\"button google-button\" onClick={handleGoogleLogin}>\n                    Continue with Google\n                </button>\n                {error ? <p className=\"auth-error\">{error}</p> : null}\n                <label>Email</label>\n                <input type=\"email\" />\n                <label>Password</label>\n                <input type=\"password\" />\n                <button type=\"submit\" className=\"button\" onClick={() => (window.location.href = '/home')}>\n                    Login\n                </button>\n            </form>\n        </div>\n    )\n}\n",
+          "size_bytes": 1672,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "token\\s*=",
+              "line_number": 12,
+              "line_snippet": "const token = await user.getIdToken()"
+            }
+          ],
+          "debt_signal_count": 1,
+          "metrics": {
+            "total_lines": 50,
+            "code_lines": 43,
+            "blank_lines": 6,
+            "comment_lines": 1,
+            "comment_ratio": 0.02,
+            "max_indentation_depth": 5,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/pages/Programs.jsx",
+          "language": "jsx",
+          "content": "import React from 'react'\n\nexport default function Programs() {\n    return (\n        <div style={{ padding: '4rem', textAlign: 'center', fontFamily: 'Inter, sans-serif' }}>\n            <h1 style={{ color: '#204155' }}>Our Programs</h1>\n            <p style={{ color: '#5a4a38', marginTop: '1rem' }}>This page is coming soon. We are building something impactful for you.</p>\n            <a href=\"/home\" style={{ display: 'inline-block', marginTop: '2rem', padding: '0.8rem 1.5rem', background: '#c4714a', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 600 }}>Go Back to Home</a>\n        </div>\n    )\n}\n",
+          "size_bytes": 627,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 11,
+            "code_lines": 10,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/pages/Signup.jsx",
+          "language": "jsx",
+          "content": "import React, { useState } from 'react'\nimport { signInWithGoogle } from '../firebase'\n\nexport default function Signup() {\n    const [error, setError] = useState('')\n\n    const handleGoogleSignup = async () => {\n        try {\n            setError('')\n            const result = await signInWithGoogle()\n            const user = result.user\n            const token = await user.getIdToken()\n\n            // Sync with backend\n            const response = await fetch('http://localhost:5000/api/auth/sync', {\n                method: 'POST',\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                }\n            })\n\n            if (!response.ok) {\n                throw new Error('Failed to sync with backend')\n            }\n\n            window.location.href = '/home'\n        } catch (err) {\n            setError(err?.message || 'Google sign-up failed')\n        }\n    }\n\n    return (\n        <div className=\"auth-page\">\n            <form className=\"auth-form auth-form--signup\" onSubmit={(event) => event.preventDefault()}>\n                <p className=\"auth-kicker\">Ummeed</p>\n                <h2>Create your account</h2>\n                <p className=\"auth-subcopy\">Join volunteers, donors, and welfare centers working together for NGOs, orphanages, animal welfare, and elder care.</p>\n                <button type=\"button\" className=\"button google-button\" onClick={handleGoogleSignup}>\n                    Sign up with Google\n                </button>\n                {error ? <p className=\"auth-error\">{error}</p> : null}\n                <label>Name</label>\n                <input placeholder=\"Your name\" />\n                <label>Email</label>\n                <input type=\"email\" placeholder=\"you@example.com\" />\n                <label>Password</label>\n                <input type=\"password\" placeholder=\"Create a password\" />\n                <button type=\"submit\" className=\"button\" onClick={() => (window.location.href = '/home')}>\n                    Create account\n                </button>\n            </form>\n        </div>\n    )\n}\n",
+          "size_bytes": 2081,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "token\\s*=",
+              "line_number": 12,
+              "line_snippet": "const token = await user.getIdToken()"
+            }
+          ],
+          "debt_signal_count": 1,
+          "metrics": {
+            "total_lines": 54,
+            "code_lines": 47,
+            "blank_lines": 6,
+            "comment_lines": 1,
+            "comment_ratio": 0.019,
+            "max_indentation_depth": 5,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/pages/Stories.jsx",
+          "language": "jsx",
+          "content": "import React from 'react'\n\nexport default function Stories() {\n    return (\n        <div style={{ padding: '4rem', textAlign: 'center', fontFamily: 'Inter, sans-serif' }}>\n            <h1 style={{ color: '#204155' }}>Stories of Hope</h1>\n            <p style={{ color: '#5a4a38', marginTop: '1rem' }}>This page is coming soon. Real stories from real people are being gathered.</p>\n            <a href=\"/home\" style={{ display: 'inline-block', marginTop: '2rem', padding: '0.8rem 1.5rem', background: '#c4714a', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 600 }}>Go Back to Home</a>\n        </div>\n    )\n}\n",
+          "size_bytes": 634,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [],
+          "debt_signal_count": 0,
+          "metrics": {
+            "total_lines": 11,
+            "code_lines": 10,
+            "blank_lines": 1,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 3,
+            "long_functions_detected": [],
+            "long_function_count": 0
+          }
+        },
+        {
+          "path": "frontend/src/pages/VolunteerForm.jsx",
+          "language": "jsx",
+          "content": "import React, { useState } from 'react'\nimport { auth } from '../firebase'\n\nconst STATES = [\n    \"Andhra Pradesh\", \"Arunachal Pradesh\", \"Assam\", \"Bihar\", \"Chhattisgarh\", \"Goa\", \"Gujarat\", \"Haryana\", \n    \"Himachal Pradesh\", \"Jharkhand\", \"Karnataka\", \"Kerala\", \"Madhya Pradesh\", \"Maharashtra\", \"Manipur\", \n    \"Meghalaya\", \"Mizoram\", \"Nagaland\", \"Odisha\", \"Punjab\", \"Rajasthan\", \"Sikkim\", \"Tamil Nadu\", \"Telangana\", \n    \"Tripura\", \"Uttar Pradesh\", \"Uttarakhand\", \"West Bengal\", \"Andaman and Nicobar Islands\", \"Chandigarh\", \n    \"Dadra and Nagar Haveli and Daman and Diu\", \"Delhi\", \"Jammu and Kashmir\", \"Ladakh\", \"Lakshadweep\", \"Puducherry\"\n]\n\nconst ID_TYPES = [\n    { value: 'aadhaar', label: 'Aadhaar Card' },\n    { value: 'pan', label: 'PAN Card' },\n    { value: 'voter', label: 'Voter ID' },\n    { value: 'dl', label: 'Driving License' }\n]\n\nexport default function VolunteerForm() {\n    const [formData, setFormData] = useState({\n        name: '',\n        dob: '',\n        phone: '',\n        address1: '',\n        address2: '',\n        pin: '',\n        city: '',\n        state: 'Karnataka',\n        idType: 'aadhaar'\n    })\n    const [file, setFile] = useState(null)\n    const [loading, setLoading] = useState(false)\n    const [result, setResult] = useState(null)\n    const [error, setError] = useState('')\n\n    const handleChange = (e) => {\n        setFormData({ ...formData, [e.target.name]: e.target.value })\n    }\n\n    const handleFileChange = (e) => {\n        setFile(e.target.files[0])\n    }\n\n    const handleSubmit = async (e) => {\n        e.preventDefault()\n        if (!file) {\n            setError('Please upload your Government ID.')\n            return\n        }\n        setLoading(true)\n        setError('')\n        setResult(null)\n\n        try {\n            const user = auth.currentUser\n            if (!user) throw new Error('You must be logged in to volunteer.')\n            const token = await user.getIdToken()\n\n            const data = new FormData()\n            data.append('file', file)\n            data.append('name', formData.name)\n            data.append('dob', formData.dob)\n            data.append('idType', formData.idType)\n            data.append('details', JSON.stringify(formData))\n\n            const response = await fetch('http://localhost:5000/api/verify-id', {\n                method: 'POST',\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                },\n                body: data\n            })\n\n            const resData = await response.json()\n            if (!response.ok) throw new Error(resData.error || 'Verification failed.')\n\n            setResult(resData)\n        } catch (err) {\n            setError(err.message)\n        } finally {\n            setLoading(false)\n        }\n    }\n\n    return (\n        <div className=\"seva-page\">\n            <nav>\n                <a href=\"/home\" className=\"logo\">Ummeed<span>.</span></a>\n                <ul>\n                    <li><a href=\"/home\" className=\"nav-cta\">Go Back to Home</a></li>\n                </ul>\n            </nav>\n\n            <section className=\"volunteer-section\">\n                <div className=\"volunteer-container\">\n                    <div className=\"volunteer-header\">\n                        <div className=\"section-tag\">Join the Movement</div>\n                        <h1>Become a <em>Volunteer</em></h1>\n                        <p>Fill in your details and upload a valid government ID for AI verification. This helps us maintain a safe community.</p>\n                    </div>\n\n                    <div className=\"volunteer-form-card\">\n                        <form onSubmit={handleSubmit}>\n                            <div className=\"form-grid\">\n                                <div className=\"form-group\">\n                                    <label>Full Name (as on ID)</label>\n                                    <input type=\"text\" name=\"name\" required value={formData.name} onChange={handleChange} placeholder=\"John Doe\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>Date of Birth (as on ID)</label>\n                                    <input type=\"date\" name=\"dob\" required value={formData.dob} onChange={handleChange} />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>Phone Number</label>\n                                    <input type=\"tel\" name=\"phone\" required value={formData.phone} onChange={handleChange} placeholder=\"+91 98765 43210\" />\n                                </div>\n                                <div className=\"form-group full-width\">\n                                    <label>Address Line 1</label>\n                                    <input type=\"text\" name=\"address1\" required value={formData.address1} onChange={handleChange} placeholder=\"House No, Building Name\" />\n                                </div>\n                                <div className=\"form-group full-width\">\n                                    <label>Address Line 2</label>\n                                    <input type=\"text\" name=\"address2\" value={formData.address2} onChange={handleChange} placeholder=\"Street, Area\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>PIN Code</label>\n                                    <input type=\"text\" name=\"pin\" required value={formData.pin} onChange={handleChange} placeholder=\"560001\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>City</label>\n                                    <input type=\"text\" name=\"city\" required value={formData.city} onChange={handleChange} placeholder=\"Bengaluru\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>State</label>\n                                    <select name=\"state\" value={formData.state} onChange={handleChange}>\n                                        {STATES.map(s => <option key={s} value={s}>{s}</option>)}\n                                    </select>\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>ID Type</label>\n                                    <select name=\"idType\" value={formData.idType} onChange={handleChange}>\n                                        {ID_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}\n                                    </select>\n                                </div>\n                                <div className=\"form-group full-width\">\n                                    <label>Upload Government ID (Image)</label>\n                                    <div className=\"file-upload-area\">\n                                        <input type=\"file\" accept=\"image/*\" onChange={handleFileChange} id=\"id-upload\" hidden />\n                                        <label htmlFor=\"id-upload\" className=\"file-label\">\n                                            {file ? file.name : 'Click to upload ID Card (Aadhaar, PAN, etc.)'}\n                                        </label>\n                                    </div>\n                                </div>\n                            </div>\n\n                            {error && <div className=\"form-error\">{error}</div>}\n\n                            <button type=\"submit\" className=\"volunteer-submit-btn\" disabled={loading}>\n                                {loading ? 'Verifying with AI...' : 'Submit & Verify Identity'}\n                            </button>\n                        </form>\n\n                        {result && (\n                            <div className={`verification-result ${result.verified ? 'success' : 'failure'}`}>\n                                <h3>{result.verified ? '\u2713 Verification Successful' : '\u26a0 Verification Failed'}</h3>\n                                <p>{result.reason}</p>\n                                {result.verified && <p className=\"success-sub\">You are now registered as a volunteer. Welcome to the family!</p>}\n                                {!result.verified && <p className=\"failure-sub\">Please ensure the image is clear and details match your input.</p>}\n                            </div>\n                        )}\n                    </div>\n                </div>\n            </section>\n        </div>\n    )\n}\n",
+          "size_bytes": 8608,
+          "debt_category_hint": "code_quality",
+          "debt_signals": [
+            {
+              "pattern": "token\\s*=",
+              "line_number": 57,
+              "line_snippet": "const token = await user.getIdToken()"
+            }
+          ],
+          "debt_signal_count": 1,
+          "metrics": {
+            "total_lines": 176,
+            "code_lines": 159,
+            "blank_lines": 17,
+            "comment_lines": 0,
+            "comment_ratio": 0.0,
+            "max_indentation_depth": 11,
+            "long_functions_detected": [
+              {
+                "approximate_start_line": 44,
+                "approximate_length_lines": 133,
+                "first_line": "const handleSubmit = async (e) => {"
+              }
+            ],
+            "long_function_count": 1
+          }
+        }
+      ]
+    },
+    "detailed_files": [
+      {
+        "path": "backend/requirements.txt",
+        "language": "txt",
+        "content": "Flask>=2.0\npython-dotenv>=0.19\nfirebase-admin>=6.0\npymongo>=4.0\nflask-cors>=3.0\npytesseract\nPillow\nopencv-python-headless\nthefuzz\npython-Levenshtein\n\n",
+        "size_bytes": 150,
+        "debt_category_hint": "dependencies",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 11,
+          "code_lines": 10,
+          "blank_lines": 1,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 0,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "frontend/package.json",
+        "language": "json",
+        "content": "{\n    \"name\": \"frontend\",\n    \"version\": \"0.0.1\",\n    \"private\": true,\n    \"scripts\": {\n        \"dev\": \"vite\",\n        \"build\": \"vite build\",\n        \"preview\": \"vite preview\"\n    },\n    \"dependencies\": {\n        \"firebase\": \"^10.13.2\",\n        \"leaflet\": \"^1.9.4\",\n        \"razorpay\": \"^2.9.6\",\n        \"react\": \"^18.2.0\",\n        \"react-dom\": \"^18.2.0\"\n    },\n    \"devDependencies\": {\n        \"@vitejs/plugin-react\": \"^4.0.0\",\n        \"vite\": \"^5.0.0\"\n    }\n}\n",
+        "size_bytes": 462,
+        "debt_category_hint": "dependencies",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 21,
+          "code_lines": 21,
+          "blank_lines": 0,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 2,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "backend/README.md",
+        "language": "markdown",
+        "content": "Flask backend for the project\n\n- Copy your Firebase service account JSON to `firebase-credentials.json` (do NOT commit it).\n- Copy `.env.example` to `.env` and fill in real credentials (do NOT commit `.env`).\n\nInstall and run:\n\n```\npython -m venv venv\nvenv\\Scripts\\activate\npip install -r requirements.txt\nset FLASK_APP=app.py\nset FLASK_ENV=development\nflask run\n```\n",
+        "size_bytes": 367,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 15,
+          "code_lines": 12,
+          "blank_lines": 3,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 0,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "backend/app.py",
+        "language": "python",
+        "content": "import os\nimport re\nimport cv2\nimport pytesseract\nfrom PIL import Image\nfrom thefuzz import fuzz\nfrom flask import Flask, jsonify, request\nfrom flask_cors import CORS\nfrom werkzeug.utils import secure_filename\nfrom auth import verify_firebase_token\nfrom dotenv import load_dotenv\n\nload_dotenv()\n\n# Tesseract path from user request\npytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_CMD', r\"C:\\Program Files\\Tesseract-OCR\\tesseract.exe\")\n\napp = Flask(__name__)\nCORS(app, resources={r\"/api/*\": {\"origins\": \"*\"}}, supports_credentials=True)\n\nUPLOAD_FOLDER = 'uploads'\nif not os.path.exists(UPLOAD_FOLDER):\n    os.makedirs(UPLOAD_FOLDER)\n\napp.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER\n\n# ID Regex Patterns\nID_PATTERNS = {\n    'aadhaar': r'\\d{4}\\s?\\d{4}\\s?\\d{4}',\n    'pan': r'[A-Z]{5}[0-9]{4}[A-Z]',\n    'voter': r'[A-Z]{3}[0-9]{7}',\n    'dl': r'^[A-Z]{2}[0-9]{2}\\s?[0-9]{11}$'\n}\n\nGOVT_KEYWORDS = ['government', 'india', 'income tax', 'election commission', 'unique identification', 'aadhaar', 'permanent account number', 'driving license']\n\ndef extract_text(image_path):\n    # Basic image processing with OpenCV\n    img = cv2.imread(image_path)\n    if img is None:\n        return \"\"\n    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\n    # Applying thresholding for better OCR\n    thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]\n    \n    text = pytesseract.image_to_string(thresh)\n    return text.lower()\n\n@app.route('/api/verify-id', methods=['POST'])\n@verify_firebase_token\ndef verify_id():\n    if 'file' not in request.files:\n        return jsonify({'error': 'No file uploaded'}), 400\n    \n    file = request.files['file']\n    id_type = request.form.get('idType', '').lower()\n    user_name = request.form.get('name', '').lower()\n    user_dob = request.form.get('dob', '') # Expected YYYY-MM-DD\n    \n    # Convert YYYY-MM-DD to common ID formats for searching\n    dob_formats = []\n    if user_dob:\n        parts = user_dob.split('-')\n        if len(parts) == 3:\n            y, m, d = parts\n            dob_formats = [f\"{d}/{m}/{y}\", f\"{d}-{m}-{y}\", f\"{d} {m} {y}\", user_dob]\n\n    if file.filename == '':\n        return jsonify({'error': 'No file selected'}), 400\n\n    filename = \"id.png\" # Fixed name as requested\n    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)\n    file.save(filepath)\n\n    try:\n        extracted_text = extract_text(filepath)\n        \n        # 1. Check for Govt Keywords\n        has_govt_keyword = any(keyword in extracted_text for keyword in GOVT_KEYWORDS)\n        \n        # 2. Check Regex Pattern\n        pattern = ID_PATTERNS.get(id_type)\n        id_match = False\n        if pattern:\n            id_match = bool(re.search(pattern, extracted_text.upper()))\n        \n        # 3. Fuzzy match name\n        name_score = fuzz.token_set_ratio(user_name, extracted_text)\n\n        # 4. Check DOB\n        dob_match = any(fmt in extracted_text for fmt in dob_formats) if dob_formats else True # Default to true if not provided\n        \n        # Verification Logic\n        is_verified = False\n        reason = \"\"\n        \n        if not has_govt_keyword and not id_match:\n            reason = \"Document does not appear to be a valid government ID.\"\n        elif id_type in ID_PATTERNS and not id_match:\n            reason = f\"Could not find a valid {id_type.upper()} number format.\"\n        elif name_score < 70:\n            reason = f\"Name on ID does not match the entered name ({name_score}% match).\"\n        elif not dob_match:\n            reason = \"Date of Birth on ID does not match the entered date.\"\n        else:\n            is_verified = True\n            reason = \"Identity verified successfully via AI.\"\n\n        return jsonify({\n            'verified': is_verified,\n            'reason': reason,\n            'ocr_text': extracted_text[:200] + \"...\" if len(extracted_text) > 200 else extracted_text,\n            'debug': {\n                'has_govt_keyword': has_govt_keyword,\n                'id_match': id_match,\n                'name_score': name_score,\n                'dob_match': dob_match\n            }\n        })\n\n\n    except Exception as e:\n        return jsonify({'error': str(e)}), 500\n\n@app.route('/api')\ndef index():\n    return jsonify({'status': 'ok'})\n\n@app.route('/api/auth/sync', methods=['POST'])\n@verify_firebase_token\ndef sync_user():\n    user = getattr(request, 'user', None)\n    return jsonify({'status': 'synced', 'user': user})\n\nif __name__ == '__main__':\n    port = int(os.getenv('PORT', 5000))\n    app.run(host='0.0.0.0', port=port, debug=os.getenv('FLASK_DEBUG', 'False') == 'True')\n\n",
+        "size_bytes": 4587,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 138,
+          "code_lines": 100,
+          "blank_lines": 28,
+          "comment_lines": 10,
+          "comment_ratio": 0.072,
+          "max_indentation_depth": 4,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "backend/auth.py",
+        "language": "python",
+        "content": "import os\nfrom functools import wraps\nfrom flask import jsonify, request\nimport firebase_admin\nfrom firebase_admin import auth, credentials\nfrom datetime import datetime\ntry:\n    from pymongo import MongoClient\nexcept Exception:\n    MongoClient = None\n\n# Initialize Firebase Admin SDK\ncred_path = os.getenv(\"FIREBASE_CREDENTIALS_PATH\") or os.path.join(os.path.dirname(__file__), 'firebase-credentials.json')\nif not firebase_admin._apps:\n    try:\n        if os.path.exists(cred_path) and os.path.getsize(cred_path) > 0:\n            cred = credentials.Certificate(cred_path)\n            firebase_admin.initialize_app(cred)\n        else:\n            print(f\"[Firebase] Warning: {cred_path} is missing or empty. Using default credentials.\")\n            firebase_admin.initialize_app()\n    except Exception as e:\n        print(f\"[Firebase] Error initializing Firebase Admin SDK: {e}\")\n        # Initialize without credentials to let the app start (will fail on auth calls, but not on startup)\n        try:\n            firebase_admin.initialize_app()\n        except:\n            pass\n\n# Initialize MongoDB Client once\nmongo_client = None\nmongo_uri = os.getenv('MONGODB_URI')\nif mongo_uri:\n    try:\n        from pymongo import MongoClient\n        mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)\n        # Test connection\n        mongo_client.admin.command('ping')\n        print(\"[MongoDB] Connected successfully\")\n    except Exception as e:\n        print(f\"[MongoDB] Initial connection failed: {e}\")\n        mongo_client = None\n\n\ndef verify_firebase_token(f):\n    \"\"\"Verify a Firebase ID token using the Firebase Admin SDK.\"\"\"\n    @wraps(f)\n    def decorated_function(*args, **kwargs):\n        # Development bypass: when set, skip token verification and inject a dev user.\n        try:\n            bypass_env = os.getenv(\"CHATBOT_BYPASS_AUTH\", \"false\").lower() in (\"1\", \"true\", \"yes\")\n            flask_env = os.getenv(\"FLASK_ENV\", \"\").lower()\n            if bypass_env or flask_env == \"development\":\n                print(\"[Auth] Bypass enabled (CHATBOT_BYPASS_AUTH or FLASK_ENV=development) \u2014 skipping token verification (dev only)\")\n                request.user = {\"uid\": \"dev_bypass_user\", \"email\": \"dev@local\"}\n                return f(*args, **kwargs)\n        except Exception:\n            pass\n\n        auth_header = request.headers.get(\"Authorization\")\n\n        if not auth_header:\n            return jsonify({\"error\": \"Missing authorization header\"}), 401\n\n        try:\n            parts = auth_header.split(\" \")\n            if len(parts) != 2 or parts[0].lower() != \"bearer\":\n                return jsonify({\"error\": \"Invalid authorization header format\"}), 401\n\n            id_token = parts[1]\n\n            try:\n                decoded_token = auth.verify_id_token(id_token)\n            except Exception as primary_err:\n                print(f\"[Auth Warning] Primary verification failed: {primary_err}\")\n                return jsonify({\"error\": \"Invalid token\", \"details\": str(primary_err)}), 401\n\n            if \"uid\" not in decoded_token:\n                decoded_token[\"uid\"] = decoded_token.get(\"user_id\") or decoded_token.get(\"sub\")\n\n            request.user = decoded_token\n\n            # Persist or update user record in MongoDB if available\n            try:\n                if mongo_client:\n                    db_name = os.getenv('MONGODB_DB', 'ummeed')\n                    db = mongo_client[db_name]\n                    users = db.get_collection('users')\n                    \n                    print(f\"[Auth DB] Syncing user {decoded_token['uid']} to collection 'users' in db '{db.name}'\")\n                    result = users.update_one(\n                        {\"uid\": decoded_token[\"uid\"]},\n                        {\"$set\": {\n                            \"email\": decoded_token.get('email'),\n                            \"name\": decoded_token.get('name') or decoded_token.get('display_name'),\n                            \"provider\": decoded_token.get('firebase', {}).get('sign_in_provider') if isinstance(decoded_token.get('firebase'), dict) else None,\n                            \"last_seen\": datetime.utcnow()\n                        }},\n                        upsert=True\n                    )\n                    print(f\"[Auth DB] Upsert successful: {result.upserted_id or 'Updated existing'}\")\n                else:\n                    print(\"[Auth DB] MongoDB client not initialized, skipping sync\")\n            except Exception as e:\n                # Don't fail the request if DB write fails; log for diagnostics\n                print(f\"[Auth DB] Failed to upsert user: {e}\")\n            return f(*args, **kwargs)\n        except Exception as e:\n            print(f\"[Token Error] {str(e)}\")\n            return jsonify({\"error\": \"Invalid token\", \"details\": str(e)}), 401\n\n    return decorated_function\n",
+        "size_bytes": 4846,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [
+          {
+            "pattern": "print\\(",
+            "line_number": 20,
+            "line_snippet": "print(f\"[Firebase] Warning: {cred_path} is missing or empty. Using default credentials.\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 23,
+            "line_snippet": "print(f\"[Firebase] Error initializing Firebase Admin SDK: {e}\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 39,
+            "line_snippet": "print(\"[MongoDB] Connected successfully\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 41,
+            "line_snippet": "print(f\"[MongoDB] Initial connection failed: {e}\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 54,
+            "line_snippet": "print(\"[Auth] Bypass enabled (CHATBOT_BYPASS_AUTH or FLASK_ENV=development) \u2014 skipping token verification (dev only)\")"
+          },
+          {
+            "pattern": "token\\s*=",
+            "line_number": 70,
+            "line_snippet": "id_token = parts[1]"
+          },
+          {
+            "pattern": "token\\s*=",
+            "line_number": 73,
+            "line_snippet": "decoded_token = auth.verify_id_token(id_token)"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 75,
+            "line_snippet": "print(f\"[Auth Warning] Primary verification failed: {primary_err}\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 90,
+            "line_snippet": "print(f\"[Auth DB] Syncing user {decoded_token['uid']} to collection 'users' in db '{db.name}'\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 101,
+            "line_snippet": "print(f\"[Auth DB] Upsert successful: {result.upserted_id or 'Updated existing'}\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 103,
+            "line_snippet": "print(\"[Auth DB] MongoDB client not initialized, skipping sync\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 106,
+            "line_snippet": "print(f\"[Auth DB] Failed to upsert user: {e}\")"
+          },
+          {
+            "pattern": "print\\(",
+            "line_number": 109,
+            "line_snippet": "print(f\"[Token Error] {str(e)}\")"
+          }
+        ],
+        "debt_signal_count": 13,
+        "metrics": {
+          "total_lines": 112,
+          "code_lines": 91,
+          "blank_lines": 14,
+          "comment_lines": 7,
+          "comment_ratio": 0.062,
+          "max_indentation_depth": 7,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "frontend/README.md",
+        "language": "markdown",
+        "content": "Frontend (React + Vite)\n\nInstall and run:\n\n```\ncd frontend\nnpm install\nnpm run dev\n```\n\nPages:\n- Landing: `/` (src/pages/Landing.jsx)\n- Login: `/login` (stub)\n- Signup: `/signup` (stub)\n\nFirebase client config is in `src/firebase.js`.\n",
+        "size_bytes": 235,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 16,
+          "code_lines": 12,
+          "blank_lines": 4,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 0,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "frontend/index.html",
+        "language": "html",
+        "content": "<!doctype html>\n<html>\n\n<head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Ummeed</title>\n</head>\n\n<body>\n    <div id=\"root\"></div>\n    <script type=\"module\" src=\"/src/main.jsx\"></script>\n</body>\n\n</html>",
+        "size_bytes": 277,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 15,
+          "code_lines": 12,
+          "blank_lines": 3,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 1,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "frontend/src/App.jsx",
+        "language": "jsx",
+        "content": "import React from 'react'\nimport Landing from './pages/Landing'\nimport Login from './pages/Login'\nimport Signup from './pages/Signup'\nimport Home from './pages/Home'\nimport HowItWorks from './pages/HowItWorks'\nimport Programs from './pages/Programs'\nimport Stories from './pages/Stories'\nimport Donate from './pages/Donate'\nimport VolunteerForm from './pages/VolunteerForm'\n\nexport default function App() {\n    const path = window.location.pathname\n\n    if (path === '/home') {\n        return <Home />\n    }\n\n    if (path === '/how-it-works') {\n        return <HowItWorks />\n    }\n\n    if (path === '/programs') {\n        return <Programs />\n    }\n\n    if (path === '/stories') {\n        return <Stories />\n    }\n\n    if (path === '/donate') {\n        return <Donate />\n    }\n\n    if (path === '/volunteer') {\n        return <VolunteerForm />\n    }\n\n    if (path === '/login') {\n        return <Login />\n    }\n\n    if (path === '/signup') {\n        return <Signup />\n    }\n\n    return <Landing />\n}\n",
+        "size_bytes": 999,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 48,
+          "code_lines": 38,
+          "blank_lines": 10,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 2,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "frontend/src/firebase.js",
+        "language": "javascript",
+        "content": "// Firebase client config\nimport { initializeApp } from \"firebase/app\";\nimport { getAuth, GoogleAuthProvider, signInWithPopup } from \"firebase/auth\";\n\nconst firebaseConfig = {\n    apiKey: \"AIzaSyDLV6-DJTOqlxNv6Lc79LrM-kpwpLUGEpw\",\n    authDomain: \"ritconnect-f4c31.firebaseapp.com\",\n    projectId: \"ritconnect-f4c31\",\n    storageBucket: \"ritconnect-f4c31.firebasestorage.app\",\n    messagingSenderId: \"440809006695\",\n    appId: \"1:440809006695:web:a6565823de9a4eb35716c2\",\n    measurementId: \"G-K22HEHMNVK\"\n};\n\nconst app = initializeApp(firebaseConfig);\nexport const auth = getAuth(app);\nexport const googleProvider = new GoogleAuthProvider();\n\nexport async function signInWithGoogle() {\n    return signInWithPopup(auth, googleProvider);\n}\n\nexport default app;\n",
+        "size_bytes": 760,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 23,
+          "code_lines": 18,
+          "blank_lines": 4,
+          "comment_lines": 1,
+          "comment_ratio": 0.043,
+          "max_indentation_depth": 1,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "frontend/src/main.jsx",
+        "language": "jsx",
+        "content": "import React from 'react'\nimport { createRoot } from 'react-dom/client'\nimport App from './App'\nimport './styles.css'\n\ncreateRoot(document.getElementById('root')).render(<App />)\n",
+        "size_bytes": 179,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 6,
+          "code_lines": 5,
+          "blank_lines": 1,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 0,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "frontend/src/pages/Landing.jsx",
+        "language": "jsx",
+        "content": "import React from 'react'\n\nconst heroHtml = `\n<nav>\n    <div class=\"logo\">Ummeed<span>.</span></div>\n    <ul>\n        <li><a href=\"#how\">How It Works</a></li>\n        <li><a href=\"#programs\">Programs</a></li>\n        <li><a href=\"#stories\">Stories</a></li>\n        <li><a href=\"#volunteer\">Volunteer</a></li>\n        <li><a href=\"/login\" class=\"nav-cta\">Login</a></li>\n    </ul>\n</nav>\n<section class=\"hero\">\n    <div class=\"hero-bg\"></div>\n    <div class=\"hero-content\">\n        <div class=\"hero-tag\">\ud83c\udf3f Welfare &amp; Community Care</div>\n        <h1>Spreading <em>hope</em> to those who need it most</h1>\n        <p>Ummeed connects welfare centers, volunteers, and communities \u2014 bringing food, shelter, education, and healing to vulnerable hearts across India.</p>\n        <div class=\"hero-btns\">\n            <a href=\"/signup\" class=\"btn-primary\">Get Started</a>\n            <a href=\"#programs\" class=\"btn-secondary\">Explore Programs</a>\n        </div>\n    </div>\n</section>\n`\n\nexport default function Landing() {\n    return <div dangerouslySetInnerHTML={{ __html: heroHtml }} />\n}\n",
+        "size_bytes": 1088,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 30,
+          "code_lines": 28,
+          "blank_lines": 2,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 3,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "frontend/src/pages/Login.jsx",
+        "language": "jsx",
+        "content": "import React, { useState } from 'react'\nimport { signInWithGoogle } from '../firebase'\n\nexport default function Login() {\n    const [error, setError] = useState('')\n\n    const handleGoogleLogin = async () => {\n        try {\n            setError('')\n            const result = await signInWithGoogle()\n            const user = result.user\n            const token = await user.getIdToken()\n\n            // Sync with backend\n            const response = await fetch('http://localhost:5000/api/auth/sync', {\n                method: 'POST',\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                }\n            })\n\n            if (!response.ok) {\n                throw new Error('Failed to sync with backend')\n            }\n\n            window.location.href = '/home'\n        } catch (err) {\n            setError(err?.message || 'Google sign-in failed')\n        }\n    }\n\n    return (\n        <div className=\"auth-page\">\n            <form className=\"auth-form\" onSubmit={(event) => event.preventDefault()}>\n                <h2>Login</h2>\n                <button type=\"button\" className=\"button google-button\" onClick={handleGoogleLogin}>\n                    Continue with Google\n                </button>\n                {error ? <p className=\"auth-error\">{error}</p> : null}\n                <label>Email</label>\n                <input type=\"email\" />\n                <label>Password</label>\n                <input type=\"password\" />\n                <button type=\"submit\" className=\"button\" onClick={() => (window.location.href = '/home')}>\n                    Login\n                </button>\n            </form>\n        </div>\n    )\n}\n",
+        "size_bytes": 1672,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [
+          {
+            "pattern": "token\\s*=",
+            "line_number": 12,
+            "line_snippet": "const token = await user.getIdToken()"
+          }
+        ],
+        "debt_signal_count": 1,
+        "metrics": {
+          "total_lines": 50,
+          "code_lines": 43,
+          "blank_lines": 6,
+          "comment_lines": 1,
+          "comment_ratio": 0.02,
+          "max_indentation_depth": 5,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "frontend/src/pages/Programs.jsx",
+        "language": "jsx",
+        "content": "import React from 'react'\n\nexport default function Programs() {\n    return (\n        <div style={{ padding: '4rem', textAlign: 'center', fontFamily: 'Inter, sans-serif' }}>\n            <h1 style={{ color: '#204155' }}>Our Programs</h1>\n            <p style={{ color: '#5a4a38', marginTop: '1rem' }}>This page is coming soon. We are building something impactful for you.</p>\n            <a href=\"/home\" style={{ display: 'inline-block', marginTop: '2rem', padding: '0.8rem 1.5rem', background: '#c4714a', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 600 }}>Go Back to Home</a>\n        </div>\n    )\n}\n",
+        "size_bytes": 627,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 11,
+          "code_lines": 10,
+          "blank_lines": 1,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 3,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "frontend/src/pages/Signup.jsx",
+        "language": "jsx",
+        "content": "import React, { useState } from 'react'\nimport { signInWithGoogle } from '../firebase'\n\nexport default function Signup() {\n    const [error, setError] = useState('')\n\n    const handleGoogleSignup = async () => {\n        try {\n            setError('')\n            const result = await signInWithGoogle()\n            const user = result.user\n            const token = await user.getIdToken()\n\n            // Sync with backend\n            const response = await fetch('http://localhost:5000/api/auth/sync', {\n                method: 'POST',\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                }\n            })\n\n            if (!response.ok) {\n                throw new Error('Failed to sync with backend')\n            }\n\n            window.location.href = '/home'\n        } catch (err) {\n            setError(err?.message || 'Google sign-up failed')\n        }\n    }\n\n    return (\n        <div className=\"auth-page\">\n            <form className=\"auth-form auth-form--signup\" onSubmit={(event) => event.preventDefault()}>\n                <p className=\"auth-kicker\">Ummeed</p>\n                <h2>Create your account</h2>\n                <p className=\"auth-subcopy\">Join volunteers, donors, and welfare centers working together for NGOs, orphanages, animal welfare, and elder care.</p>\n                <button type=\"button\" className=\"button google-button\" onClick={handleGoogleSignup}>\n                    Sign up with Google\n                </button>\n                {error ? <p className=\"auth-error\">{error}</p> : null}\n                <label>Name</label>\n                <input placeholder=\"Your name\" />\n                <label>Email</label>\n                <input type=\"email\" placeholder=\"you@example.com\" />\n                <label>Password</label>\n                <input type=\"password\" placeholder=\"Create a password\" />\n                <button type=\"submit\" className=\"button\" onClick={() => (window.location.href = '/home')}>\n                    Create account\n                </button>\n            </form>\n        </div>\n    )\n}\n",
+        "size_bytes": 2081,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [
+          {
+            "pattern": "token\\s*=",
+            "line_number": 12,
+            "line_snippet": "const token = await user.getIdToken()"
+          }
+        ],
+        "debt_signal_count": 1,
+        "metrics": {
+          "total_lines": 54,
+          "code_lines": 47,
+          "blank_lines": 6,
+          "comment_lines": 1,
+          "comment_ratio": 0.019,
+          "max_indentation_depth": 5,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "frontend/src/pages/Stories.jsx",
+        "language": "jsx",
+        "content": "import React from 'react'\n\nexport default function Stories() {\n    return (\n        <div style={{ padding: '4rem', textAlign: 'center', fontFamily: 'Inter, sans-serif' }}>\n            <h1 style={{ color: '#204155' }}>Stories of Hope</h1>\n            <p style={{ color: '#5a4a38', marginTop: '1rem' }}>This page is coming soon. Real stories from real people are being gathered.</p>\n            <a href=\"/home\" style={{ display: 'inline-block', marginTop: '2rem', padding: '0.8rem 1.5rem', background: '#c4714a', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 600 }}>Go Back to Home</a>\n        </div>\n    )\n}\n",
+        "size_bytes": 634,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 11,
+          "code_lines": 10,
+          "blank_lines": 1,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 3,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      },
+      {
+        "path": "frontend/src/pages/VolunteerForm.jsx",
+        "language": "jsx",
+        "content": "import React, { useState } from 'react'\nimport { auth } from '../firebase'\n\nconst STATES = [\n    \"Andhra Pradesh\", \"Arunachal Pradesh\", \"Assam\", \"Bihar\", \"Chhattisgarh\", \"Goa\", \"Gujarat\", \"Haryana\", \n    \"Himachal Pradesh\", \"Jharkhand\", \"Karnataka\", \"Kerala\", \"Madhya Pradesh\", \"Maharashtra\", \"Manipur\", \n    \"Meghalaya\", \"Mizoram\", \"Nagaland\", \"Odisha\", \"Punjab\", \"Rajasthan\", \"Sikkim\", \"Tamil Nadu\", \"Telangana\", \n    \"Tripura\", \"Uttar Pradesh\", \"Uttarakhand\", \"West Bengal\", \"Andaman and Nicobar Islands\", \"Chandigarh\", \n    \"Dadra and Nagar Haveli and Daman and Diu\", \"Delhi\", \"Jammu and Kashmir\", \"Ladakh\", \"Lakshadweep\", \"Puducherry\"\n]\n\nconst ID_TYPES = [\n    { value: 'aadhaar', label: 'Aadhaar Card' },\n    { value: 'pan', label: 'PAN Card' },\n    { value: 'voter', label: 'Voter ID' },\n    { value: 'dl', label: 'Driving License' }\n]\n\nexport default function VolunteerForm() {\n    const [formData, setFormData] = useState({\n        name: '',\n        dob: '',\n        phone: '',\n        address1: '',\n        address2: '',\n        pin: '',\n        city: '',\n        state: 'Karnataka',\n        idType: 'aadhaar'\n    })\n    const [file, setFile] = useState(null)\n    const [loading, setLoading] = useState(false)\n    const [result, setResult] = useState(null)\n    const [error, setError] = useState('')\n\n    const handleChange = (e) => {\n        setFormData({ ...formData, [e.target.name]: e.target.value })\n    }\n\n    const handleFileChange = (e) => {\n        setFile(e.target.files[0])\n    }\n\n    const handleSubmit = async (e) => {\n        e.preventDefault()\n        if (!file) {\n            setError('Please upload your Government ID.')\n            return\n        }\n        setLoading(true)\n        setError('')\n        setResult(null)\n\n        try {\n            const user = auth.currentUser\n            if (!user) throw new Error('You must be logged in to volunteer.')\n            const token = await user.getIdToken()\n\n            const data = new FormData()\n            data.append('file', file)\n            data.append('name', formData.name)\n            data.append('dob', formData.dob)\n            data.append('idType', formData.idType)\n            data.append('details', JSON.stringify(formData))\n\n            const response = await fetch('http://localhost:5000/api/verify-id', {\n                method: 'POST',\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                },\n                body: data\n            })\n\n            const resData = await response.json()\n            if (!response.ok) throw new Error(resData.error || 'Verification failed.')\n\n            setResult(resData)\n        } catch (err) {\n            setError(err.message)\n        } finally {\n            setLoading(false)\n        }\n    }\n\n    return (\n        <div className=\"seva-page\">\n            <nav>\n                <a href=\"/home\" className=\"logo\">Ummeed<span>.</span></a>\n                <ul>\n                    <li><a href=\"/home\" className=\"nav-cta\">Go Back to Home</a></li>\n                </ul>\n            </nav>\n\n            <section className=\"volunteer-section\">\n                <div className=\"volunteer-container\">\n                    <div className=\"volunteer-header\">\n                        <div className=\"section-tag\">Join the Movement</div>\n                        <h1>Become a <em>Volunteer</em></h1>\n                        <p>Fill in your details and upload a valid government ID for AI verification. This helps us maintain a safe community.</p>\n                    </div>\n\n                    <div className=\"volunteer-form-card\">\n                        <form onSubmit={handleSubmit}>\n                            <div className=\"form-grid\">\n                                <div className=\"form-group\">\n                                    <label>Full Name (as on ID)</label>\n                                    <input type=\"text\" name=\"name\" required value={formData.name} onChange={handleChange} placeholder=\"John Doe\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>Date of Birth (as on ID)</label>\n                                    <input type=\"date\" name=\"dob\" required value={formData.dob} onChange={handleChange} />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>Phone Number</label>\n                                    <input type=\"tel\" name=\"phone\" required value={formData.phone} onChange={handleChange} placeholder=\"+91 98765 43210\" />\n                                </div>\n                                <div className=\"form-group full-width\">\n                                    <label>Address Line 1</label>\n                                    <input type=\"text\" name=\"address1\" required value={formData.address1} onChange={handleChange} placeholder=\"House No, Building Name\" />\n                                </div>\n                                <div className=\"form-group full-width\">\n                                    <label>Address Line 2</label>\n                                    <input type=\"text\" name=\"address2\" value={formData.address2} onChange={handleChange} placeholder=\"Street, Area\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>PIN Code</label>\n                                    <input type=\"text\" name=\"pin\" required value={formData.pin} onChange={handleChange} placeholder=\"560001\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>City</label>\n                                    <input type=\"text\" name=\"city\" required value={formData.city} onChange={handleChange} placeholder=\"Bengaluru\" />\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>State</label>\n                                    <select name=\"state\" value={formData.state} onChange={handleChange}>\n                                        {STATES.map(s => <option key={s} value={s}>{s}</option>)}\n                                    </select>\n                                </div>\n                                <div className=\"form-group\">\n                                    <label>ID Type</label>\n                                    <select name=\"idType\" value={formData.idType} onChange={handleChange}>\n                                        {ID_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}\n                                    </select>\n                                </div>\n                                <div className=\"form-group full-width\">\n                                    <label>Upload Government ID (Image)</label>\n                                    <div className=\"file-upload-area\">\n                                        <input type=\"file\" accept=\"image/*\" onChange={handleFileChange} id=\"id-upload\" hidden />\n                                        <label htmlFor=\"id-upload\" className=\"file-label\">\n                                            {file ? file.name : 'Click to upload ID Card (Aadhaar, PAN, etc.)'}\n                                        </label>\n                                    </div>\n                                </div>\n                            </div>\n\n                            {error && <div className=\"form-error\">{error}</div>}\n\n                            <button type=\"submit\" className=\"volunteer-submit-btn\" disabled={loading}>\n                                {loading ? 'Verifying with AI...' : 'Submit & Verify Identity'}\n                            </button>\n                        </form>\n\n                        {result && (\n                            <div className={`verification-result ${result.verified ? 'success' : 'failure'}`}>\n                                <h3>{result.verified ? '\u2713 Verification Successful' : '\u26a0 Verification Failed'}</h3>\n                                <p>{result.reason}</p>\n                                {result.verified && <p className=\"success-sub\">You are now registered as a volunteer. Welcome to the family!</p>}\n                                {!result.verified && <p className=\"failure-sub\">Please ensure the image is clear and details match your input.</p>}\n                            </div>\n                        )}\n                    </div>\n                </div>\n            </section>\n        </div>\n    )\n}\n",
+        "size_bytes": 8608,
+        "debt_category_hint": "code_quality",
+        "debt_signals": [
+          {
+            "pattern": "token\\s*=",
+            "line_number": 57,
+            "line_snippet": "const token = await user.getIdToken()"
+          }
+        ],
+        "debt_signal_count": 1,
+        "metrics": {
+          "total_lines": 176,
+          "code_lines": 159,
+          "blank_lines": 17,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 11,
+          "long_functions_detected": [
+            {
+              "approximate_start_line": 44,
+              "approximate_length_lines": 133,
+              "first_line": "const handleSubmit = async (e) => {"
+            }
+          ],
+          "long_function_count": 1
+        }
+      },
+      {
+        "path": "frontend/vite.config.js",
+        "language": "javascript",
+        "content": "import { defineConfig } from 'vite'\nimport react from '@vitejs/plugin-react'\n\nexport default defineConfig({\n    plugins: [react()],\n    server: {\n        headers: {\n            'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',\n        },\n    },\n})\n",
+        "size_bytes": 256,
+        "debt_category_hint": "architecture",
+        "debt_signals": [],
+        "debt_signal_count": 0,
+        "metrics": {
+          "total_lines": 11,
+          "code_lines": 10,
+          "blank_lines": 1,
+          "comment_lines": 0,
+          "comment_ratio": 0.0,
+          "max_indentation_depth": 3,
+          "long_functions_detected": [],
+          "long_function_count": 0
+        }
+      }
+    ],
+    "analysis_summary": {
+      "total_debt_signals": 16,
+      "files_with_debt_signals": 4,
+      "cost_estimate": {
+        "chunks_to_analyze": 21,
+        "total_code_chars": 27817,
+        "approx_tokens": 6954
+      }
+    }
+  },
+  "summary": {
+    "repo_url": "Sunidhishree/googlexramaiah",
+    "repo_id": "dd59fe89",
+    "health_score": 100,
+    "total_security_issues": 0,
+    "total_debt_issues": 0,
+    "critical_issues": 0,
+    "quick_wins": 0
+  }
+}

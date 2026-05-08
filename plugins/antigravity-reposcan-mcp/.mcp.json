@@ -3,12 +3,12 @@
     "reposcan-continuous-intelligence": {
       "command": "python",
       "args": [
-        "../../backend/mcp_runtime_server.py"
+        "c:/Users/ASUS VIVOBOOK/Desktop/GitHopper_Samsung/backend/mcp_runtime_server.py"
       ],
-      "cwd": "../../backend",
+      "cwd": "c:/Users/ASUS VIVOBOOK/Desktop/GitHopper_Samsung/backend",
       "env": {
         "MCP_TRANSPORT": "stdio",
-        "GITHUB_TOKEN": "[SET_ME]"
+        "GITHUB_TOKEN": "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"
       }
     }
   }

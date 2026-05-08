@@ -1,7 +1,7 @@
 # =============================================================================
-# test_bedrock.py — Local test for Ananya's Bedrock engine
-# Run: python test_bedrock.py
-# Needs: AWS credentials configured (aws configure) + boto3 installed
+# test_openclaw.py — Local test for OpenClaw engine
+# Run: python test_openclaw.py
+# Needs: OPENCLAW_PROVIDER configured
 # =============================================================================
 
 import json
@@ -10,7 +10,7 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../ai"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
-from bedrock_client import scan_chunk, scan_all_chunks
+from openclaw_client import scan_chunk, scan_all_chunks
 from utils.file_classifier import classify_file
 
 # ---------------------------------------------------------------------------
@@ -215,7 +215,7 @@ def test_full_scan():
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    print("GitHopper — Bedrock Engine Test")
+    print("GitHopper — OpenClaw Engine Test")
     print("=" * 50)
 
     # 1. classify_file (no AWS needed)
